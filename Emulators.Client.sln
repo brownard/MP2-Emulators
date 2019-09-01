@@ -1,0 +1,47 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emulators", "Emulators\Emulators\Emulators.csproj", "{954604B1-5F96-4491-B80E-18413C2BEE90}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emulators.Common", "Emulators\Emulators.Common\Emulators.Common.csproj", "{F7E3D356-1CF6-43A8-91F1-4BACA72F6637}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpRetro", "Emulators\SharpRetro\SharpRetro.csproj", "{CBA289BC-DEB5-4542-9564-4F0D646717DA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{954604B1-5F96-4491-B80E-18413C2BEE90}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{954604B1-5F96-4491-B80E-18413C2BEE90}.Debug|x86.ActiveCfg = Debug|x86
+		{954604B1-5F96-4491-B80E-18413C2BEE90}.Debug|x86.Build.0 = Debug|x86
+		{954604B1-5F96-4491-B80E-18413C2BEE90}.Release|Any CPU.ActiveCfg = Release|x86
+		{954604B1-5F96-4491-B80E-18413C2BEE90}.Release|x86.ActiveCfg = Release|x86
+		{954604B1-5F96-4491-B80E-18413C2BEE90}.Release|x86.Build.0 = Release|x86
+		{F7E3D356-1CF6-43A8-91F1-4BACA72F6637}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{F7E3D356-1CF6-43A8-91F1-4BACA72F6637}.Debug|x86.ActiveCfg = Debug|x86
+		{F7E3D356-1CF6-43A8-91F1-4BACA72F6637}.Debug|x86.Build.0 = Debug|x86
+		{F7E3D356-1CF6-43A8-91F1-4BACA72F6637}.Release|Any CPU.ActiveCfg = Release|x86
+		{F7E3D356-1CF6-43A8-91F1-4BACA72F6637}.Release|x86.ActiveCfg = Release|x86
+		{F7E3D356-1CF6-43A8-91F1-4BACA72F6637}.Release|x86.Build.0 = Release|x86
+		{CBA289BC-DEB5-4542-9564-4F0D646717DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBA289BC-DEB5-4542-9564-4F0D646717DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBA289BC-DEB5-4542-9564-4F0D646717DA}.Debug|x86.ActiveCfg = Debug|x86
+		{CBA289BC-DEB5-4542-9564-4F0D646717DA}.Debug|x86.Build.0 = Debug|x86
+		{CBA289BC-DEB5-4542-9564-4F0D646717DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBA289BC-DEB5-4542-9564-4F0D646717DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBA289BC-DEB5-4542-9564-4F0D646717DA}.Release|x86.ActiveCfg = Release|x86
+		{CBA289BC-DEB5-4542-9564-4F0D646717DA}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CF688E3C-1BC2-4FFA-9504-2A2119838961}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,3 @@
+[submodule "MediaPortal-2"]
+	path = MediaPortal-2
+	url = https://github.com/MediaPortal/MediaPortal-2
