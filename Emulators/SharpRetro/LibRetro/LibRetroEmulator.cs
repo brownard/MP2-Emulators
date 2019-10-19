@@ -1,4 +1,5 @@
 ﻿using SharpRetro.Controller;
+using SharpRetro.Cores;
 using SharpRetro.RetroGL;
 using SharpRetro.Utils;
 using SharpRetro.Video;
@@ -17,7 +18,7 @@ namespace SharpRetro.LibRetro
   /// <summary>
   /// Implements the LibRetro API, enabling the loading and running of LibRetro cores
   /// </summary>
-  public unsafe class LibRetroEmulator : LibRetroBase
+  public unsafe class LibRetroEmulator
   {
     #region LibRetro Interfaces
     retro_log_printf_t retro_log_printf_cb;
@@ -58,6 +59,10 @@ namespace SharpRetro.LibRetro
     protected IRetroKeyboard _retroKeyboard;
     protected IRetroPointer _retroPointer;
     protected IRetroRumble _retroRumble;
+
+    protected string _corePath;
+    protected ICore _core;
+
     #endregion
 
     #region Public Properties
@@ -240,8 +245,15 @@ namespace SharpRetro.LibRetro
     /// </summary>
     /// <param name="corePath">The path to the LibRetro core to load</param>
     public LibRetroEmulator(string corePath)
-    : base(corePath)
     {
+      _corePath = corePath;
+      _core = new Core(corePath);
+      _core.SetEnvironment(RetroEnvironment);
+      _core.SetVideoRefresh(RetroVideoRefresh);
+      _core.SetAudioSample(RetroAudioSample);
+      _core.SetAudioSampleBatch(RetroAudioSampleBatch);
+      _core.SetInputPoll(RetroInputPoll);
+      _core.SetInputStateCallback(RetroInputState);
     }
     #endregion
 
@@ -249,14 +261,13 @@ namespace SharpRetro.LibRetro
     /// <summary>
     /// Initializes the LibRetro core
     /// </summary>
-    public override void Init()
+    public void Init()
     {
       try
       {
         InitInterfaces();
         InitPaths();
-        base.Init();
-        retro_init();
+        _core.Init();
         UpdateSystemInfo();
       }
       catch
@@ -273,7 +284,7 @@ namespace SharpRetro.LibRetro
     {
       //Mupen64 crashes if deinit is called when run hasn't been called
       if (!_firstRun)
-        retro_deinit();
+        _core.Deinit();
     }
 
     protected void InitInterfaces()
@@ -307,7 +318,7 @@ namespace SharpRetro.LibRetro
     protected void UpdateSystemInfo()
     {
       retro_system_info system_info = new retro_system_info();
-      retro_get_system_info(ref system_info);
+      _core.GetSystemInfo(ref system_info);
       _systemInfo = new SystemInfo()
       {
         LibraryName = Marshal.PtrToStringAnsi(system_info.library_name),
@@ -361,7 +372,7 @@ namespace SharpRetro.LibRetro
     /// <returns>True if the game was loaded successfully</returns>
     public bool LoadGame(retro_game_info gameInfo)
     {
-      if (!retro_load_game(ref gameInfo))
+      if (!_core.LoadGame(ref gameInfo))
       {
         Log(RETRO_LOG_LEVEL.WARN, "retro_load_game() failed");
         return false;
@@ -375,7 +386,7 @@ namespace SharpRetro.LibRetro
     /// </summary>
     public void Reset()
     {
-      retro_reset();
+      _core.Reset();
     }
 
     /// <summary>
@@ -383,13 +394,13 @@ namespace SharpRetro.LibRetro
     /// </summary>
     public void UnloadGame()
     {
-      retro_unload_game();
+      _core.UnloadGame();
     }
 
     protected void GetAVInfo()
     {
       retro_system_av_info av = new retro_system_av_info();
-      retro_get_system_av_info(ref av);
+      _core.GetSystemAVInfo(ref av);
       _maxVideoWidth = (int)av.geometry.max_width;
       _maxVideoHeight = (int)av.geometry.max_height;
       _videoBuffer = new int[_maxVideoWidth * _maxVideoHeight];
@@ -407,7 +418,7 @@ namespace SharpRetro.LibRetro
     public void Run()
     {
       CheckGLContextStatus();
-      retro_run();
+      _core.Run();
     }
 
     protected void CheckGLContextStatus()
@@ -428,7 +439,7 @@ namespace SharpRetro.LibRetro
     /// <returns>The size of the memory type</returns>
     public int GetMemorySize(RETRO_MEMORY memoryType)
     {
-      return (int)retro_get_memory_size(memoryType);
+      return (int)_core.GetMemorySize(memoryType);
     }
 
     /// <summary>
@@ -439,10 +450,10 @@ namespace SharpRetro.LibRetro
     /// <returns>True if the memory data was successfully retrieved</returns>
     public bool GetMemoryData(RETRO_MEMORY memoryType, byte[] buffer)
     {
-      int size = (int)retro_get_memory_size(memoryType);
+      int size = (int)_core.GetMemorySize(memoryType);
       if (size == 0)
         return false;
-      IntPtr ptr = retro_get_memory_data(memoryType);
+      IntPtr ptr = _core.GetMemoryData(memoryType);
       if (ptr == IntPtr.Zero)
         return false;
       Marshal.Copy(ptr, buffer, 0, size);
@@ -456,10 +467,10 @@ namespace SharpRetro.LibRetro
     /// <returns>A byte array containing the memory data</returns>
     public byte[] GetMemoryData(RETRO_MEMORY memoryType)
     {
-      uint size = retro_get_memory_size(memoryType);
+      uint size = _core.GetMemorySize(memoryType);
       if (size == 0)
         return null;
-      IntPtr ptr = retro_get_memory_data(memoryType);
+      IntPtr ptr = _core.GetMemoryData(memoryType);
       if (ptr == IntPtr.Zero)
         return null;
       byte[] saveBuffer = new byte[size];
@@ -475,10 +486,10 @@ namespace SharpRetro.LibRetro
     /// <returns>True if the memory data was successfully loaded</returns>
     public bool SetMemoryData(RETRO_MEMORY memoryType, byte[] buffer)
     {
-      int size = GetMemorySize(memoryType);
+      int size = (int)_core.GetMemorySize(memoryType);
       if (size > buffer.Length)
         size = buffer.Length;
-      IntPtr ptr = retro_get_memory_data(memoryType);
+      IntPtr ptr = _core.GetMemoryData(memoryType);
       if (ptr == IntPtr.Zero)
         return false;
       Marshal.Copy(buffer, 0, ptr, size);
@@ -491,7 +502,7 @@ namespace SharpRetro.LibRetro
     /// <returns>The size of the serialized state</returns>
     public int GetSerializeSize()
     {
-      return (int)retro_serialize_size();
+      return (int)_core.SerializeSize();
     }
 
     /// <summary>
@@ -501,11 +512,11 @@ namespace SharpRetro.LibRetro
     /// <returns>True if the state was successfully serialized</returns>
     public bool Serialize(byte[] buffer)
     {
-      uint size = retro_serialize_size();
+      uint size = _core.SerializeSize();
       if (size == 0)
         return false;
       fixed (byte* p = &buffer[0])
-        return retro_serialize((IntPtr)p, size);
+        return _core.Serialize((IntPtr)p, size);
     }
 
     /// <summary>
@@ -514,11 +525,11 @@ namespace SharpRetro.LibRetro
     /// <returns>A buffer containing the current state of the LibRetro core if successful, otherwise null</returns>
     public byte[] Serialize()
     {
-      uint size = retro_serialize_size();
+      uint size = _core.SerializeSize();
       byte[] buffer = new byte[size];
       bool result;
       fixed (byte* p = &buffer[0])
-        result = retro_serialize((IntPtr)p, size);
+        result = _core.Serialize((IntPtr)p, size);
       return result ? buffer : null;
     }
 
@@ -528,14 +539,15 @@ namespace SharpRetro.LibRetro
     /// <param name="buffer">A buffer containing the serialized state</param>
     public void Unserialize(byte[] buffer)
     {
-      uint size = retro_serialize_size();
+      uint size = _core.SerializeSize();
       fixed (byte* p = &buffer[0])
-        retro_unserialize((IntPtr)p, size);
+        _core.Unserialize((IntPtr)p, size);
     }
     #endregion
 
     #region Environment
-    protected override bool RetroEnvironment(RETRO_ENVIRONMENT cmd, IntPtr data)
+
+    protected bool RetroEnvironment(RETRO_ENVIRONMENT cmd, IntPtr data)
     {      
       //Log("Environment: {0}", cmd);
       switch (cmd)
@@ -744,7 +756,7 @@ namespace SharpRetro.LibRetro
     #endregion
 
     #region Video
-    protected override void RetroVideoRefresh(IntPtr data, uint width, uint height, uint pitch)
+    protected void RetroVideoRefresh(IntPtr data, uint width, uint height, uint pitch)
     {
       //dupe frame
       if (data == IntPtr.Zero)
@@ -770,7 +782,7 @@ namespace SharpRetro.LibRetro
     #endregion
 
     #region Audio
-    protected override void RetroAudioSample(short left, short right)
+    protected void RetroAudioSample(short left, short right)
     {
       _audioBuffer.Data[0] = left;
       _audioBuffer.Data[1] = right;
@@ -778,7 +790,7 @@ namespace SharpRetro.LibRetro
       OnAudioReady();
     }
 
-    protected override uint RetroAudioSampleBatch(IntPtr data, uint frames)
+    protected uint RetroAudioSampleBatch(IntPtr data, uint frames)
     {
       int samples = (int)(frames * 2);
       if (_audioBuffer.Data.Length < samples)
@@ -791,7 +803,7 @@ namespace SharpRetro.LibRetro
     #endregion
 
     #region Input
-    protected override short RetroInputState(uint port, uint device, uint index, uint id)
+    protected short RetroInputState(uint port, uint device, uint index, uint id)
     {
       switch ((RETRO_DEVICE)device)
       {
@@ -805,6 +817,10 @@ namespace SharpRetro.LibRetro
           return GetAnalogStatus(port, (RETRO_DEVICE_INDEX_ANALOG)index, (RETRO_DEVICE_ID_ANALOG)id);
       }
       return 0;
+    }
+
+    protected void RetroInputPoll()
+    {
     }
 
     protected bool RetroSetRumbleState(uint port, retro_rumble_effect effect, ushort strength)
@@ -880,9 +896,9 @@ namespace SharpRetro.LibRetro
     /// <summary>
     /// Disposes the LibRetro core, the OpenGL context and any unmanaged resources
     /// </summary>
-    public override void Dispose()
+    public void Dispose()
     {
-      base.Dispose();
+      _core.Dispose();
       if (_glContext != null)
       {
         _glContext.Dispose();
