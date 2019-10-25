@@ -11,6 +11,7 @@ using MediaPortal.Common.Settings;
 using MediaPortal.UI.SkinEngine.Players;
 using MediaPortal.UI.SkinEngine.SkinManagement;
 using SharpDX.Direct3D9;
+using SharpRetro.Audio;
 using SharpRetro.LibRetro;
 using System;
 using System.Collections.Generic;
@@ -29,7 +30,6 @@ namespace Emulators.LibRetro
 
     #region Protected Members
     protected readonly object _surfaceLock = new object();
-    protected readonly object _audioLock = new object();
 
     protected LibRetroSettings _settings;
     protected LibRetroThread _retroThread;
@@ -43,7 +43,6 @@ namespace Emulators.LibRetro
     protected RenderDlgt _renderDlgt;    
     protected bool _guiInitialized;
     protected bool _isPaused;
-    protected bool _hasAudio;
 
     protected string _corePath;
     protected string _gamePath;
@@ -136,9 +135,7 @@ namespace Emulators.LibRetro
 
     public void SetVolume(int volume)
     {
-      lock (_audioLock)
-        if (_soundOutput != null)
-          _soundOutput.SetVolume(volume);
+      _soundOutput.SetVolume(volume);
     }
 
     public bool SetRenderDelegate(RenderDlgt dlgt)
@@ -189,13 +186,16 @@ namespace Emulators.LibRetro
     {
       try
       {
-        InitializeLibRetro();
+        InitializeLibRetro();       
+        
         if (!LoadGame())
           return;
-        InitializeVideo();
-        InitializeAudio();
-        InitializeSaveStateHandler();
+        
         _synchronizationStrategy = new SynchronizationStrategy(_retroEmulator.TimingInfo.FPS, _settings.SynchronizationType);
+        _soundOutput.SetSynchronizationStrategy(_synchronizationStrategy);
+
+        InitializeVideo();
+        InitializeSaveStateHandler();
         _retroThread.IsInit = true;
       }
       catch (Exception ex)
@@ -211,6 +211,7 @@ namespace Emulators.LibRetro
 
     protected void InitializeLibRetro()
     {
+      _soundOutput = new LibRetroDirectSound(SkinContext.Form.Handle, _settings.AudioDeviceId, _settings.AudioBufferSize);
       _glContext = new RetroGLContext();
       _retroEmulator = new LibRetroEmulator(_corePath)
       {
@@ -218,13 +219,13 @@ namespace Emulators.LibRetro
         SystemDirectory = _settings.SystemDirectory,
         LogDelegate = RetroLogDlgt,
         Controller = _controllerWrapper,
-        GLContext = _glContext
+        GLContext = _glContext,
+        AudioOutput = _soundOutput as IAudioOutput
       };
 
       SetCoreVariables();
       _retroEmulator.VideoReady += OnVideoReady;
       _retroEmulator.FrameBufferReady += OnFrameBufferReady;
-      _retroEmulator.AudioReady += OnAudioReady;
       _retroEmulator.AVInfoUpdated += OnAVInfoUpdated;
       _retroEmulator.Init();
       Logger.Debug("LibRetroFrontend: Libretro initialized");
@@ -235,21 +236,6 @@ namespace Emulators.LibRetro
       lock (_surfaceLock)
         _textureProvider = new LibRetroTextureWrapper();
       Logger.Debug("LibRetroFrontend: Video initialized");
-    }
-
-    protected void InitializeAudio()
-    {
-      lock (_audioLock)
-      {
-        _soundOutput = new LibRetroDirectSound();
-        if (!_soundOutput.Init(SkinContext.Form.Handle, _settings.AudioDeviceId, (int)_retroEmulator.TimingInfo.SampleRate, _settings.AudioBufferSize))
-        {
-          _soundOutput.Dispose();
-          _soundOutput = null;
-          return;
-        }
-      }
-      Logger.Debug("LibRetroFrontend: Audio initialized");
     }
 
     protected void InitializeSaveStateHandler()
@@ -322,9 +308,7 @@ namespace Emulators.LibRetro
     private void RetroThreadStarted(object sender, EventArgs e)
     {
       _controllerWrapper.Start();
-      lock (_audioLock)
-        if (_soundOutput != null)
-          _soundOutput.Play();
+      _soundOutput.Play();
       Logger.Debug("LibRetroFrontend: Libretro thread running");
     }
 
@@ -337,7 +321,7 @@ namespace Emulators.LibRetro
     protected void RunEmulator()
     {
       //reset this every frame in case we get a frame without audio
-      _hasAudio = false;
+      _soundOutput.HasAudio = false;
       _retroEmulator.Run();
       if (_autoSave)
         _saveHandler.AutoSave();
@@ -346,7 +330,7 @@ namespace Emulators.LibRetro
     protected void RenderFrame()
     {
       RenderDlgt dlgt = _renderDlgt;
-      bool wait = _synchronizationStrategy.SyncToAudio ? !_hasAudio : dlgt == null;
+      bool wait = _synchronizationStrategy.SyncToAudio ? !_soundOutput.HasAudio : dlgt == null;
       if (wait)
         _synchronizationStrategy.Synchronize();
       if (dlgt != null)
@@ -370,16 +354,12 @@ namespace Emulators.LibRetro
 
     private void RetroThreadPaused(object sender, EventArgs e)
     {
-      lock (_audioLock)
-        if (_soundOutput != null)
-          _soundOutput.Pause();
+      _soundOutput.Pause();
     }
 
     private void RetroThreadUnPaused(object sender, EventArgs e)
     {
-      lock (_audioLock)
-        if (_soundOutput != null)
-          _soundOutput.UnPause();
+      _soundOutput.UnPause();
     }
     #endregion
 
@@ -420,29 +400,9 @@ namespace Emulators.LibRetro
       }
     }
 
-    protected void OnAudioReady(object sender, EventArgs e)
-    {
-      lock (_audioLock)
-      {
-        if (_soundOutput != null)
-        {
-          _soundOutput.WriteSamples(_retroEmulator.AudioBuffer.Data, _retroEmulator.AudioBuffer.Length, _synchronizationStrategy.SyncToAudio);
-          _hasAudio = true;
-        }
-      }
-    }
-
     protected void OnAVInfoUpdated(object sender, EventArgs e)
     {
       Logger.Debug("LibRetroFrontend: AV info updated, reinitializing");
-      lock(_audioLock)
-      {
-        if (_soundOutput != null)
-          _soundOutput.Dispose();
-        InitializeAudio();
-        if (_soundOutput != null)
-          _soundOutput.Play();
-      }
     }
     #endregion
 
