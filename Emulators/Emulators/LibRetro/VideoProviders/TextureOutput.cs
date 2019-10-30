@@ -1,0 +1,213 @@
+﻿using MediaPortal.UI.SkinEngine.SkinManagement;
+using SharpDX;
+using SharpDX.Direct3D9;
+using SharpRetro.LibRetro;
+using SharpRetro.Video;
+using System;
+using System.Drawing;
+
+namespace Emulators.LibRetro.VideoProviders
+{
+  public class TextureOutput : IVideoOutput, IHardwareRender, IDisposable
+  {
+    protected readonly object _surfaceLock = new object();
+
+    protected RenderContext _renderContext;
+    protected RETRO_PIXEL_FORMAT _pixelFormat = RETRO_PIXEL_FORMAT.XRGB1555;
+    
+    protected SafeTexture _renderTexture;
+    protected Size _textureSize;
+    protected float _displayAspectRatio = -1;
+
+    protected bool _isAllocated = true;
+
+    public object SurfaceLock => _surfaceLock;
+    public Size TextureSize => _textureSize;
+
+    public Texture Texture
+    {
+      get
+      {
+        lock (_surfaceLock)
+          return _renderTexture;
+      }
+    }
+
+    public SizeF DisplayAspectRatio
+    {
+      get
+      {
+        if(_displayAspectRatio > 0)
+          return new SizeF(_displayAspectRatio, 1);
+        Size size = _textureSize;
+        if (size.Width > 0 && size.Height > 0)
+          return new SizeF(size.Width, size.Height);
+        return new SizeF(1, 1);
+      }
+    }
+
+    public void Create()
+    {
+      _renderContext?.Create();
+    }
+
+    public void SetPixelFormat(RETRO_PIXEL_FORMAT pixelFormat)
+    {
+      _pixelFormat = pixelFormat;
+    }
+
+    public void SetGeometry(retro_game_geometry geometry)
+    {
+      _textureSize = new Size((int)geometry.base_width, (int)geometry.base_height);
+      _displayAspectRatio = geometry.aspect_ratio;
+      _renderContext?.SetGeometry(geometry);
+    }
+
+    public bool SetHWRender(ref retro_hw_render_callback hwRenderCallback)
+    {
+      if (_renderContext != null)
+        _renderContext.Dispose();
+      _renderContext = new RenderContext();
+      return _renderContext.SetRenderCallback(ref hwRenderCallback);
+    }
+
+    public void VideoRefresh(IntPtr data, uint width, uint height, uint pitch)
+    {
+      // Dupe frame.
+      if (data == IntPtr.Zero)
+        return;
+
+      lock (_surfaceLock)
+      {
+        if (!_isAllocated)
+          return;
+
+        // update the current size
+        if (_textureSize.Width != width || _textureSize.Height != height)
+          _textureSize = new Size((int)width, (int)height);
+
+        if (data.ToInt32() == retro_hw_render_callback.RETRO_HW_FRAME_BUFFER_VALID)
+          // OpenGl back buffer has been updated, copy it to our render texture
+          UpdateTextureFromFramebuffer(_textureSize.Width, _textureSize.Height);
+        else
+          // data contains a pointer to the pixel data, blit it into our render texture
+          UpdateTextureFromData(data, _textureSize.Width, _textureSize.Height, (int)pitch);
+      }
+    }
+
+    protected void UpdateTextureFromFramebuffer(int width, int height)
+    {
+      if (_renderContext == null)
+        return;
+      
+      // Update the render context's front buffer, inverting the image if necessary.
+      _renderContext.Render(width, height);
+
+      // If the OpenGl context supports the DirectX extensions
+      // then it will have rendered to a DirectX texture.
+      Texture glTexture = _renderContext.Texture;
+
+      // Check the size and usage of the render texture, if gl texture is null
+      // then we need Usage.Dynamic so we can copy in the OpenGl pixel data.
+      CheckRenderTexture(width, height, glTexture != null ? Usage.RenderTarget : Usage.Dynamic);
+      lock (_renderTexture.SyncRoot)
+      {
+        // The client can dispose our texture when resizing the window
+        // check inside the lock that this isn't the case.
+        if (_renderTexture.IsDisposing)
+          return;
+
+        if (glTexture != null)
+        {
+          // The OpenGl context rendered to a texture, so we can simply stretch onto our render texture.
+          SkinContext.Device.StretchRectangle(glTexture.GetSurfaceLevel(0), _renderTexture.GetSurfaceLevel(0), TextureFilter.None);
+        }
+        else
+        {
+          // No texture, read back the pixel data and copy into our render texture.
+          DataRectangle rectangle = _renderTexture.LockRectangle(0, LockFlags.Discard);
+          try
+          {
+            _renderContext.ReadPixels(width, height, rectangle.DataPointer);
+          }
+          finally
+          {
+            _renderTexture.UnlockRectangle(0);
+          }
+        }
+      }
+    }
+
+    protected void UpdateTextureFromData(IntPtr data, int width, int height, int pitch)
+    {
+      // Check the current size of our render texture.
+      CheckRenderTexture(width, height, Usage.Dynamic);
+
+      lock (_renderTexture.SyncRoot)
+      {
+        // The client can dispose our texture when resizing the window
+        // check inside the lock that this isn't the case.
+        if (_renderTexture.IsDisposing)
+          return;
+
+        DataRectangle rectangle = _renderTexture.LockRectangle(0, LockFlags.Discard);
+        try
+        {
+          // Convert the pixel data to a 32 bit format and blit it into our render texture.
+          VideoBlitter.Blit(_pixelFormat, data, rectangle.DataPointer, width, height, pitch, rectangle.Pitch);
+        }
+        finally
+        {
+          _renderTexture.UnlockRectangle(0);
+        }
+      }
+    }
+
+    protected void CheckRenderTexture(int width, int height, Usage usage)
+    {
+      if (_renderTexture != null)
+      {
+        lock (_renderTexture.SyncRoot)
+        {
+          if (!_renderTexture.IsDisposing)
+          {
+            SurfaceDescription desc = _renderTexture.GetLevelDescription(0);
+            if (desc.Width == width && desc.Height == height && desc.Usage == usage)
+              return;
+            _renderTexture.Dispose();
+          }
+        }
+      }
+      _renderTexture = new SafeTexture(SkinContext.Device, width, height, 1, usage, Format.X8R8G8B8, Pool.Default);
+    }
+
+    public void Reallocate()
+    {
+      lock (_surfaceLock)
+        _isAllocated = true;
+    }
+
+    public void Release()
+    {
+      lock (_surfaceLock)
+      {
+        if (_renderTexture != null)
+        {
+          _renderTexture.Dispose();
+          _renderTexture = null;
+        }
+        _isAllocated = false;
+      }
+    }
+
+    public void Dispose()
+    {
+      Release();
+      if (_renderContext != null)
+      {
+        _renderContext.Dispose();
+        _renderContext = null;
+      }
+    }
+  }
+}

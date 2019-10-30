@@ -265,47 +265,27 @@ namespace Emulators.LibRetro
 
     public Texture Texture
     {
-      get { return _retro != null ? _retro.Texture : null; }
+      get { return _retro?.TextureOutput?.Texture; }
     }
 
     public SizeF VideoAspectRatio
     {
-      get
-      {
-        if (_retro != null)
-        {
-          VideoInfo videoInfo = _retro.VideoInfo;
-          if (videoInfo != null)
-            return new SizeF(videoInfo.VirtualWidth, videoInfo.VirtualHeight);
-        }
-        return new SizeF(1, 1);
-      }
+      get { return _retro?.TextureOutput?.DisplayAspectRatio ?? new SizeF(1, 1); }
     }
 
     public Size VideoSize
     {
-      get
-      {
-        if (_retro != null)
-        {
-          VideoInfo videoInfo = _retro.VideoInfo;
-          if (videoInfo != null)
-            return new Size(videoInfo.Width, videoInfo.Height);
-        }
-        return new Size(0, 0);
-      }
+      get { return _retro?.TextureOutput?.TextureSize ?? new Size(0, 0); }
     }
 
     public void ReallocGUIResources()
     {
-      if (_retro != null)
-        _retro.ReallocGUIResources();
+      _retro?.ReallocGUIResources();
     }
 
     public void ReleaseGUIResources()
     {
-      if (_retro != null)
-        _retro.ReleaseGUIResources();
+      _retro?.ReleaseGUIResources();
     }
 
     public bool SetRenderDelegate(RenderDlgt dlgt)

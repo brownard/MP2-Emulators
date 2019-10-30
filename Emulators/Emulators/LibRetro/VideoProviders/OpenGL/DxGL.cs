@@ -1,23 +1,40 @@
-﻿using SharpGL;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Emulators.LibRetro.GLContexts
+namespace Emulators.LibRetro.VideoProviders.OpenGL
 {
-  public class OpenGLEx : OpenGL
+  public static class DxGL
   {
-    protected Dictionary<string, Delegate> _extensionFunctions = new Dictionary<string, Delegate>();
+    static readonly string[] EXTENSION_FUNCTIONS = new[]
+    {
+      "wglDXSetResourceShareHandleNV",
+      "wglDXOpenDeviceNV",
+      "wglDXCloseDeviceNV",
+      "wglDXRegisterObjectNV",
+      "wglDXUnregisterObjectNV",
+      "wglDXLockObjectsNV",
+      "wglDXUnlockObjectsNV"
+    };
+
+
+    [DllImport("opengl32", EntryPoint = "wglGetProcAddress", ExactSpelling = true)]
+    private static extern IntPtr wglGetProcAddress(string function_name);
+
+    public static bool HasDXExtensions()
+    {
+      return EXTENSION_FUNCTIONS.All(f => wglGetProcAddress(f) != IntPtr.Zero);
+    }
+
+    static Dictionary<string, Delegate> _extensionFunctions = new Dictionary<string, Delegate>();
 
     /// <summary>
     /// Returns a delegate for an extension function. This delegate  can be called to execute the extension function.
     /// </summary>
     /// <typeparam name="T">The extension delegate type.</typeparam>
     /// <returns>The delegate that points to the extension function.</returns>
-    protected T GetDelegateFor<T>() where T : class
+    static T GetDelegateFor<T>() where T : class
     {
       //  Get the type of the extension function.
       Type delegateType = typeof(T);
@@ -29,7 +46,7 @@ namespace Emulators.LibRetro.GLContexts
       Delegate del = null;
       if (_extensionFunctions.TryGetValue(name, out del) == false)
       {
-        IntPtr proc = Win32.wglGetProcAddress(name);
+        IntPtr proc = wglGetProcAddress(name);
         if (proc == IntPtr.Zero)
           throw new Exception("Extension function " + name + " not supported");
 
@@ -45,37 +62,37 @@ namespace Emulators.LibRetro.GLContexts
 
     #region WGL_NV_DX_interop / WGL_NV_DX_interop2
 
-    public bool DXSetResourceShareHandleNV(IntPtr dxObject, IntPtr shareHandle)
+    public static bool DXSetResourceShareHandleNV(IntPtr dxObject, IntPtr shareHandle)
     {
       return GetDelegateFor<wglDXSetResourceShareHandleNV>()(dxObject, shareHandle);
     }
 
-    public IntPtr DXOpenDeviceNV(IntPtr dxDevice)
+    public static IntPtr DXOpenDeviceNV(IntPtr dxDevice)
     {
       return GetDelegateFor<wglDXOpenDeviceNV>()(dxDevice);
     }
 
-    public bool DXCloseDeviceNV(IntPtr hDevice)
+    public static bool DXCloseDeviceNV(IntPtr hDevice)
     {
       return GetDelegateFor<wglDXCloseDeviceNV>()(hDevice);
     }
 
-    public IntPtr DXRegisterObjectNV(IntPtr hDevice, IntPtr dxObject, uint name, uint type, uint access)
+    public static IntPtr DXRegisterObjectNV(IntPtr hDevice, IntPtr dxObject, uint name, uint type, uint access)
     {
       return GetDelegateFor<wglDXRegisterObjectNV>()(hDevice, dxObject, name, type, access);
     }
 
-    public bool DXUnregisterObjectNV(IntPtr hDevice, IntPtr hObject)
+    public static bool DXUnregisterObjectNV(IntPtr hDevice, IntPtr hObject)
     {
       return GetDelegateFor<wglDXUnregisterObjectNV>()(hDevice, hObject);
     }
 
-    public bool DXObjectAccessNV(IntPtr hObject, uint access)
+    public static bool DXObjectAccessNV(IntPtr hObject, uint access)
     {
       return GetDelegateFor<wglDXObjectAccessNV>()(hObject, access);
     }
 
-    public bool DXLockObjectsNV(IntPtr hDevice, IntPtr[] hObjects)
+    public static bool DXLockObjectsNV(IntPtr hDevice, IntPtr[] hObjects)
     {
       unsafe
       {
@@ -90,7 +107,7 @@ namespace Emulators.LibRetro.GLContexts
       }
     }
 
-    public bool DXUnlockObjectsNV(IntPtr hDevice, IntPtr[] hObjects)
+    public static bool DXUnlockObjectsNV(IntPtr hDevice, IntPtr[] hObjects)
     {
       unsafe
       {

@@ -1,6 +1,5 @@
 ﻿using Emulators.LibRetro.Controllers;
 using Emulators.LibRetro.Controllers.Mapping;
-using Emulators.LibRetro.GLContexts;
 using Emulators.LibRetro.Render;
 using Emulators.LibRetro.Settings;
 using Emulators.LibRetro.SoundProviders;
@@ -29,15 +28,12 @@ namespace Emulators.LibRetro
     #endregion
 
     #region Protected Members
-    protected readonly object _surfaceLock = new object();
-
     protected LibRetroSettings _settings;
     protected LibRetroThread _retroThread;
     protected LibRetroEmulator _retroEmulator;
     protected LibRetroSaveStateHandler _saveHandler;
-    protected RetroGLContext _glContext;
-    protected ITextureProvider _textureProvider;
     protected ISoundOutput _soundOutput;
+    protected TextureOutput _textureOutput;
     protected ControllerWrapper _controllerWrapper;
     protected SynchronizationStrategy _synchronizationStrategy;    
     protected RenderDlgt _renderDlgt;    
@@ -61,9 +57,15 @@ namespace Emulators.LibRetro
     #endregion
 
     #region Public Properties
+
+    public TextureOutput TextureOutput
+    {
+      get { return _textureOutput; }
+    }
+
     public object SurfaceLock
     {
-      get { return _surfaceLock; }
+      get { return _textureOutput?.SurfaceLock; }
     }
 
     public bool Paused
@@ -73,22 +75,7 @@ namespace Emulators.LibRetro
 
     public Texture Texture
     {
-      get
-      {
-        lock (_surfaceLock)
-        {
-          return _textureProvider != null ? _textureProvider.Texture : null;
-        }
-      }
-    }
-
-    public VideoInfo VideoInfo
-    {
-      get
-      {
-        LibRetroEmulator emulator = _retroEmulator;
-        return emulator != null ? emulator.VideoInfo : null;
-      }
+      get { return _textureOutput?.Texture; }
     }
     #endregion
 
@@ -146,19 +133,13 @@ namespace Emulators.LibRetro
 
     public void ReallocGUIResources()
     {
-      lock (_surfaceLock)
-        _guiInitialized = true;
+      _textureOutput?.Reallocate();
       _synchronizationStrategy.Update();
     }
 
     public void ReleaseGUIResources()
     {
-      lock (_surfaceLock)
-      {
-        _guiInitialized = false;
-        if (_textureProvider != null)
-          _textureProvider.Release();
-      }
+      _textureOutput?.Release();
     }
 
     public void SetStateIndex(int index)
@@ -193,8 +174,7 @@ namespace Emulators.LibRetro
         
         _synchronizationStrategy = new SynchronizationStrategy(_retroEmulator.TimingInfo.FPS, _settings.SynchronizationType);
         _soundOutput.SetSynchronizationStrategy(_synchronizationStrategy);
-
-        InitializeVideo();
+        
         InitializeSaveStateHandler();
         _retroThread.IsInit = true;
       }
@@ -211,31 +191,21 @@ namespace Emulators.LibRetro
 
     protected void InitializeLibRetro()
     {
+      _textureOutput = new TextureOutput();
       _soundOutput = new LibRetroDirectSound(SkinContext.Form.Handle, _settings.AudioDeviceId, _settings.AudioBufferSize);
-      _glContext = new RetroGLContext();
       _retroEmulator = new LibRetroEmulator(_corePath)
       {
         SaveDirectory = _settings.SavesDirectory,
         SystemDirectory = _settings.SystemDirectory,
         LogDelegate = RetroLogDlgt,
         Controller = _controllerWrapper,
-        GLContext = _glContext,
-        AudioOutput = _soundOutput as IAudioOutput
+        AudioOutput = _soundOutput as IAudioOutput,
+        VideoOutput = _textureOutput
       };
 
       SetCoreVariables();
-      _retroEmulator.VideoReady += OnVideoReady;
-      _retroEmulator.FrameBufferReady += OnFrameBufferReady;
-      _retroEmulator.AVInfoUpdated += OnAVInfoUpdated;
       _retroEmulator.Init();
       Logger.Debug("LibRetroFrontend: Libretro initialized");
-    }
-
-    protected void InitializeVideo()
-    {
-      lock (_surfaceLock)
-        _textureProvider = new LibRetroTextureWrapper();
-      Logger.Debug("LibRetroFrontend: Video initialized");
     }
 
     protected void InitializeSaveStateHandler()
@@ -349,6 +319,16 @@ namespace Emulators.LibRetro
     {
       _retroEmulator.Dispose();
       _retroEmulator = null;
+      if (_textureOutput != null)
+      {
+        _textureOutput.Dispose();
+        _textureOutput = null;
+      }
+      if (_soundOutput != null)
+      {
+        _soundOutput.Dispose();
+        _soundOutput = null;
+      }
       Logger.Debug("LibRetroFrontend: Libretro thread finished");
     }
 
@@ -360,49 +340,6 @@ namespace Emulators.LibRetro
     private void RetroThreadUnPaused(object sender, EventArgs e)
     {
       _soundOutput.UnPause();
-    }
-    #endregion
-
-    #region Audio/Video Output
-    protected void OnVideoReady(object sender, EventArgs e)
-    {
-      lock (_surfaceLock)
-      {
-        if (_guiInitialized)
-          _textureProvider.UpdateTexture(_retroEmulator.VideoBuffer, _retroEmulator.VideoInfo.Width, _retroEmulator.VideoInfo.Height, false);
-      }
-    }
-
-    protected void OnFrameBufferReady(object sender, EventArgs e)
-    {
-      int width = _retroEmulator.VideoInfo.Width;
-      int height = _retroEmulator.VideoInfo.Height;
-
-      if (_glContext.HasDXContext)
-      {
-        lock (_surfaceLock)
-        {
-          if (_guiInitialized)
-          {
-            _glContext.UpdateCurrentTexture(width, height);
-            _textureProvider.UpdateTexture(_glContext.Texture, width, height, _glContext.BottomLeftOrigin);
-          }
-        }
-      }
-      else
-      {
-        byte[] pixels = _glContext.ReadPixels(width, height);
-        lock (_surfaceLock)
-        {
-          if (_guiInitialized)
-            _textureProvider.UpdateTexture(pixels, width, height, _glContext.BottomLeftOrigin);
-        }
-      }
-    }
-
-    protected void OnAVInfoUpdated(object sender, EventArgs e)
-    {
-      Logger.Debug("LibRetroFrontend: AV info updated, reinitializing");
     }
     #endregion
 
@@ -439,21 +376,10 @@ namespace Emulators.LibRetro
         _retroThread.Dispose();
         _retroThread = null;
       }
-      _glContext = null;
       if (_controllerWrapper != null)
       {
         _controllerWrapper.Dispose();
         _controllerWrapper = null;
-      }
-      if (_textureProvider != null)
-      {
-        _textureProvider.Dispose();
-        _textureProvider = null;
-      }
-      if (_soundOutput != null)
-      {
-        _soundOutput.Dispose();
-        _soundOutput = null;
       }
       if (_synchronizationStrategy != null)
       {

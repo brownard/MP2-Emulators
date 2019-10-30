@@ -140,10 +140,6 @@
     <Compile Include="LibRetro\Cores\LocalCore.cs" />
     <Compile Include="LibRetro\Cores\OnlineCore.cs" />
     <Compile Include="LibRetro\Cores\CoreUpdaterSettings.cs" />
-    <Compile Include="LibRetro\GLContexts\DXRenderContextProvider.cs" />
-    <Compile Include="LibRetro\GLContexts\FBORenderContextProvider.cs" />
-    <Compile Include="LibRetro\GLContexts\OpenGLEx.cs" />
-    <Compile Include="LibRetro\GLContexts\SharedTexture.cs" />
     <Compile Include="LibRetro\ILibRetroCoreInstanceManager.cs" />
     <Compile Include="LibRetro\LibRetroCoreInstanceManager.cs" />
     <Compile Include="LibRetro\LibRetroPlayerUIContributor.cs" />
@@ -153,7 +149,6 @@
     <Compile Include="LibRetro\Settings\LibRetroCoreSettings.cs" />
     <Compile Include="LibRetro\LibRetroFrontend.cs" />
     <Compile Include="LibRetro\LibRetroMediaItem.cs" />
-    <Compile Include="LibRetro\GLContexts\RetroGLContext.cs" />
     <Compile Include="LibRetro\LibRetroSaveStateHandler.cs" />
     <Compile Include="LibRetro\Settings\LibRetroMappingSettings.cs" />
     <Compile Include="LibRetro\Settings\LibRetroSettings.cs" />
@@ -161,9 +156,14 @@
     <Compile Include="LibRetro\SoundProviders\LibRetroDirectSound.cs" />
     <Compile Include="LibRetro\LibRetroPlayer.cs" />
     <Compile Include="LibRetro\LibRetroPlayerBuilder.cs" />
-    <Compile Include="LibRetro\VideoProviders\ITextureProvider.cs" />
-    <Compile Include="LibRetro\VideoProviders\LibRetroTextureWrapper.cs" />
+    <Compile Include="LibRetro\VideoProviders\OpenGL\DxGL.cs" />
+    <Compile Include="LibRetro\VideoProviders\OpenGL\DxOpenGLContext.cs" />
+    <Compile Include="LibRetro\VideoProviders\OpenGL\IHardwareContext.cs" />
+    <Compile Include="LibRetro\VideoProviders\OpenGL\OpenGLContext.cs" />
+    <Compile Include="LibRetro\VideoProviders\RenderContext.cs" />
     <Compile Include="LibRetro\Controllers\XInput\XInputController.cs" />
+    <Compile Include="LibRetro\VideoProviders\SafeTexture.cs" />
+    <Compile Include="LibRetro\VideoProviders\TextureOutput.cs" />
     <Compile Include="MediaCategoryHelper.cs" />
     <Compile Include="MediaExtensions\GameAspectWrapper.cs" />
     <Compile Include="MediaExtensions\GameFilterByDeveloperScreenData.cs" />
@@ -476,6 +476,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="OpenGL.Net">
+      <Version>0.8.4</Version>
+    </PackageReference>
     <PackageReference Include="SharpDX">
       <Version>4.0.1</Version>
     </PackageReference>

@@ -173,17 +173,17 @@ namespace Emulators.LibRetro.SoundProviders
           _secondaryBuffer.Volume = volume;
     }
 
-    void IAudioOutput.SetTimingInfo(TimingInfo timingInfo)
+    void IAudioOutput.SetTimingInfo(retro_system_timing timing)
     {
       // If we are currently playing then we need to
       //  resume playbackafter recreating the device.
       bool wasPlaying = _isPlaying;      
-      CreateDirectSound((int)timingInfo.SampleRate);
+      CreateDirectSound((int)timing.sample_rate);
       if (wasPlaying)
         Play();
     }
 
-    void IAudioOutput.RetroAudioSample(short left, short right)
+    void IAudioOutput.AudioSample(short left, short right)
     {
       lock (_syncObj)
       {
@@ -197,7 +197,7 @@ namespace Emulators.LibRetro.SoundProviders
       }
     }
 
-    uint IAudioOutput.RetroAudioSampleBatch(IntPtr data, uint frames)
+    uint IAudioOutput.AudioSampleBatch(IntPtr data, uint frames)
     {
       if (frames == 0)
         return frames;

@@ -75,6 +75,8 @@
     <Compile Include="Cores\ICore.cs" />
     <Compile Include="Info\Firmware.cs" />
     <Compile Include="Info\CoreInfo.cs" />
+    <Compile Include="Video\IHardwareRender.cs" />
+    <Compile Include="Video\IVideoOutput.cs" />
     <Compile Include="LibRetro\Libretro.cs" />
     <Compile Include="LibRetro\LibRetroEmulator.cs" />
     <Compile Include="LibRetro\LibRetroVariables.cs" />
