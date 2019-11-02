@@ -16,7 +16,6 @@
       <References Include="$(TargetDir)Emulators.Common.dll" />
       <References Include="$(TargetDir)SharpDX.DirectSound.dll" />
       <References Include="$(TargetDir)SharpDX.XInput.dll" />
-      <References Include="$(TargetDir)SharpGL.dll" />
       <References Include="$(TargetDir)OpenGL.Net.dll" />
       <References Include="$(TargetDir)SharpLibHid.dll" />
       <References Include="$(TargetDir)SharpLibWin32.dll" />
