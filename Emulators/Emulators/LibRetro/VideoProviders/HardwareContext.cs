@@ -13,6 +13,7 @@ namespace Emulators.LibRetro.VideoProviders
     protected retro_hw_context_reset_t _contextReset;
     protected retro_hw_context_reset_t _contextDestroy;
 
+    protected Device _device;
     protected DxOpenGLContext _contextProvider;
     protected bool _depth;
     protected bool _stencil;
@@ -20,6 +21,11 @@ namespace Emulators.LibRetro.VideoProviders
 
     protected int _maxWidth;
     protected int _maxHeight;
+
+    public HardwareContext(Device device)
+    {
+      _device = device;
+    }
 
     public Texture Texture
     {
@@ -44,7 +50,7 @@ namespace Emulators.LibRetro.VideoProviders
     /// <returns></returns>
     public bool SetRenderCallback(ref retro_hw_render_callback hwRenderCallback)
     {
-      _contextProvider = new DxOpenGLContext();
+      _contextProvider = new DxOpenGLContext(_device);
 
       _depth = hwRenderCallback.depth;
       _stencil = hwRenderCallback.stencil;

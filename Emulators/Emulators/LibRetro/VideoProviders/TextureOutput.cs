@@ -1,5 +1,4 @@
-﻿using MediaPortal.UI.SkinEngine.SkinManagement;
-using SharpDX;
+﻿using SharpDX;
 using SharpDX.Direct3D9;
 using SharpRetro.LibRetro;
 using SharpRetro.Video;
@@ -12,6 +11,7 @@ namespace Emulators.LibRetro.VideoProviders
   {
     protected readonly object _surfaceLock = new object();
 
+    protected Device _device;
     protected HardwareContext _renderContext;
     protected RETRO_PIXEL_FORMAT _pixelFormat = RETRO_PIXEL_FORMAT.XRGB1555;
     
@@ -23,6 +23,11 @@ namespace Emulators.LibRetro.VideoProviders
 
     public object SurfaceLock => _surfaceLock;
     public Size TextureSize => _textureSize;
+
+    public TextureOutput(Device device)
+    {
+      _device = device;
+    }
 
     public Texture Texture
     {
@@ -72,7 +77,7 @@ namespace Emulators.LibRetro.VideoProviders
     {
       if (_renderContext != null)
         _renderContext.Dispose();
-      _renderContext = new HardwareContext();
+      _renderContext = new HardwareContext(_device);
       return _renderContext.SetRenderCallback(ref hwRenderCallback);
     }
 
@@ -125,7 +130,7 @@ namespace Emulators.LibRetro.VideoProviders
         if (glTexture != null)
         {
           // The OpenGl context rendered to a dx texture, so we can simply stretch onto our render texture.
-          SkinContext.Device.StretchRectangle(glTexture.GetSurfaceLevel(0), _renderTexture.GetSurfaceLevel(0), TextureFilter.None);
+          _device.StretchRectangle(glTexture.GetSurfaceLevel(0), _renderTexture.GetSurfaceLevel(0), TextureFilter.None);
         }
         else
         {
@@ -183,7 +188,7 @@ namespace Emulators.LibRetro.VideoProviders
           }
         }
       }
-      _renderTexture = new SafeTexture(SkinContext.Device, width, height, 1, usage, Format.X8R8G8B8, Pool.Default);
+      _renderTexture = new SafeTexture(_device, width, height, 1, usage, Format.X8R8G8B8, Pool.Default);
     }
 
     public void Reallocate()

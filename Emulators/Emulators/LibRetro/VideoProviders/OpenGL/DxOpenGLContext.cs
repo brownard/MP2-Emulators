@@ -6,12 +6,17 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
 {
   public class DxOpenGLContext : OpenGLContext
   {
-    protected Device _dxDevice = MediaPortal.UI.SkinEngine.SkinManagement.SkinContext.Device;
+    protected Device _dxDevice;
     protected IntPtr _glDeviceHandle;
     
     protected Texture _dxTexture;
 
     protected IntPtr _glTextureHandle;
+
+    public DxOpenGLContext(Device device)
+    {
+      _dxDevice = device;
+    }
 
     public Texture Texture
     {

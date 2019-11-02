@@ -191,7 +191,7 @@ namespace Emulators.LibRetro
 
     protected void InitializeLibRetro()
     {
-      _textureOutput = new TextureOutput();
+      _textureOutput = new TextureOutput(SkinContext.Device);
       _soundOutput = new LibRetroDirectSound(SkinContext.Form.Handle, _settings.AudioDeviceId, _settings.AudioBufferSize);
       _retroEmulator = new LibRetroEmulator(_corePath)
       {
