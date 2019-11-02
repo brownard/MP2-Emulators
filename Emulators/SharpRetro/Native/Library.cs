@@ -22,8 +22,8 @@ namespace SharpRetro.Native
 
     protected void LoadLibrary(string dllPath)
     {
-      //try to locate dlls in the current directory (for libretro cores)
-      //this isnt foolproof but its a little better than nothing
+      // Try to locate dlls in the current directory (for libretro cores),
+      // this isn't foolproof but it's a little better than nothing.
       string path = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
       try
       {
