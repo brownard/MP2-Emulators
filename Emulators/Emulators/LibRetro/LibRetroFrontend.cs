@@ -311,6 +311,7 @@ namespace Emulators.LibRetro
     {
       Logger.Debug("LibRetroFrontend: Libretro thread finishing");
       _saveHandler.SaveSaveRam();
+      _textureOutput.Destroy();
       _retroEmulator.UnloadGame();
       _retroEmulator.DeInit();
     }

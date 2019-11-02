@@ -6,5 +6,6 @@ namespace SharpRetro.Video
   {
     bool SetHWRender(ref retro_hw_render_callback hwRenderCallback);
     void Create();
+    void Destroy();
   }
 }

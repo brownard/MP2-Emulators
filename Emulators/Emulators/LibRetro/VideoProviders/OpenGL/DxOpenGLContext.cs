@@ -81,7 +81,6 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
     {
       IntPtr sharedResourceHandle = IntPtr.Zero;
       _dxTexture = new Texture(_dxDevice, width, height, 1, Usage.RenderTarget, Format.X8R8G8B8, Pool.Default, ref sharedResourceHandle);
-      _dxTexture.Disposing += TextureDisposing;
       bool result = DxGL.DXSetResourceShareHandleNV(_dxTexture.NativePointer, sharedResourceHandle);
 
       _frontTexture = Gl.GenTexture();
@@ -89,11 +88,6 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
       DxGL.DXLockObjectsNV(_glDeviceHandle, new[] { _glTextureHandle });
       Gl.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2d, _frontTexture, 0);
       DxGL.DXUnlockObjectsNV(_glDeviceHandle, new[] { _glTextureHandle });
-    }
-
-    void TextureDisposing(object sender, EventArgs e)
-    {
-      return;
     }
 
     protected void DestroySharedTexture()

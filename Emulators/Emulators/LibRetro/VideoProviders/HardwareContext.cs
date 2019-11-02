@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace Emulators.LibRetro.VideoProviders
 {
-  public class RenderContext : IDisposable
+  public class HardwareContext : IDisposable
   {
     protected retro_hw_get_proc_address_t _getProcAddressDlgt;
     protected retro_hw_get_current_framebuffer_t _getCurrentFramebufferDlgt;
@@ -20,8 +20,6 @@ namespace Emulators.LibRetro.VideoProviders
 
     protected int _maxWidth;
     protected int _maxHeight;
-
-    protected bool _isContextCreated;
 
     public Texture Texture
     {
@@ -74,6 +72,16 @@ namespace Emulators.LibRetro.VideoProviders
         CreateContext();
     }
 
+    public void Destroy()
+    {
+      if (_contextProvider != null)
+      {
+        _contextDestroy?.Invoke();
+        _contextProvider.Destroy();
+        _contextProvider = null;
+      }
+    }
+
     public void SetGeometry(retro_game_geometry geometry)
     {
       _maxWidth = (int)geometry.max_width;
@@ -93,12 +101,7 @@ namespace Emulators.LibRetro.VideoProviders
 
     public void Dispose()
     {
-      if (_contextProvider != null)
-      {
-        _contextProvider.Destroy();
-        _contextProvider = null;
-        _isContextCreated = false;
-      }
+      Destroy();
     }
   }
 }

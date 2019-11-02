@@ -12,7 +12,7 @@ namespace Emulators.LibRetro.VideoProviders
   {
     protected readonly object _surfaceLock = new object();
 
-    protected RenderContext _renderContext;
+    protected HardwareContext _renderContext;
     protected RETRO_PIXEL_FORMAT _pixelFormat = RETRO_PIXEL_FORMAT.XRGB1555;
     
     protected SafeTexture _renderTexture;
@@ -51,6 +51,11 @@ namespace Emulators.LibRetro.VideoProviders
       _renderContext?.Create();
     }
 
+    public void Destroy()
+    {
+      _renderContext?.Destroy();
+    }
+
     public void SetPixelFormat(RETRO_PIXEL_FORMAT pixelFormat)
     {
       _pixelFormat = pixelFormat;
@@ -67,7 +72,7 @@ namespace Emulators.LibRetro.VideoProviders
     {
       if (_renderContext != null)
         _renderContext.Dispose();
-      _renderContext = new RenderContext();
+      _renderContext = new HardwareContext();
       return _renderContext.SetRenderCallback(ref hwRenderCallback);
     }
 
@@ -119,7 +124,7 @@ namespace Emulators.LibRetro.VideoProviders
 
         if (glTexture != null)
         {
-          // The OpenGl context rendered to a texture, so we can simply stretch onto our render texture.
+          // The OpenGl context rendered to a dx texture, so we can simply stretch onto our render texture.
           SkinContext.Device.StretchRectangle(glTexture.GetSurfaceLevel(0), _renderTexture.GetSurfaceLevel(0), TextureFilter.None);
         }
         else

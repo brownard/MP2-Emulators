@@ -111,7 +111,7 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
       Gl.TexCoord2(1, 0); Gl.Vertex3(width, 0, 0);
       Gl.End();
 
-      Gl.BindRenderbuffer(RenderbufferTarget.Renderbuffer, 0);
+      Gl.BindTexture(TextureTarget.Texture2d, 0);
       Gl.Disable(EnableCap.Texture2d);
 
       Gl.BindFramebufferEXT(FramebufferTarget.Framebuffer, 0);
@@ -275,6 +275,7 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
 
       if (_deviceContext == null)
         return;
+      _deviceContext.MakeCurrent(IntPtr.Zero);
       _deviceContext.DeleteContext(_glContext);
       _deviceContext.Dispose();
       _deviceContext = null;
