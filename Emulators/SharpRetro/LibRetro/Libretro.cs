@@ -330,6 +330,13 @@ namespace SharpRetro.LibRetro
     GET_USERNAME = 38,
     GET_LANGUAGE = 39,
 
+    /// <summary>
+    /// uint64_t * --
+    /// Sets quirk flags associated with serialization. The frontend will zero any flags it doesn't
+    /// recognize or support. Should be set in either retro_init or retro_load_game, but not both.
+    /// </summary>
+    SET_SERIALIZATION_QUIRKS = 44,
+
     EXPERIMENTAL = 0x10000
   };
 
@@ -344,7 +351,55 @@ namespace SharpRetro.LibRetro
 
     RETRO_HW_CONTEXT_DUMMY = Int32.MaxValue
   };
-  
+
+  [Flags]
+  public enum RETRO_SERIALIZATION_QUIRK
+  {
+    /// <summary>
+    /// Serialized state is incomplete in some way. Set if serialization is
+    /// usable in typical end-user cases but should not be relied upon to
+    /// implement frame-sensitive frontend features such as netplay or
+    /// rerecording. 
+    ///</summary>
+    INCOMPLETE = (1 << 0),
+
+    /// <summary>
+    /// The core must spend some time initializing before serialization is
+    /// supported. retro_serialize() will initially fail; retro_unserialize()
+    /// and retro_serialize_size() may or may not work correctly either.
+    /// </summary>
+    MUST_INITIALIZE = (1 << 1),
+
+    /// <summary>
+    /// Serialization size may change within a session.
+    /// </summary>
+    CORE_VARIABLE_SIZE = (1 << 2),
+
+    /// <summary>
+    /// Set by the frontend to acknowledge that it supports variable-sized
+    /// states.
+    /// </summary>
+    FRONT_VARIABLE_SIZE = (1 << 3),
+
+    /// <summary>
+    /// Serialized state can only be loaded during the same session.
+    /// </summary>
+    SINGLE_SESSION = (1 << 4),
+
+    /// <summary>
+    /// Serialized state cannot be loaded on an architecture with a different
+    /// endianness from the one it was saved on.
+    /// </summary>
+    ENDIAN_DEPENDENT = (1 << 5),
+    
+    /// <summary>
+    /// Serialized state cannot be loaded on a different platform from the one it
+    /// was saved on for reasons other than endianness, such as word size
+    /// dependence
+    /// </summary>
+    PLATFORM_DEPENDENT = (1 << 6),
+  }
+
   [StructLayout(LayoutKind.Sequential)]
   public struct retro_hw_render_callback
   {

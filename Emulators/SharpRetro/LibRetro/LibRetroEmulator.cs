@@ -555,6 +555,9 @@ namespace SharpRetro.LibRetro
           return SetGeometry(data);
         case RETRO_ENVIRONMENT.SET_SUBSYSTEM_INFO:
           return SetSubsystemInfo(data);
+        case RETRO_ENVIRONMENT.SET_SERIALIZATION_QUIRKS:
+          RETRO_SERIALIZATION_QUIRK quirks = (RETRO_SERIALIZATION_QUIRK)(*(ulong*)data.ToPointer());
+          return false;
         default:
           Log(RETRO_LOG_LEVEL.WARN, "Unknkown retro_environment command {0} - {1}", (int)cmd, cmd);
           return false;
