@@ -101,6 +101,7 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
       Gl.BindFramebufferEXT(FramebufferTarget.Framebuffer, _frontBuffer);
 
       Gl.Enable(EnableCap.Texture2d);
+      Gl.ActiveTexture(TextureUnit.Texture0);
       Gl.BindTexture(TextureTarget.Texture2d, _backTexture);
 
       // Draw a textured quad

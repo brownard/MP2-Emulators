@@ -18,6 +18,12 @@ namespace Emulators.LibRetro.VideoProviders
       Disposing += OnDisposing;
     }
 
+    public SafeTexture(Device device, int width, int height, int levelCount, Usage usage, Format format, Pool pool, ref IntPtr sharedHandle)
+      : base(device, width, height, levelCount, usage, format, pool, ref sharedHandle)
+    {
+      Disposing += OnDisposing;
+    }
+
     public object SyncRoot
     {
       get { return _syncRoot; }

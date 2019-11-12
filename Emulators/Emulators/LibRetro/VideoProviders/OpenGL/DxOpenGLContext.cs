@@ -9,7 +9,7 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
     protected Device _dxDevice;
     protected IntPtr _glDeviceHandle;
     
-    protected Texture _dxTexture;
+    protected SafeTexture _dxTexture;
 
     protected IntPtr _glTextureHandle;
 
@@ -18,7 +18,7 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
       _dxDevice = device;
     }
 
-    public Texture Texture
+    public SafeTexture Texture
     {
       get { return _dxTexture; }
     }
@@ -30,13 +30,29 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
 
     public override void Render(int width, int height, bool bottomLeftOrigin)
     {
-      if (HasDxContext)
-        DxGL.DXLockObjectsNV(_glDeviceHandle, new[] { _glTextureHandle });
+      if (!HasDxContext)
+      {
+        base.Render(width, height, bottomLeftOrigin);
+        return;
+      }
+
+      SafeTexture texture = _dxTexture;
+      lock (texture.SyncRoot)
+      {
+        if (texture.IsDisposing)
+        {
+          DestroySharedTexture();
+          Gl.BindFramebufferEXT(FramebufferTarget.Framebuffer, _frontBuffer);
+          CreateSharedTexture(width, height);
+          Gl.BindFramebufferEXT(FramebufferTarget.Framebuffer, 0);
+        }
+      }
+
+      DxGL.DXLockObjectsNV(_glDeviceHandle, new[] { _glTextureHandle });
 
       base.Render(width, height, bottomLeftOrigin);
 
-      if (HasDxContext)
-        DxGL.DXUnlockObjectsNV(_glDeviceHandle, new[] { _glTextureHandle });
+      DxGL.DXUnlockObjectsNV(_glDeviceHandle, new[] { _glTextureHandle });
     }
 
     public override void ReadPixels(int width, int height, IntPtr data)
@@ -85,7 +101,7 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
     protected void CreateSharedTexture(int width, int height)
     {
       IntPtr sharedResourceHandle = IntPtr.Zero;
-      _dxTexture = new Texture(_dxDevice, width, height, 1, Usage.RenderTarget, Format.X8R8G8B8, Pool.Default, ref sharedResourceHandle);
+      _dxTexture = new SafeTexture(_dxDevice, width, height, 1, Usage.RenderTarget, Format.X8R8G8B8, Pool.Default, ref sharedResourceHandle);
       bool result = DxGL.DXSetResourceShareHandleNV(_dxTexture.NativePointer, sharedResourceHandle);
 
       _frontTexture = Gl.GenTexture();

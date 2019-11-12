@@ -34,7 +34,7 @@ namespace Emulators.LibRetro.VideoProviders
       get
       {
         lock (_surfaceLock)
-          return _renderTexture;
+          return _renderContext?.Texture ?? _renderTexture;
       }
     }
 
@@ -109,17 +109,21 @@ namespace Emulators.LibRetro.VideoProviders
     {
       if (_renderContext == null)
         return;
-      
+
       // Update the render context's front buffer, inverting the image if necessary.
       _renderContext.Render(width, height);
 
       // If the OpenGl context supports the DirectX extensions
-      // then it will have rendered to a DirectX texture.
+      // then we'll just use the texture directly.
       Texture glTexture = _renderContext.Texture;
+      if (glTexture != null)
+        return;
 
-      // Check the size and usage of the render texture, if gl texture is null
-      // then we need Usage.Dynamic so we can copy in the OpenGl pixel data.
-      CheckRenderTexture(width, height, glTexture != null ? Usage.RenderTarget : Usage.Dynamic);
+      // DirectX extensions not supported, manually copy
+      // the OpenGl pixel data to a DirectX texture.
+
+      // Check the size and usage of the render texture
+      CheckRenderTexture(width, height, Usage.Dynamic);
       lock (_renderTexture.SyncRoot)
       {
         // The client can dispose our texture when resizing the window
@@ -127,23 +131,16 @@ namespace Emulators.LibRetro.VideoProviders
         if (_renderTexture.IsDisposing)
           return;
 
-        if (glTexture != null)
+        // Read back the pixel data from the OpenGl context
+        // directly into the DirectX texture's data pointer.
+        DataRectangle rectangle = _renderTexture.LockRectangle(0, LockFlags.Discard);
+        try
         {
-          // The OpenGl context rendered to a dx texture, so we can simply stretch onto our render texture.
-          _device.StretchRectangle(glTexture.GetSurfaceLevel(0), _renderTexture.GetSurfaceLevel(0), TextureFilter.None);
+          _renderContext.ReadPixels(width, height, rectangle.DataPointer);
         }
-        else
+        finally
         {
-          // No texture, read back the pixel data and copy into our render texture.
-          DataRectangle rectangle = _renderTexture.LockRectangle(0, LockFlags.Discard);
-          try
-          {
-            _renderContext.ReadPixels(width, height, rectangle.DataPointer);
-          }
-          finally
-          {
-            _renderTexture.UnlockRectangle(0);
-          }
+          _renderTexture.UnlockRectangle(0);
         }
       }
     }
