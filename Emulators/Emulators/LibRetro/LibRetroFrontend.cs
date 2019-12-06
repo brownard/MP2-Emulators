@@ -192,7 +192,8 @@ namespace Emulators.LibRetro
     protected void InitializeLibRetro()
     {
       _textureOutput = new TextureOutput(SkinContext.Device);
-      _soundOutput = new LibRetroDirectSound(SkinContext.Form.Handle, _settings.AudioDeviceId, _settings.AudioBufferSize);
+      //_soundOutput = new LibRetroDirectSound(SkinContext.Form.Handle, _settings.AudioDeviceId, _settings.AudioBufferSize);
+      _soundOutput = new LibRetroXAudio(_settings.AudioDeviceId);
       _retroEmulator = new LibRetroEmulator(_corePath)
       {
         SaveDirectory = _settings.SavesDirectory,
@@ -285,6 +286,7 @@ namespace Emulators.LibRetro
     private void RetroThreadRunning(object sender, EventArgs e)
     {
       RunEmulator();
+      Update();
       RenderFrame();
     }
 
@@ -297,14 +299,20 @@ namespace Emulators.LibRetro
         _saveHandler.AutoSave();
     }
 
+    protected void Update()
+    {
+      _soundOutput.Update();
+    }
+
     protected void RenderFrame()
     {
       RenderDlgt dlgt = _renderDlgt;
       bool wait = _synchronizationStrategy.SyncToAudio ? !_soundOutput.HasAudio : dlgt == null;
-      if (wait)
-        _synchronizationStrategy.Synchronize();
       if (dlgt != null)
         dlgt();
+
+      if (wait)
+        _synchronizationStrategy.Synchronize();
     }
 
     private void RetroThreadFinishing(object sender, EventArgs e)

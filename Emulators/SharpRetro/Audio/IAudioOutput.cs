@@ -9,6 +9,12 @@ namespace SharpRetro.Audio
   public interface IAudioOutput
   {
     /// <summary>
+    /// Sets the <see cref="retro_system_timing"/> to use to determine the sample rate of the audio.
+    /// </summary>
+    /// <param name="timing">The timing info to use.</param>
+    void SetTimingInfo(retro_system_timing timing);
+
+    /// <summary>
     /// Process a single audio frame.
     /// </summary>
     /// <param name="left">The left sample.</param>
@@ -22,11 +28,5 @@ namespace SharpRetro.Audio
     /// <param name="frames">The number of frames.</param>
     /// <returns>The number of frames actually processed.</returns>
     uint AudioSampleBatch(IntPtr data, uint frames);
-
-    /// <summary>
-    /// Sets the <see cref="retro_system_timing"/> to use to determine the sample rate of the audio.
-    /// </summary>
-    /// <param name="timing">The timing info to use.</param>
-    void SetTimingInfo(retro_system_timing timing);
   }
 }

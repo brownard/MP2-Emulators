@@ -156,6 +156,9 @@
     <Compile Include="LibRetro\SoundProviders\LibRetroDirectSound.cs" />
     <Compile Include="LibRetro\LibRetroPlayer.cs" />
     <Compile Include="LibRetro\LibRetroPlayerBuilder.cs" />
+    <Compile Include="LibRetro\SoundProviders\LibRetroXAudio.cs" />
+    <Compile Include="LibRetro\SoundProviders\XAudioPlayer.cs" />
+    <Compile Include="LibRetro\SoundProviders\XAudioRingBuffer.cs" />
     <Compile Include="LibRetro\VideoProviders\OpenGL\DxGL.cs" />
     <Compile Include="LibRetro\VideoProviders\OpenGL\DxOpenGLContext.cs" />
     <Compile Include="LibRetro\VideoProviders\OpenGL\IHardwareContext.cs" />
@@ -489,6 +492,9 @@
       <Version>4.0.1</Version>
     </PackageReference>
     <PackageReference Include="SharpDX.Mathematics">
+      <Version>4.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="SharpDX.XAudio2">
       <Version>4.0.1</Version>
     </PackageReference>
     <PackageReference Include="SharpDX.XInput">

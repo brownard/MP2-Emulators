@@ -331,19 +331,7 @@ namespace Emulators.LibRetro
     {
       int volume = _isMuted ? 0 : _volume;
       if (_retro != null)
-        _retro.SetVolume(VolumeToHundredthDeciBel(volume));
-    }
-
-    /// <summary>
-    /// Helper method for calculating the hundredth decibel value, needed by DirectSound
-    /// (in the range from -10000 to 0), which is logarithmic, from our volume (in the range from 0 to 100),
-    /// which is linear.
-    /// </summary>
-    /// <param name="volume">Volume in the range from 0 to 100, in a linear scale.</param>
-    /// <returns>Volume in the range from -10000 to 0, in a logarithmic scale.</returns>
-    protected static int VolumeToHundredthDeciBel(int volume)
-    {
-      return (int)((Math.Log10(volume * 99f / 100f + 1) - 2) * 5000);
+        _retro.SetVolume(volume);
     }
 
     public void SetAudioStream(string audioStream) { }

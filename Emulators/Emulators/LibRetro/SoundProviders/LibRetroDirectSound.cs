@@ -166,11 +166,15 @@ namespace Emulators.LibRetro.SoundProviders
         }
     }
 
+    public void Update()
+    {
+    }
+
     public void SetVolume(int volume)
     {
       lock (_syncObj)
         if (_secondaryBuffer != null)
-          _secondaryBuffer.Volume = volume;
+          _secondaryBuffer.Volume = VolumeToHundredthDeciBel(volume);
     }
 
     void IAudioOutput.SetTimingInfo(retro_system_timing timing)
@@ -276,6 +280,18 @@ namespace Emulators.LibRetro.SoundProviders
       int wPos;
       _secondaryBuffer.GetCurrentPosition(out pPos, out wPos);
       return wPos < _nextWrite ? wPos + _bufferBytes - _nextWrite : wPos - _nextWrite;
+    }
+
+    /// <summary>
+    /// Helper method for calculating the hundredth decibel value, needed by DirectSound
+    /// (in the range from -10000 to 0), which is logarithmic, from our volume (in the range from 0 to 100),
+    /// which is linear.
+    /// </summary>
+    /// <param name="volume">Volume in the range from 0 to 100, in a linear scale.</param>
+    /// <returns>Volume in the range from -10000 to 0, in a logarithmic scale.</returns>
+    protected static int VolumeToHundredthDeciBel(int volume)
+    {
+      return (int)((Math.Log10(volume * 99f / 100f + 1) - 2) * 5000);
     }
 
     public void Dispose()
