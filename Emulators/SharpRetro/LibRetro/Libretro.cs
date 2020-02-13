@@ -337,6 +337,19 @@ namespace SharpRetro.LibRetro
     /// </summary>
     SET_SERIALIZATION_QUIRKS = 44,
 
+    /// <summary>
+    /// * N/A (null) * --
+    /// The frontend will try to use a 'shared' hardware context (mostly applicable
+    /// to OpenGL) when a hardware context is being set up.
+    ///
+    /// Returns true if the frontend supports shared hardware contexts and false
+    /// if the frontend does not support shared hardware contexts.
+    ///
+    /// This will do nothing on its own until SET_HW_RENDER env callbacks are
+    /// being used.
+    /// </summary>
+    SET_HW_SHARED_CONTEXT = 44 | EXPERIMENTAL,
+
     EXPERIMENTAL = 0x10000
   };
 

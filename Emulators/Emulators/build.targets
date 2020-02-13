@@ -18,9 +18,11 @@
       <References Include="$(TargetDir)SharpDX.XAudio2.dll" />
       <References Include="$(TargetDir)SharpDX.XInput.dll" />
       <References Include="$(TargetDir)OpenGL.Net.dll" />
+      <References Include="$(TargetDir)OpenGL.Net.Math.dll" />
       <References Include="$(TargetDir)SharpLibHid.dll" />
       <References Include="$(TargetDir)SharpLibWin32.dll" />
       <References Include="$(TargetDir)SharpRetro.dll" />
+      <References Include="$(TargetDir)SharpRetro.OpenGL.dll" />
       <References Include="$(TargetDir)SharpCompress.dll" />
     </ItemGroup>
     

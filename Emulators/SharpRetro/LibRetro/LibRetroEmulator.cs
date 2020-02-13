@@ -558,8 +558,10 @@ namespace SharpRetro.LibRetro
         case RETRO_ENVIRONMENT.SET_SERIALIZATION_QUIRKS:
           RETRO_SERIALIZATION_QUIRK quirks = (RETRO_SERIALIZATION_QUIRK)(*(ulong*)data.ToPointer());
           return false;
+        case RETRO_ENVIRONMENT.SET_HW_SHARED_CONTEXT | RETRO_ENVIRONMENT.EXPERIMENTAL:
+          return true;
         default:
-          Log(RETRO_LOG_LEVEL.WARN, "Unknkown retro_environment command {0} - {1}", (int)cmd, cmd);
+          Log(RETRO_LOG_LEVEL.WARN, "Unknkown retro_environment command {0} - {1}", (int)cmd, cmd & (~RETRO_ENVIRONMENT.EXPERIMENTAL));
           return false;
       }
     }
@@ -653,7 +655,7 @@ namespace SharpRetro.LibRetro
 
     protected bool InitGlContext(IntPtr data)
     {
-      IHardwareRender hardwareRenderContext = _videoOutput as IHardwareRender;
+      IHardwareRenderer hardwareRenderContext = _videoOutput as IHardwareRenderer;
       if (hardwareRenderContext == null)
         return false;
 

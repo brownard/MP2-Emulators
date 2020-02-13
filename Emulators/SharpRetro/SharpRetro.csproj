@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -75,7 +76,7 @@
     <Compile Include="Cores\ICore.cs" />
     <Compile Include="Info\Firmware.cs" />
     <Compile Include="Info\CoreInfo.cs" />
-    <Compile Include="Video\IHardwareRender.cs" />
+    <Compile Include="Video\IHardwareRenderer.cs" />
     <Compile Include="Video\IVideoOutput.cs" />
     <Compile Include="LibRetro\Libretro.cs" />
     <Compile Include="LibRetro\LibRetroEmulator.cs" />

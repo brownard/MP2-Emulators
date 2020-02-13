@@ -1,13 +1,19 @@
-﻿using OpenGL;
+﻿using Emulators.LibRetro.VideoProviders.OpenGL.Objects;
+using Emulators.LibRetro.VideoProviders.OpenGL.Shaders;
+using OpenGL;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Emulators.LibRetro.VideoProviders.OpenGL
 {
   /// <summary>
   /// Represents a libretro compatible OpenGl context that can be used with a <see cref="SharpRetro.Native.retro_hw_render_callback"/>.
   /// </summary>
-  public class OpenGLContext : IDisposable, IHardwareContext
+  public class OpenGLContextNew : IDisposable, IHardwareContext
   {
     [DllImport("opengl32", EntryPoint = "wglGetProcAddress", ExactSpelling = true)]
     private static extern IntPtr wglGetProcAddress(IntPtr function_name);
@@ -16,6 +22,9 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
     protected IntPtr _glContext;
     protected IntPtr _sharedContext;
 
+    protected VertexArrayObject _vertexArrayObject;
+    protected ShaderProgram _program;
+
     protected uint _backBuffer;
     protected uint _backTexture;
     protected uint _backColourBuffer;
@@ -23,6 +32,14 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
 
     protected uint _frontBuffer;
     protected uint _frontTexture;
+
+    float[] quadVertices = {
+        // Positions       // Texture Coords
+        -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+        1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+    };
 
     public uint GetCurrentFramebuffer()
     {
@@ -38,18 +55,22 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
     {
       // Clean up any existing context
       Destroy();
-            
+
       _deviceContext = DeviceContext.Create();
-      _glContext = _deviceContext.CreateContext(IntPtr.Zero); //.CreateContextAttrib(IntPtr.Zero, null, new Khronos.KhronosVersion(3, 2, "gl")); //
+      _glContext = _deviceContext.CreateContext(IntPtr.Zero);//CreateGlContext();
 
       if (_glContext == IntPtr.Zero)
         throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
-      
-      //_sharedContext = _deviceContext.CreateContext(_glContext);
 
-      _deviceContext.MakeCurrent(_sharedContext != IntPtr.Zero ? _sharedContext : _glContext);
+      //_sharedContext = _deviceContext.CreateContextAttrib(IntPtr.Zero, null, new Khronos.KhronosVersion(2, 1, "gl"));//_glContext);
 
-      CreateFrameBuffers(width, height);
+      _deviceContext.MakeCurrent(_glContext);
+
+      CreateFrontBuffer(width, height);
+      CreateProgram();
+
+      MakeCurrent(true);
+      CreateBackBuffer(width, height);
     }
 
     public void SetDimensions(int width, int height)
@@ -86,115 +107,94 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
     public virtual void Render(int width, int height, bool bottomLeftOrigin)
     {
       MakeCurrent(false);
-      RenderBackBuffer(width, height, bottomLeftOrigin);
+      //RenderBackBuffer(width, height, bottomLeftOrigin);
+      RenderToTexture(width, height, bottomLeftOrigin);
       MakeCurrent(true);
     }
 
-    protected void RenderBackBuffer(int width, int height, bool bottomLeftOrigin)
+    protected void RenderToTexture(int width, int height, bool bottomLeftOrigin)
     {
-      Gl.PushAttrib(AttribMask.TextureBit | AttribMask.DepthBufferBit | AttribMask.LightingBit);
       Gl.Disable(EnableCap.DepthTest);
       Gl.Disable(EnableCap.Lighting);
-      Gl.UseProgram(0);
-
-      Gl.MatrixMode(MatrixMode.Projection);
-      Gl.PushMatrix();
-      Gl.LoadIdentity();
-
-      // Scale by -1 if bottom left origin is true to flip
-      // the image to the 'correct' orientation.
-      Gl.Scale(1, bottomLeftOrigin ? -1 : 1, 1);
-
-      Gl.Ortho(0d, width, 0d, height, -1d, 1d);
-
-      Gl.MatrixMode(MatrixMode.Modelview);
-      Gl.PushMatrix();
-      Gl.LoadIdentity();
-
-      Gl.BindFramebufferEXT(FramebufferTarget.Framebuffer, _frontBuffer);
+      Gl.Disable(EnableCap.AlphaTest);
 
       Gl.Enable(EnableCap.Texture2d);
+
+      _vertexArrayObject.Bind();
+      _program.Enable();
+
+      Gl.BindFramebuffer(FramebufferTarget.Framebuffer, _frontBuffer);
+      Gl.DrawBuffers(Gl.COLOR_ATTACHMENT0);
+      CheckError();
+
+      Gl.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+      Gl.Clear(ClearBufferMask.ColorBufferBit);
+      Gl.Viewport(0, 0, width, height);
+
+      // Compute MVP
+      float scaleY = bottomLeftOrigin ? -1 : 1;
+      Matrix4x4f mvp = Matrix4x4f.Scaled(1, scaleY, 1);
+      _program.SetMVPMatrix(mvp);
+
       Gl.ActiveTexture(TextureUnit.Texture0);
       Gl.BindTexture(TextureTarget.Texture2d, _backTexture);
+      _program.SetFragTexture(0);
+      CheckError();
 
-      // Draw a textured quad
-      Gl.Begin(PrimitiveType.Quads);
-      Gl.TexCoord2(0, 0); Gl.Vertex3(0, 0, 0);
-      Gl.TexCoord2(0, 1); Gl.Vertex3(0, height, 0);
-      Gl.TexCoord2(1, 1); Gl.Vertex3(width, height, 0);
-      Gl.TexCoord2(1, 0); Gl.Vertex3(width, 0, 0);
-      Gl.End();
+      Gl.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
+      CheckError();
 
       Gl.BindTexture(TextureTarget.Texture2d, 0);
+
+      Gl.DrawBuffers(0);
+      Gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+      _program.Disable();
+      _vertexArrayObject.Unbind();
       Gl.Disable(EnableCap.Texture2d);
-
-      Gl.BindFramebufferEXT(FramebufferTarget.Framebuffer, 0);
-
-      Gl.MatrixMode(MatrixMode.Projection);
-      Gl.PopMatrix();
-
-      Gl.MatrixMode(MatrixMode.Modelview);
-      Gl.PopMatrix();
-
-      Gl.PopAttrib();
-    }
-
-    protected void RenderBackBufferEx(int width, int height, bool bottomLeftOrigin)
-    {
-      Gl.BindFramebufferEXT(FramebufferTarget.Framebuffer, _frontBuffer);
-
-      //Gl.PushAttrib(AttribMask.TextureBit | AttribMask.DepthBufferBit | AttribMask.LightingBit);
-      Gl.Disable(EnableCap.DepthTest);
-      Gl.Disable(EnableCap.Lighting);
-      Gl.UseProgram(0);
-
-      Gl.Clear(ClearBufferMask.ColorBufferBit);
-      Gl.MatrixMode(MatrixMode.Projection);
-      Gl.PushMatrix();
-      Gl.LoadIdentity();
-
-      // Scale by -1 if bottom left origin is true to flip
-      // the image to the 'correct' orientation.
-      Gl.Scale(1, bottomLeftOrigin ? -1 : 1, 1);
-
-      Gl.Ortho(0d, width, 0d, height, -1d, 1d);
-
-      Gl.MatrixMode(MatrixMode.Modelview);
-      Gl.PushMatrix();
-      Gl.LoadIdentity();
-      
-      Gl.Enable(EnableCap.Texture2d);
-      //Gl.ActiveTexture(TextureUnit.Texture0);
-      Gl.BindTexture(TextureTarget.Texture2d, _backTexture);
-      //Gl.BindRenderbufferEXT(RenderbufferTarget.Renderbuffer, _backColourBuffer);
-
-      // Draw a textured quad
-      Gl.Begin(PrimitiveType.Quads);
-      Gl.TexCoord2(0, 0); Gl.Vertex3(0, 0, 0);
-      Gl.TexCoord2(0, 1); Gl.Vertex3(0, height, 0);
-      Gl.TexCoord2(1, 1); Gl.Vertex3(width, height, 0);
-      Gl.TexCoord2(1, 0); Gl.Vertex3(width, 0, 0);
-      Gl.End();
-
-      //Gl.BindRenderbufferEXT(RenderbufferTarget.Renderbuffer, 0);
-      Gl.BindTexture(TextureTarget.Texture2d, 0);
-      Gl.Disable(EnableCap.Texture2d);
-      
-      Gl.MatrixMode(MatrixMode.Projection);
-      Gl.PopMatrix();
-
-      Gl.MatrixMode(MatrixMode.Modelview);
-      Gl.PopMatrix();
-
-      //Gl.PopAttrib();
-
-      Gl.BindFramebufferEXT(FramebufferTarget.Framebuffer, 0);
     }
 
     protected void MakeCurrent(bool sharedContext)
     {
       if (_sharedContext != IntPtr.Zero && _deviceContext != null)
         _deviceContext.MakeCurrent(sharedContext ? _sharedContext : _glContext);
+    }
+
+    protected IntPtr CreateGlContext()
+    {
+      int major = 2;
+      int minor = 1;
+
+      List<int> attributes = new List<int>();
+
+      attributes.AddRange(new int[] {
+            Wgl.CONTEXT_MAJOR_VERSION_ARB, major,
+            Wgl.CONTEXT_MINOR_VERSION_ARB, minor
+          });
+
+      uint contextFlags = 0;
+      contextFlags |= Wgl.CONTEXT_DEBUG_BIT_ARB;
+      attributes.AddRange(new int[] { Wgl.CONTEXT_FLAGS_ARB, unchecked((int)contextFlags) });
+
+      uint contextProfile = 0;
+      contextProfile |= Wgl.CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
+      attributes.AddRange(new int[] { Wgl.CONTEXT_PROFILE_MASK_ARB, unchecked((int)contextProfile) });
+
+      attributes.Add(0);
+
+      return _deviceContext.CreateContextAttrib(IntPtr.Zero, attributes.ToArray());
+    }
+
+    protected void CreateProgram()
+    {
+      _vertexArrayObject = new VertexArrayObject();
+      _vertexArrayObject.Bind();
+
+      _program = new ShaderProgram();
+      _program.Link();
+
+      _vertexArrayObject.SetInterleavedBuffer((uint)_program.PositionAttribLocation, 3, (uint)_program.TexCoordsAttribLocation, 2, quadVertices);
+
+      _vertexArrayObject.Unbind();
     }
 
     /// <summary>
@@ -225,10 +225,7 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
       _backTexture = CreateTextureBuffer(width, height);
       //_backColourBuffer = CreateColourBuffer(width, height);
       _backDepthBuffer = CreateDepthBuffer(width, height);
-
-      //FramebufferStatus framebufferStatus = Gl.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
-      //if (framebufferStatus != FramebufferStatus.FramebufferComplete)
-      //  throw new InvalidOperationException("framebuffer not complete");
+      FramebufferStatus framebufferStatus = Gl.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
       
       Gl.BindFramebufferEXT(FramebufferTarget.Framebuffer, 0);
     }
@@ -243,6 +240,7 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
       _frontBuffer = Gl.GenFramebuffer();
       Gl.BindFramebufferEXT(FramebufferTarget.Framebuffer, _frontBuffer);
       _frontTexture = CreateTextureBuffer(width, height);
+      //_backColourBuffer = CreateColourBuffer(width, height);
       FramebufferStatus framebufferStatus = Gl.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
       Gl.BindFramebufferEXT(FramebufferTarget.Framebuffer, 0);
     }
@@ -261,13 +259,17 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
       
       // Set storage, format and size
       Gl.TextureImage2DEXT(texture, TextureTarget.Texture2d, 0, InternalFormat.Rgba, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, null);
-      Gl.TextureParameter(texture, TextureParameterName.TextureMagFilter, (float)TextureMagFilter.Nearest);
-      Gl.TextureParameter(texture, TextureParameterName.TextureMinFilter, (float)TextureMagFilter.Nearest);
+      Gl.TextureParameter(texture, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+      Gl.TextureParameter(texture, TextureParameterName.TextureMinFilter, (int)TextureMagFilter.Nearest);
+      Gl.TextureParameter(texture, TextureParameterName.TextureBaseLevel, 0);
+      Gl.TextureParameter(texture, TextureParameterName.TextureMaxLevel, 0);
+      var error = Gl.GetError();
 
       //Gl.RenderbufferStorage(RenderbufferTarget.Renderbuffer, InternalFormat.Rgb8, width, height);
 
       // Attach the texture to the currently bound FBO
       Gl.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2d, texture, 0);
+      Gl.DrawBuffers(Gl.COLOR_ATTACHMENT0);
       Gl.BindTexture(TextureTarget.Texture2d, 0);
       return texture;
     }
@@ -321,6 +323,17 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
     {
       MakeCurrent(false);
       DestroyFrontBuffer();
+      if (_program != null)
+      {
+        _program.Dispose();
+        _program = null;
+      }
+      if (_vertexArrayObject != null)
+      {
+        _vertexArrayObject.Dispose();
+        _vertexArrayObject = null;
+      }
+
       MakeCurrent(true);
       DestroyBackBuffer();
     }
@@ -331,7 +344,6 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
     protected virtual void DestroyBackBuffer()
     {
       DestroyTexture(ref _backTexture);
-      DestroyRenderBuffer(ref _backColourBuffer);
       DestroyRenderBuffer(ref _backDepthBuffer);
       DestroyFrameBuffer(ref _backBuffer);
     }
@@ -369,10 +381,17 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
       renderBuffer = 0;
     }
 
+    protected void CheckError()
+    {
+      ErrorCode error = Gl.GetError();
+      if (error != ErrorCode.NoError)
+        return;
+    }
+
     public virtual void Destroy()
     {
       DestroyFrameBuffers();
-
+           
       if (_deviceContext == null)
         return;
       _deviceContext.MakeCurrent(IntPtr.Zero);

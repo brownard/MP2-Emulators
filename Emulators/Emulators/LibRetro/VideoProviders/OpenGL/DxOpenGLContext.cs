@@ -4,7 +4,7 @@ using System;
 
 namespace Emulators.LibRetro.VideoProviders.OpenGL
 {
-  public class DxOpenGLContext : OpenGLContext
+  public class DxOpenGLContext : OpenGLContextNew
   {
     protected Device _dxDevice;
     protected IntPtr _glDeviceHandle;
@@ -35,7 +35,8 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
         base.Render(width, height, bottomLeftOrigin);
         return;
       }
-
+            
+      MakeCurrent(false);
       SafeTexture texture = _dxTexture;
       lock (texture.SyncRoot)
       {
@@ -49,21 +50,25 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
       }
 
       DxGL.DXLockObjectsNV(_glDeviceHandle, new[] { _glTextureHandle });
-
-      base.Render(width, height, bottomLeftOrigin);
-
+      RenderToTexture(width, height, bottomLeftOrigin);
+      //RenderBackBufferEx(width, height, bottomLeftOrigin);
       DxGL.DXUnlockObjectsNV(_glDeviceHandle, new[] { _glTextureHandle });
+
+      MakeCurrent(true);
     }
 
     public override void ReadPixels(int width, int height, IntPtr data)
     {
+      MakeCurrent(false);
       if (HasDxContext)
         DxGL.DXLockObjectsNV(_glDeviceHandle, new[] { _glTextureHandle });
 
       base.ReadPixels(width, height, data);
 
+      MakeCurrent(false);
       if (HasDxContext)
         DxGL.DXUnlockObjectsNV(_glDeviceHandle, new[] { _glTextureHandle });
+      MakeCurrent(true);
     }
 
     protected override void CreateFrontBuffer(int width, int height)
@@ -80,6 +85,7 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
       _frontBuffer = Gl.GenFramebuffer();
       Gl.BindFramebufferEXT(FramebufferTarget.Framebuffer, _frontBuffer);
       CreateSharedTexture(width, height);
+      FramebufferStatus framebufferStatus = Gl.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
       Gl.BindFramebufferEXT(FramebufferTarget.Framebuffer, 0);
     }
 
@@ -105,7 +111,7 @@ namespace Emulators.LibRetro.VideoProviders.OpenGL
       bool result = DxGL.DXSetResourceShareHandleNV(_dxTexture.NativePointer, sharedResourceHandle);
 
       _frontTexture = Gl.GenTexture();
-      _glTextureHandle = DxGL.DXRegisterObjectNV(_glDeviceHandle, _dxTexture.NativePointer, _frontTexture, (uint)TextureTarget.Texture2d, DxGL.WGL_ACCESS_WRITE_DISCARD_NV);
+      _glTextureHandle = DxGL.DXRegisterObjectNV(_glDeviceHandle, _dxTexture.NativePointer, _frontTexture, (uint)TextureTarget.Texture2d, DxGL.WGL_ACCESS_READ_WRITE_NV);
       DxGL.DXLockObjectsNV(_glDeviceHandle, new[] { _glTextureHandle });
       Gl.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2d, _frontTexture, 0);
       DxGL.DXUnlockObjectsNV(_glDeviceHandle, new[] { _glTextureHandle });

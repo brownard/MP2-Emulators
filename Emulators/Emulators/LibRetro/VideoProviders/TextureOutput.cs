@@ -1,21 +1,25 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D9;
 using SharpRetro.LibRetro;
+using SharpRetro.OpenGL;
+using SharpRetro.OpenGL.Render;
 using SharpRetro.Video;
 using System;
 using System.Drawing;
 
 namespace Emulators.LibRetro.VideoProviders
 {
-  public class TextureOutput : IVideoOutput, IHardwareRender, IDisposable
+  public class TextureOutput : IVideoOutput, IHardwareRenderer, IDisposable
   {
     protected readonly object _surfaceLock = new object();
 
     protected Device _device;
-    protected HardwareContext _renderContext;
+    protected DxTextureRenderContext _glRenderContext;
+    protected GLHardwareRenderer _hwRenderer;
     protected RETRO_PIXEL_FORMAT _pixelFormat = RETRO_PIXEL_FORMAT.XRGB1555;
     
     protected SafeTexture _renderTexture;
+    protected Size _maxSize;
     protected Size _textureSize;
     protected float _displayAspectRatio = -1;
 
@@ -34,7 +38,7 @@ namespace Emulators.LibRetro.VideoProviders
       get
       {
         lock (_surfaceLock)
-          return _renderContext?.Texture ?? _renderTexture;
+          return _glRenderContext?.Texture ?? _renderTexture;
       }
     }
 
@@ -53,12 +57,12 @@ namespace Emulators.LibRetro.VideoProviders
 
     public void Create()
     {
-      _renderContext?.Create();
+      _hwRenderer?.Create();
     }
 
     public void Destroy()
     {
-      _renderContext?.Destroy();
+      _hwRenderer?.Destroy();
     }
 
     public void SetPixelFormat(RETRO_PIXEL_FORMAT pixelFormat)
@@ -69,16 +73,20 @@ namespace Emulators.LibRetro.VideoProviders
     public void SetGeometry(retro_game_geometry geometry)
     {
       _textureSize = new Size((int)geometry.base_width, (int)geometry.base_height);
+      _maxSize = new Size((int)geometry.max_width, (int)geometry.max_height);
       _displayAspectRatio = geometry.aspect_ratio;
-      _renderContext?.SetGeometry(geometry);
+      _hwRenderer?.SetDimensions(_maxSize.Width, _maxSize.Height);
     }
 
     public bool SetHWRender(ref retro_hw_render_callback hwRenderCallback)
     {
-      if (_renderContext != null)
-        _renderContext.Dispose();
-      _renderContext = new HardwareContext(_device);
-      return _renderContext.SetRenderCallback(ref hwRenderCallback);
+      if (_hwRenderer != null)
+        _hwRenderer.Destroy();
+      _glRenderContext = new DxTextureRenderContext(_device);
+      _hwRenderer = new GLHardwareRenderer(new DefaultRenderStrategy(), _glRenderContext);
+      if (!_maxSize.IsEmpty)
+        _hwRenderer.SetDimensions(_maxSize.Width, _maxSize.Height);
+      return _hwRenderer.SetHWRender(ref hwRenderCallback);
     }
 
     public void VideoRefresh(IntPtr data, uint width, uint height, uint pitch)
@@ -107,15 +115,15 @@ namespace Emulators.LibRetro.VideoProviders
 
     protected void UpdateTextureFromFramebuffer(int width, int height)
     {
-      if (_renderContext == null)
+      if (_hwRenderer == null)
         return;
 
       // Update the render context's front buffer, inverting the image if necessary.
-      _renderContext.Render(width, height);
+      _hwRenderer.Render(width, height);
 
       // If the OpenGl context supports the DirectX extensions
       // then we'll just use the texture directly.
-      Texture glTexture = _renderContext.Texture;
+      Texture glTexture = _glRenderContext.Texture;
       if (glTexture != null)
         return;
 
@@ -136,7 +144,7 @@ namespace Emulators.LibRetro.VideoProviders
         DataRectangle rectangle = _renderTexture.LockRectangle(0, LockFlags.Discard);
         try
         {
-          _renderContext.ReadPixels(width, height, rectangle.DataPointer);
+          _glRenderContext.ReadPixels(width, height, rectangle.DataPointer);
         }
         finally
         {
@@ -210,10 +218,10 @@ namespace Emulators.LibRetro.VideoProviders
     public void Dispose()
     {
       Release();
-      if (_renderContext != null)
+      if (_hwRenderer != null)
       {
-        _renderContext.Dispose();
-        _renderContext = null;
+        _hwRenderer.Destroy();
+        _hwRenderer = null;
       }
     }
   }

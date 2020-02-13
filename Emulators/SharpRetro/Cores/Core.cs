@@ -105,6 +105,12 @@ namespace SharpRetro.Cores
       entryPoint.SetValue(this, dlgt);
     }
 
+    protected void DetachEntryPoints()
+    {
+      foreach (FieldInfo entryPoint in GetAllEntryPoints())
+        entryPoint.SetValue(this, null);
+    }
+
     protected IEnumerable<FieldInfo> GetAllEntryPoints()
     {
       return GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Where(f => f.IsDefined(typeof(CoreEntryPointAttribute)));
@@ -247,6 +253,7 @@ namespace SharpRetro.Cores
 
     public void Dispose()
     {
+      DetachEntryPoints();
       if (_library != null)
       {
         _library.Dispose();
