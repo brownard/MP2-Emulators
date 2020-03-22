@@ -160,28 +160,7 @@
     <Compile Include="LibRetro\SoundProviders\XAudioPlayer.cs" />
     <Compile Include="LibRetro\SoundProviders\XAudioRingBuffer.cs" />
     <Compile Include="LibRetro\VideoProviders\DxTextureRenderContext.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\DefaultRenderStrategy.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\DxFrontendRenderContext.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\DxGL.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\DxOpenGLContext.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\FrontendRenderContext.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\IRenderStrategy.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\Objects\RenderBuffer.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\RetroGlRenderContext.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\IHardwareContext.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\GlContext.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\OpenGlUtils.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\Objects\AbstractObject.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\Objects\Framebuffer.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\Objects\Texture2D.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\OpenGLContextNew.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\OpenGLContext.cs" />
-    <Compile Include="LibRetro\VideoProviders\HardwareContext.cs" />
     <Compile Include="LibRetro\Controllers\XInput\XInputController.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\RetroGlRenderer.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\Shaders\ShaderProgram.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\Shaders\ShaderSource.cs" />
-    <Compile Include="LibRetro\VideoProviders\OpenGL\Objects\VertexArrayObject.cs" />
     <Compile Include="LibRetro\VideoProviders\SafeTexture.cs" />
     <Compile Include="LibRetro\VideoProviders\TextureOutput.cs" />
     <Compile Include="MediaCategoryHelper.cs" />
@@ -401,8 +380,6 @@
     <None Include="build.targets">
       <SubType>Designer</SubType>
     </None>
-    <EmbeddedResource Include="LibRetro\VideoProviders\OpenGL\Shaders\DefaultVertexShader.glsl" />
-    <EmbeddedResource Include="LibRetro\VideoProviders\OpenGL\Shaders\DefaultFragmentShader.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Skin\default\screens\emulator_config_libretro_options.xaml">

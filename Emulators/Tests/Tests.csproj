@@ -61,6 +61,10 @@
       <Project>{954604B1-5F96-4491-B80E-18413C2BEE90}</Project>
       <Name>Emulators</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SharpRetro.OpenGL\SharpRetro.OpenGL.csproj">
+      <Project>{A3131B11-64BA-4983-A03E-30F500BBB1E0}</Project>
+      <Name>SharpRetro.OpenGL</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SharpRetro\SharpRetro.csproj">
       <Project>{CBA289BC-DEB5-4542-9564-4F0D646717DA}</Project>
       <Name>SharpRetro</Name>

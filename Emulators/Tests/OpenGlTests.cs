@@ -1,6 +1,6 @@
-﻿using Emulators.LibRetro.VideoProviders.OpenGL;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using OpenGL;
+using SharpRetro.OpenGL.Contexts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
