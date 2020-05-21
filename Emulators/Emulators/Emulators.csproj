@@ -37,48 +37,68 @@
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="FanArtService.Client, Version=2.1.1711.10774, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\x86\$(Configuration)\Plugins\FanArtService.Client\FanArtService.Client.dll</HintPath>
+      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\$(Configuration)\Plugins\FanArtService.Client\FanArtService.Client.dll</HintPath>
     </Reference>
     <Reference Include="FanArtService.Interfaces, Version=2.1.1711.10774, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\x86\$(Configuration)\Plugins\FanArtService.Client\FanArtService.Interfaces.dll</HintPath>
+      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\$(Configuration)\Plugins\FanArtService.Client\FanArtService.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="Media, Version=2.1.1711.10774, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\x86\$(Configuration)\Plugins\Media\Media.dll</HintPath>
+      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\$(Configuration)\Plugins\Media\Media.dll</HintPath>
     </Reference>
     <Reference Include="MediaPortal.Common, Version=2.1.1711.10774, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\x86\$(Configuration)\MediaPortal.Common.dll</HintPath>
+      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\$(Configuration)\MediaPortal.Common.dll</HintPath>
     </Reference>
     <Reference Include="MediaPortal.UI, Version=2.1.1711.10774, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\x86\$(Configuration)\MediaPortal.UI.dll</HintPath>
+      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\$(Configuration)\MediaPortal.UI.dll</HintPath>
     </Reference>
     <Reference Include="MediaPortal.Utilities, Version=2.1.1711.10774, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\x86\$(Configuration)\MediaPortal.Utilities.dll</HintPath>
+      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\$(Configuration)\MediaPortal.Utilities.dll</HintPath>
     </Reference>
     <Reference Include="OnlineLibraries, Version=2.1.1711.10774, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\x86\$(Configuration)\Plugins\OnlineLibraries\OnlineLibraries.dll</HintPath>
+      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\$(Configuration)\Plugins\OnlineLibraries\OnlineLibraries.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="ServerSettings.Interfaces, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\x86\$(Configuration)\Plugins\ServerSettings.Client\ServerSettings.Interfaces.dll</HintPath>
+      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\$(Configuration)\Plugins\ServerSettings.Client\ServerSettings.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="SkinBase, Version=2.1.1711.10774, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\x86\$(Configuration)\Plugins\SkinBase\SkinBase.dll</HintPath>
+      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\$(Configuration)\Plugins\SkinBase\SkinBase.dll</HintPath>
     </Reference>
     <Reference Include="SkinEngine, Version=2.1.1711.10774, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\x86\$(Configuration)\Plugins\SkinEngine\SkinEngine.dll</HintPath>
+      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\$(Configuration)\Plugins\SkinEngine\SkinEngine.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

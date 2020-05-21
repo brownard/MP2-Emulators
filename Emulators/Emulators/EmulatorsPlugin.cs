@@ -1,5 +1,6 @@
 ﻿using Emulators.MediaExtensions;
 using MediaPortal.Common.PluginManager;
+using MediaPortal.Utilities.SystemAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,10 @@ namespace Emulators
   {
     public void Activated(PluginRuntime pluginRuntime)
     {
+      string absolutePlatformDir;
+      if (!NativeMethods.SetPlatformSearchDirectories(out absolutePlatformDir))
+        throw new Exception("Error adding dll probe path");
+
       GamesLibrary.RegisterOnMediaLibrary();
 
       // Init OpenGl here as it creates a hidden window which we later

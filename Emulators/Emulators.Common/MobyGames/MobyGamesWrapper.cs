@@ -16,7 +16,7 @@ using System.Web;
 
 namespace Emulators.Common.MobyGames
 {
-  class MobyGamesWrapper : BaseMatcher<GameMatch<string>, string, string, string>, IOnlineMatcher
+  class MobyGamesWrapper : BaseMediaMatcher<GameMatch<string>, string, string, string>, IOnlineMatcher
   {
     #region Logger
     protected static ILogger Logger

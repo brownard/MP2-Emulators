@@ -31,15 +31,33 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="FanArtService.Interfaces">
-      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\x86\$(Configuration)\Plugins\FanArtService.Client\FanArtService.Interfaces.dll</HintPath>
+      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\$(Configuration)\Plugins\FanArtService.Client\FanArtService.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="MediaPortal.Backend">
-      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Server\bin\x86\$(Configuration)\MediaPortal.Backend.dll</HintPath>
+      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Server\bin\$(Configuration)\MediaPortal.Backend.dll</HintPath>
     </Reference>
     <Reference Include="MediaPortal.Common">
-      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\x86\$(Configuration)\MediaPortal.Common.dll</HintPath>
+      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\$(Configuration)\MediaPortal.Common.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

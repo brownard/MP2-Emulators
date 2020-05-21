@@ -104,7 +104,7 @@ namespace Emulators.LibRetro.VideoProviders
         if (_textureSize.Width != width || _textureSize.Height != height)
           _textureSize = new Size((int)width, (int)height);
 
-        if (data.ToInt32() == retro_hw_render_callback.RETRO_HW_FRAME_BUFFER_VALID)
+        if (data.ToInt64() == retro_hw_render_callback.RETRO_HW_FRAME_BUFFER_VALID)
           // OpenGl back buffer has been updated, copy it to our render texture
           UpdateTextureFromFramebuffer(_textureSize.Width, _textureSize.Height);
         else
