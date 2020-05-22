@@ -36,10 +36,10 @@ namespace Emulators.LibRetro.Cores
 
       CoreUpdaterSettings settings = ServiceRegistration.Get<ISettingsManager>().Load<CoreUpdaterSettings>();
       _baseUrl = settings.BaseUrl;
-      _latestUrl = settings.CoresUrl;
       _infoUrl = settings.CoreInfoUrl;
-      _customCoresUrl = settings.CustomCoresUrl;
       _unsupportedCores = new HashSet<string>(CoreUpdaterSettings.DEFAULT_UNSUPPORTED);
+
+      settings.GetPlatformSpecificCoresUrls(out _latestUrl, out _customCoresUrl);
     }
 
     public List<LocalCore> Cores
@@ -86,7 +86,6 @@ namespace Emulators.LibRetro.Cores
       CoreList coreList = _downloader.Download<CoreList>(url);
       if (coreList != null)
         onlineCores.AddRange(coreList.CoreUrls.OrderBy(c => c.Name));
-
 
       if (!TryCreateDirectory(_infoDirectory))
         return;

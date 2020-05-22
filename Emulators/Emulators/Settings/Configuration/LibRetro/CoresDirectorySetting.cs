@@ -13,13 +13,13 @@ namespace Emulators.Settings.Configuration.LibRetro
     public override void Load()
     {
       _pathSelectionType = PathSelectionType.Folder;
-      _path = SettingsManager.Load<LibRetroSettings>().CoresDirectory;
+      _path = SettingsManager.Load<LibRetroSettings>().GetPlatformSpecificCoresDirectory();
     }
 
     public override void Save()
     {
       LibRetroSettings settings = SettingsManager.Load<LibRetroSettings>();
-      settings.CoresDirectory = _path;
+      settings.SetPlatformSpecificCoresDirectory(_path);
       SettingsManager.Save(settings);
     }
   }

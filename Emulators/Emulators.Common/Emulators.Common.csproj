@@ -109,6 +109,7 @@
     <Compile Include="TheGamesDb\Data\ImageResult.cs" />
     <Compile Include="TheGamesDb\Data\Platforms\Platform.cs" />
     <Compile Include="TheGamesDb\TheGamesDbWrapperV2.cs" />
+    <Compile Include="Utils.cs" />
     <Compile Include="WebRequests\AbstractDownloader.cs" />
     <Compile Include="WebRequests\HtmlDownloader.cs" />
     <Compile Include="WebRequests\IHtmlDeserializable.cs" />

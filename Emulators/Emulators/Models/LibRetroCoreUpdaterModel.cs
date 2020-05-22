@@ -135,7 +135,7 @@ namespace Emulators.Models
     protected void UpdateAsync()
     {
       LibRetroSettings settings = ServiceRegistration.Get<ISettingsManager>().Load<LibRetroSettings>();
-      _coresDirectory = settings.CoresDirectory;
+      _coresDirectory = settings.GetPlatformSpecificCoresDirectory();
       _infoDirectory = settings.InfoDirectory;
       _onlyShowSupportedCores = settings.OnlyShowSupportedCores;
       _coreHandler = new CoreHandler(_coresDirectory, _infoDirectory);

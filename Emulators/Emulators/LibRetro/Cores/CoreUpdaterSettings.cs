@@ -1,4 +1,5 @@
-﻿using MediaPortal.Common.Settings;
+﻿using Emulators.Common;
+using MediaPortal.Common.Settings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,16 +44,41 @@ namespace Emulators.LibRetro.Cores
       }
     };
 
+    /// <summary>
+    /// Gets the urls to use to download cores for the current application platform.
+    /// </summary>
+    /// <param name="coresUrl"></param>
+    /// <param name="customCoresUrl"></param>
+    public void GetPlatformSpecificCoresUrls(out string coresUrl, out string customCoresUrl)
+    {
+      if (Utils.IsCurrentPlatform64Bit())
+      {
+        coresUrl = CoresUrl64Bit;
+        customCoresUrl = CustomCoresUrl64Bit;
+      }
+      else
+      {
+        coresUrl = CoresUrl;
+        customCoresUrl = CustomCoresUrl;
+      }
+    }
+
     [Setting(SettingScope.Global, "http://buildbot.libretro.com")]
     public string BaseUrl { get; set; }
 
     [Setting(SettingScope.Global, "/nightly/windows/x86/latest/")]
     public string CoresUrl { get; set; }
 
+    [Setting(SettingScope.Global, "/nightly/windows/x86_64/latest/")]
+    public string CoresUrl64Bit { get; set; }
+
     [Setting(SettingScope.Global, "/assets/frontend/info/")]
     public string CoreInfoUrl { get; set; }
 
     [Setting(SettingScope.Global, "http://brownard.github.io/Libretro/CustomCoresList.xml")]
     public string CustomCoresUrl { get; set; }
+
+    [Setting(SettingScope.Global)]
+    public string CustomCoresUrl64Bit { get; set; }
   }
 }
