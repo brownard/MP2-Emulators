@@ -27,8 +27,7 @@
     </ItemGroup>
     
     <ItemGroup>
-      <Libs Include="$(ProjectDir)..\Lib\libgcc_s_dw2-1.dll" />
-      <Libs Include="$(ProjectDir)..\Lib\libwinpthread-1.dll" />
+      <Libs Include="$(ProjectDir)..\Lib\**\*.*" />
     </ItemGroup>
   
     <ItemGroup>
@@ -41,7 +40,7 @@
   
     <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(PluginDestination)" />
     <Copy SourceFiles="@(References)" DestinationFolder="$(PluginDestination)" />
-    <Copy SourceFiles="@(Libs)" DestinationFolder="$(PluginDestination)" />
+    <Copy SourceFiles="@(Libs)" DestinationFiles="@(Libs->'$(PluginDestination)%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(LanguageFiles)" DestinationFolder="$(PluginDestination)Language\" />
     <Copy SourceFiles="@(SkinFiles)"
           DestinationFiles="@(SkinFiles->'$(PluginDestination)Skin\%(RecursiveDir)%(Filename)%(Extension)')" />
