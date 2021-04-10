@@ -1,29 +1,25 @@
-﻿using Emulators.Emulator;
-using Emulators.Models.Navigation;
+﻿using Emulators.Common;
+using Emulators.Common.Emulators;
+using Emulators.Emulator;
+using Emulators.LibRetro.Cores;
+using Emulators.LibRetro.Settings;
+using MediaPortal.Common;
 using MediaPortal.Common.Commands;
+using MediaPortal.Common.General;
+using MediaPortal.Common.Logging;
+using MediaPortal.Common.ResourceAccess;
+using MediaPortal.Common.Settings;
+using MediaPortal.Common.SystemResolver;
 using MediaPortal.UI.Presentation.DataObjects;
-using MediaPortal.UI.Presentation.Models;
+using MediaPortal.UI.Presentation.Screens;
+using MediaPortal.UI.Presentation.Workflow;
+using MediaPortal.UiComponents.SkinBase.General;
+using SharpRetro.Info;
+using SharpRetro.LibRetro;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediaPortal.UI.Presentation.Workflow;
-using MediaPortal.UI.Presentation.Screens;
-using MediaPortal.Common;
-using MediaPortal.Common.ResourceAccess;
-using MediaPortal.UiComponents.SkinBase.General;
-using Emulators.Common.Emulators;
-using MediaPortal.Common.SystemResolver;
-using SharpRetro.LibRetro;
-using MediaPortal.Common.Settings;
-using Emulators.LibRetro;
-using Emulators.LibRetro.Settings;
-using SharpRetro.Info;
-using Emulators.LibRetro.Cores;
 using System.IO;
-using MediaPortal.Common.Logging;
-using MediaPortal.Common.General;
+using System.Linq;
 
 namespace Emulators.Models
 {
@@ -127,7 +123,9 @@ namespace Emulators.Models
           IsNative = _emulatorProxy.EmulatorType == EmulatorType.Native,
           IsLibRetro = _emulatorProxy.EmulatorType == EmulatorType.LibRetro,
           Id = Guid.NewGuid(),
-          LocalSystemId = ServiceRegistration.Get<ISystemResolver>().LocalSystemId
+          LocalSystemId = ServiceRegistration.Get<ISystemResolver>().LocalSystemId,
+          // Libretro configs are platform specific, assume it requires the current platform
+          Is64Bit = _emulatorProxy.EmulatorType == EmulatorType.LibRetro && Utils.IsCurrentPlatform64Bit()
         };
       }
 
@@ -175,12 +173,14 @@ namespace Emulators.Models
       var sm = ServiceRegistration.Get<ISettingsManager>();
       var settings = sm.Load<LibRetroSettings>();
 
+      string coresDirectory = settings.GetPlatformSpecificCoresDirectory();
+
       _localCoreItems.Clear();
       try
       {
-        if (Directory.Exists(settings.CoresDirectory))
+        if (Directory.Exists(coresDirectory))
         {
-          foreach (string path in Directory.EnumerateFiles(settings.CoresDirectory, "*.dll"))
+          foreach (string path in Directory.EnumerateFiles(coresDirectory, "*.dll"))
           {
             string coreName = Path.GetFileName(path);
             CoreInfo coreInfo = CoreHandler.LoadCoreInfo(coreName, settings.InfoDirectory);
@@ -195,7 +195,7 @@ namespace Emulators.Models
       }
       catch (Exception ex)
       {
-        ServiceRegistration.Get<ILogger>().Error("EmulatorConfigurationModel: Exception loading cores from '{0}'", ex, settings.CoresDirectory);
+        ServiceRegistration.Get<ILogger>().Error("EmulatorConfigurationModel: Exception loading cores from '{0}'", ex, coresDirectory);
       }
       _localCoreItems.FireChange();
     }

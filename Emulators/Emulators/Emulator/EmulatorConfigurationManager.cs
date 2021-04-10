@@ -58,12 +58,13 @@ namespace Emulators.Emulator
         configuration = configurations.FirstOrDefault(c => c.FileExtensions.Count == 0);
       return configuration != null;
     }
-
+    
     public List<EmulatorConfiguration> Load()
     {
       ISettingsManager sm = ServiceRegistration.Get<ISettingsManager>();
       CommonSettings settings = sm.Load<CommonSettings>();
-      var configurations = new List<EmulatorConfiguration>(settings.ConfiguredEmulators);
+      // Only return configurations that are compatible with the current application platform (32bit or 64bit)
+      var configurations = new List<EmulatorConfiguration>(settings.ConfiguredEmulators.Where(c => c.IsCompatibleWithCurrentPlatform));
       return configurations;
     }
 
@@ -71,7 +72,12 @@ namespace Emulators.Emulator
     {
       ISettingsManager sm = ServiceRegistration.Get<ISettingsManager>();
       CommonSettings settings = sm.Load<CommonSettings>();
-      settings.ConfiguredEmulators = configurations;
+
+      // Keep any incompatible configurations as they shouldn't have been modified
+      List<EmulatorConfiguration> updatedConfigurations = settings.ConfiguredEmulators.Where(c => !c.IsCompatibleWithCurrentPlatform).ToList();
+      updatedConfigurations.AddRange(configurations);
+
+      settings.ConfiguredEmulators = updatedConfigurations;
       sm.Save(settings);
       SyncWithServer(configurations);
     }

@@ -205,5 +205,10 @@ namespace Emulators.Common
     {
       return Task.FromResult(false);
     }
+
+    public Task<bool> DownloadMetadataAsync(Guid mediaItemId, IDictionary<Guid, IList<MediaItemAspect>> aspectData)
+    {
+      return Task.FromResult(false);
+    }
   }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Emulators.Common.Matchers
 {
-  public class GameMatch<T> : BaseMatch<T>
+  public class GameMatch<T> : BaseMediaMatch<T>
   {
     public string GameName;
     public string Platform;

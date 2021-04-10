@@ -14,6 +14,7 @@ namespace Emulators.LibRetro.SoundProviders
     void UnPause();
     void SetVolume(int volume);
     void SetSynchronizationStrategy(SynchronizationStrategy strategy);
+    void Update();
     bool HasAudio { get; set; }
   }
 }

@@ -15,17 +15,19 @@
     <ItemGroup>
       <References Include="$(TargetDir)Emulators.Common.dll" />
       <References Include="$(TargetDir)SharpDX.DirectSound.dll" />
+      <References Include="$(TargetDir)SharpDX.XAudio2.dll" />
       <References Include="$(TargetDir)SharpDX.XInput.dll" />
-      <References Include="$(TargetDir)SharpGL.dll" />
+      <References Include="$(TargetDir)OpenGL.Net.dll" />
+      <References Include="$(TargetDir)OpenGL.Net.Math.dll" />
       <References Include="$(TargetDir)SharpLibHid.dll" />
       <References Include="$(TargetDir)SharpLibWin32.dll" />
       <References Include="$(TargetDir)SharpRetro.dll" />
+      <References Include="$(TargetDir)SharpRetro.OpenGL.dll" />
       <References Include="$(TargetDir)SharpCompress.dll" />
     </ItemGroup>
     
     <ItemGroup>
-      <Libs Include="$(ProjectDir)..\Lib\libgcc_s_dw2-1.dll" />
-      <Libs Include="$(ProjectDir)..\Lib\libwinpthread-1.dll" />
+      <Libs Include="$(ProjectDir)..\Lib\**\*.*" />
     </ItemGroup>
   
     <ItemGroup>
@@ -38,7 +40,7 @@
   
     <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(PluginDestination)" />
     <Copy SourceFiles="@(References)" DestinationFolder="$(PluginDestination)" />
-    <Copy SourceFiles="@(Libs)" DestinationFolder="$(PluginDestination)" />
+    <Copy SourceFiles="@(Libs)" DestinationFiles="@(Libs->'$(PluginDestination)%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(LanguageFiles)" DestinationFolder="$(PluginDestination)Language\" />
     <Copy SourceFiles="@(SkinFiles)"
           DestinationFiles="@(SkinFiles->'$(PluginDestination)Skin\%(RecursiveDir)%(Filename)%(Extension)')" />

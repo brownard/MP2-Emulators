@@ -31,5 +31,14 @@ namespace Emulators.Common.Emulators
     public bool IsNative { get; set; }
     public bool IsLibRetro { get; set; }
     public bool ExitsOnEscapeKey { get; set; }
+    public bool Is64Bit { get; set; }
+
+    /// <summary>
+    /// Determines whether this EmulatorConfiguration supports the current application platform.
+    /// </summary>
+    public bool IsCompatibleWithCurrentPlatform
+    {
+      get { return !IsLibRetro || Is64Bit == Utils.IsCurrentPlatform64Bit(); }
+    }
   }
 }

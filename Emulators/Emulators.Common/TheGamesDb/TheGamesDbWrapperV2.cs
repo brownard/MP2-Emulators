@@ -24,7 +24,7 @@ namespace Emulators.Common.TheGamesDb
   /// <summary>
   /// Wrapper for v2 of TheGamesDb API.
   /// </summary>
-  public class TheGamesDbWrapperV2 : BaseMatcher<GameMatch<int>, int, string, string>, IOnlineMatcher
+  public class TheGamesDbWrapperV2 : BaseMediaMatcher<GameMatch<int>, int, string, string>, IOnlineMatcher
   {
     #region Consts
     

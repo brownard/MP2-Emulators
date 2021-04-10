@@ -265,47 +265,27 @@ namespace Emulators.LibRetro
 
     public Texture Texture
     {
-      get { return _retro != null ? _retro.Texture : null; }
+      get { return _retro?.TextureOutput?.Texture; }
     }
 
     public SizeF VideoAspectRatio
     {
-      get
-      {
-        if (_retro != null)
-        {
-          VideoInfo videoInfo = _retro.VideoInfo;
-          if (videoInfo != null)
-            return new SizeF(videoInfo.VirtualWidth, videoInfo.VirtualHeight);
-        }
-        return new SizeF(1, 1);
-      }
+      get { return _retro?.TextureOutput?.DisplayAspectRatio ?? new SizeF(1, 1); }
     }
 
     public Size VideoSize
     {
-      get
-      {
-        if (_retro != null)
-        {
-          VideoInfo videoInfo = _retro.VideoInfo;
-          if (videoInfo != null)
-            return new Size(videoInfo.Width, videoInfo.Height);
-        }
-        return new Size(0, 0);
-      }
+      get { return _retro?.TextureOutput?.TextureSize ?? new Size(0, 0); }
     }
 
     public void ReallocGUIResources()
     {
-      if (_retro != null)
-        _retro.ReallocGUIResources();
+      _retro?.ReallocGUIResources();
     }
 
     public void ReleaseGUIResources()
     {
-      if (_retro != null)
-        _retro.ReleaseGUIResources();
+      _retro?.ReleaseGUIResources();
     }
 
     public bool SetRenderDelegate(RenderDlgt dlgt)
@@ -351,19 +331,7 @@ namespace Emulators.LibRetro
     {
       int volume = _isMuted ? 0 : _volume;
       if (_retro != null)
-        _retro.SetVolume(VolumeToHundredthDeciBel(volume));
-    }
-
-    /// <summary>
-    /// Helper method for calculating the hundredth decibel value, needed by DirectSound
-    /// (in the range from -10000 to 0), which is logarithmic, from our volume (in the range from 0 to 100),
-    /// which is linear.
-    /// </summary>
-    /// <param name="volume">Volume in the range from 0 to 100, in a linear scale.</param>
-    /// <returns>Volume in the range from -10000 to 0, in a logarithmic scale.</returns>
-    protected static int VolumeToHundredthDeciBel(int volume)
-    {
-      return (int)((Math.Log10(volume * 99f / 100f + 1) - 2) * 5000);
+        _retro.SetVolume(volume);
     }
 
     public void SetAudioStream(string audioStream) { }
