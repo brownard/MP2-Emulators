@@ -29,12 +29,12 @@ namespace Emulators.Common.TheGamesDb.Api
 
     protected const string BASE_URL = "https://api.thegamesdb.net/";
 
-    protected const string SEARCH_GAME_PATH = "Games/ByGameName";
-    protected const string GET_GAME_PATH = "Games/ByGameID";
-    protected const string GET_GAME_IMAGES_PATH = "/Games/Images";
-    protected const string GET_GENRES_PATH = "/Genres";
-    protected const string GET_DEVELOPERS_PATH = "/Developers";
-    protected const string GET_PUBLISHERS_PATH = "/Publishers";
+    protected const string SEARCH_GAME_PATH = "/v1.1/Games/ByGameName";
+    protected const string GET_GAME_PATH = "/v1/Games/ByGameID";
+    protected const string GET_GAME_IMAGES_PATH = "/v1/Games/Images";
+    protected const string GET_GENRES_PATH = "/v1/Genres";
+    protected const string GET_DEVELOPERS_PATH = "/v1/Developers";
+    protected const string GET_PUBLISHERS_PATH = "/v1/Publishers";
 
     protected const string GAME_CACHE_PATH = "Games";
 
