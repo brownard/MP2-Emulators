@@ -255,6 +255,7 @@
     <Content Include="Skin\default\workflow\Emulators-actions.xml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Skin\Nereus\screens\MediaItemGameDetails.inc" />
     <Content Include="Skin\Titanium\images\A24958E2-538A-455E-A1DB-A7BB241AF7EC.jpg" />
     <Content Include="Skin\Titanium\screens\MediaItemGameDetails.inc" />
     <Content Include="Skin\WMCSkin\screens\MediaItemGameDetails.inc" />
@@ -526,6 +527,20 @@
     <PackageReference Include="SharpLibHid">
       <Version>1.4.3</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Skin\Nereus\screens\emulator_config_master.xaml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\Nereus\screens\GameShowItems.xaml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\Nereus\themes\default\styles\ConfigControls.xaml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\Nereus\themes\default\styles\EmuMediaStyles.xaml">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="build.targets" />
