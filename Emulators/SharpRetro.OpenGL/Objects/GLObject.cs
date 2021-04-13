@@ -48,7 +48,6 @@ namespace SharpRetro.OpenGL.Objects
       if (obj is IDisposable d)
         d.Dispose();
       obj = default(T);
-      var i = default(int);
     }
   }
 }
