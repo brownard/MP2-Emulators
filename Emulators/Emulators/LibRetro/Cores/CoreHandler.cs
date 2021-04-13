@@ -8,8 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Emulators.LibRetro.Cores
 {
@@ -36,7 +34,7 @@ namespace Emulators.LibRetro.Cores
 
       CoreUpdaterSettings settings = ServiceRegistration.Get<ISettingsManager>().Load<CoreUpdaterSettings>();
       _baseUrl = settings.BaseUrl;
-      _infoUrl = settings.CoreInfoUrl;
+      _infoUrl = settings.CoreInfoZipUrl;
       _unsupportedCores = new HashSet<string>(CoreUpdaterSettings.DEFAULT_UNSUPPORTED);
 
       settings.GetPlatformSpecificCoresUrls(out _latestUrl, out _customCoresUrl);
@@ -50,6 +48,7 @@ namespace Emulators.LibRetro.Cores
     public void Update()
     {
       UpdateCustomCores();
+      UpdateCoreInfos();
       UpdateCores();
     }
 
@@ -87,19 +86,36 @@ namespace Emulators.LibRetro.Cores
       if (coreList != null)
         onlineCores.AddRange(coreList.CoreUrls.OrderBy(c => c.Name));
 
+      CreateLocalCores(onlineCores);
+    }
+
+    protected void UpdateCoreInfos()
+    {
       if (!TryCreateDirectory(_infoDirectory))
         return;
 
-      foreach (OnlineCore core in onlineCores)
+      if (!TryCreateAbsoluteUrl(_baseUrl, _infoUrl, out Uri uri))
       {
-        string coreName = core.Name.EndsWith(".zip") ? Path.GetFileNameWithoutExtension(core.Name) : core.Name;
-        coreName = Path.GetFileNameWithoutExtension(coreName) + ".info";
-        string infoUrl = _baseUrl + _infoUrl + coreName;
-        string path = Path.Combine(_infoDirectory, coreName);
-        _downloader.DownloadFileAsync(infoUrl, path).Wait();
+        ServiceRegistration.Get<ILogger>().Error("CoreHandler: Unable to create absolute core info url from settings, base url: '{0}', info url: '{1}'", _baseUrl, _infoUrl);
+        return;
       }
 
-      CreateLocalCores(onlineCores);
+      try
+      {
+        byte[] data = _downloader.DownloadDataAsync(uri.AbsoluteUri).Result;
+        if (data == null || data.Length == 0)
+        {
+          ServiceRegistration.Get<ILogger>().Error("CoreInfoHandler: Failed to download core infos from '{0}', response was null or empty", uri.AbsoluteUri);
+          return;
+        }
+        using (Stream stream = new MemoryStream(data))
+        using (IExtractor extractor = ExtractorFactory.Create(uri.AbsoluteUri, stream))
+          extractor.ExtractAll(_infoDirectory);
+      }
+      catch (Exception ex)
+      {
+        ServiceRegistration.Get<ILogger>().Error("CoreInfoHandler: Exception updating core infos", ex);
+      }
     }
 
     protected void UpdateCustomCores()

@@ -66,6 +66,21 @@ namespace Emulators.Common.WebRequests
       }
     }
 
+    public virtual async Task<byte[]> DownloadDataAsync(string url)
+    {
+      try
+      {
+        WebClient webClient = new CompressionWebClient();
+        webClient.Encoding = _encoding;
+        return await webClient.DownloadDataTaskAsync(url).ConfigureAwait(false);
+      }
+      catch (Exception ex)
+      {
+        ServiceRegistration.Get<ILogger>().Error("Exception opening stream from '{0}'", ex, url);
+        return null;
+      }
+    }
+
     protected abstract T Deserialize<T>(string response);
 
     protected virtual string GetResponseString(string url)

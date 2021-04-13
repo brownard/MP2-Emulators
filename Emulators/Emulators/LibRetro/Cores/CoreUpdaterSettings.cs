@@ -72,8 +72,8 @@ namespace Emulators.LibRetro.Cores
     [Setting(SettingScope.Global, "/nightly/windows/x86_64/latest/")]
     public string CoresUrl64Bit { get; set; }
 
-    [Setting(SettingScope.Global, "/assets/frontend/info/")]
-    public string CoreInfoUrl { get; set; }
+    [Setting(SettingScope.Global, "/assets/frontend/info.zip")]
+    public string CoreInfoZipUrl { get; set; }
 
     [Setting(SettingScope.Global, "http://brownard.github.io/Libretro/CustomCoresList.xml")]
     public string CustomCoresUrl { get; set; }

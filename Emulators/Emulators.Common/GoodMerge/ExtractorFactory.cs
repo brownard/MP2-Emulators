@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 namespace Emulators.Common.GoodMerge
 {
   public static class ExtractorFactory
   {
-    public static IExtractor Create(string path)
+    public static IExtractor Create(string path, Stream stream = null)
     {
-      return new SharpCompressExtractor(path);
+      return new SharpCompressExtractor(path, stream);
     }
   }
 }

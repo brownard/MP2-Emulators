@@ -20,12 +20,14 @@ namespace Emulators.Common.GoodMerge
 
     protected static readonly HashSet<string> SUPPORTED_EXTENSIONS = new HashSet<string> { ".7z", ".gz", ".rar", ".tar", ".zip" };
     protected string _archivePath;
+    protected Stream _archiveStream;
     protected IArchive _extractor;
     protected long _currentEntrySize;
 
-    public SharpCompressExtractor(string archivePath)
+    public SharpCompressExtractor(string archivePath, Stream archiveStream = null)
     {
       _archivePath = archivePath;
+      _archiveStream = archiveStream;
     }
 
     public event EventHandler<ExtractionEventArgs> ExtractionProgress;
@@ -56,7 +58,7 @@ namespace Emulators.Common.GoodMerge
         return true;
       try
       {
-        _extractor = ArchiveFactory.Open(_archivePath);
+        _extractor = _archiveStream != null ? ArchiveFactory.Open(_archiveStream) : ArchiveFactory.Open(_archivePath);
         _extractor.CompressedBytesRead += ExtractorCompressedBytesRead;
         _extractor.EntryExtractionEnd += ExtractorEntryExtractionEnd;
         return true;
