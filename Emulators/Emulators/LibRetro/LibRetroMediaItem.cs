@@ -1,17 +1,12 @@
 ﻿using MediaPortal.Common.MediaManagement;
 using MediaPortal.Common.MediaManagement.DefaultItemAspects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Emulators.LibRetro
 {
   public class LibRetroMediaItem : MediaItem
   {
-    public LibRetroMediaItem(string libRetroPath, IDictionary<Guid, IList<MediaItemAspect>> aspects)
-      : base(Guid.Empty, aspects)
+    public LibRetroMediaItem(string libRetroPath, MediaItem originalMediaItem)
+      : base(originalMediaItem.MediaItemId, originalMediaItem.Aspects, originalMediaItem.UserData)
     {
       LibRetroPath = libRetroPath;
       //otherwise MP2's player manager won't try and find a player 

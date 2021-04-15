@@ -2,27 +2,32 @@
 using Emulators.Input;
 using MediaPortal.Common;
 using MediaPortal.Common.Logging;
+using MediaPortal.Common.MediaManagement;
+using MediaPortal.Common.MediaManagement.DefaultItemAspects;
 using MediaPortal.Common.ResourceAccess;
+using MediaPortal.Common.SystemCommunication;
+using MediaPortal.Common.UserManagement;
+using MediaPortal.Common.UserProfileDataManagement;
 using MediaPortal.UI.Control.InputManager;
+using MediaPortal.UI.ServerCommunication;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Emulators.Emulator
 {
   public class EmulatorProcess : IDisposable
   {
+    protected MediaItem _mediaItem;
     protected string _gamePath;
     protected EmulatorConfiguration _emulatorConfiguration;
     protected Process _process;
     protected InputHandler _inputHandler;
     protected Key _mappedKey;
 
-    public EmulatorProcess(string gamePath, EmulatorConfiguration emulatorConfiguration, Key mappedKey)
+    public EmulatorProcess(MediaItem mediaItem, string gamePath, EmulatorConfiguration emulatorConfiguration, Key mappedKey)
     {
+      _mediaItem = mediaItem;
       _gamePath = gamePath;
       _emulatorConfiguration = emulatorConfiguration;
       _mappedKey = mappedKey;
@@ -33,6 +38,7 @@ namespace Emulators.Emulator
     {
       if (Exited != null)
         Exited(this, e);
+      Task.Run(() => NotifyPlayed(_mediaItem));
     }
 
     public bool TryStart()
@@ -92,6 +98,29 @@ namespace Emulators.Emulator
         return string.Format("{0} {1}", arguments.TrimEnd(), string.Format(format, gamePath));
       return arguments.Replace(EmulatorConfiguration.WILDCARD_GAME_PATH, string.Format(format, gamePath))
         .Replace(EmulatorConfiguration.WILDCARD_GAME_PATH_NO_EXT, string.Format(format, DosPathHelper.GetFileNameWithoutExtension(gamePath)));
+    }
+
+    protected static async Task NotifyPlayed(MediaItem mediaItem)
+    {
+      IServerConnectionManager scm = ServiceRegistration.Get<IServerConnectionManager>();
+      IContentDirectory cd = scm.ContentDirectory;
+      if (cd != null)
+      {
+        IUserManagement userProfileDataManagement = ServiceRegistration.Get<IUserManagement>();
+        if (userProfileDataManagement.IsValidUser)
+          await cd.NotifyUserPlaybackAsync(userProfileDataManagement.CurrentUser.ProfileId, mediaItem.MediaItemId, 100, true);
+        else
+          await cd.NotifyPlaybackAsync(mediaItem.MediaItemId, true);
+      }
+
+      // Update loaded item also, so changes will be visible in GUI without reloading
+      mediaItem.UserData[UserDataKeysKnown.KEY_PLAY_PERCENTAGE] = UserDataKeysKnown.GetSortablePlayPercentageString(100);
+      if (MediaItemAspect.TryGetAttribute(mediaItem.Aspects, MediaAspect.ATTR_PLAYCOUNT, 0, out int currentPlayCount))
+        MediaItemAspect.SetAttribute(mediaItem.Aspects, MediaAspect.ATTR_PLAYCOUNT, ++currentPlayCount);
+
+      int userPlayCount = mediaItem.UserData.ContainsKey(UserDataKeysKnown.KEY_PLAY_COUNT) ? Convert.ToInt32(mediaItem.UserData[UserDataKeysKnown.KEY_PLAY_COUNT]) : 0;
+      mediaItem.UserData[UserDataKeysKnown.KEY_PLAY_COUNT] = UserDataKeysKnown.GetSortablePlayCountString(++userPlayCount);
+      ContentDirectoryMessaging.SendMediaItemChangedMessage(mediaItem, ContentDirectoryMessaging.MediaItemChangeType.Updated);
     }
 
     public void Dispose()
