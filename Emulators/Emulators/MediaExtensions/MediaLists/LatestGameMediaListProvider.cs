@@ -11,6 +11,7 @@ namespace Emulators.MediaExtensions.MediaLists
     public LatestGameMediaListProvider()
     {
       _necessaryMias = EmulatorsConsts.NECESSARY_GAME_MIAS;
+      _optionalMias = EmulatorsConsts.OPTIONAL_GAME_MIAS;
       _playableConverterAction = item => new GameItem(item)
       {
         Command = new MethodDelegateCommand(() => ServiceRegistration.Get<IGameLauncher>().LaunchGame(item))

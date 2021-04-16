@@ -1,9 +1,7 @@
-﻿using MediaPortal.Common.MediaManagement.DefaultItemAspects;
+﻿using Emulators.Common.Games;
+using Emulators.Common.GoodMerge;
+using MediaPortal.Common.MediaManagement.DefaultItemAspects;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Emulators
 {
@@ -16,7 +14,12 @@ namespace Emulators
       {
           ProviderResourceAspect.ASPECT_ID,
           MediaAspect.ASPECT_ID,
-          new Guid("71D500E8-F2C3-4DAF-8CE6-A89DFE8FD96E") /* GameAspect.ASPECT_ID*/
+          GameAspect.ASPECT_ID
+      };
+
+    public static Guid[] OPTIONAL_GAME_MIAS = new Guid[]
+      {
+        GoodMergeAspect.ASPECT_ID
       };
 
     public const string RES_GAMES_VIEW_NAME = "[Emulators.GamesRootViewName]";

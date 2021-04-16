@@ -60,10 +60,8 @@ namespace Emulators.MediaExtensions
           new SortByRatingDesc()
         };
 
-      var optionalMias = new Guid[]
-      {
-        GoodMergeAspect.ASPECT_ID
-      }.Union(MediaNavigationModel.GetMediaSkinOptionalMIATypes(MediaNavigationMode));
+      var optionalMias = EmulatorsConsts.OPTIONAL_GAME_MIAS
+        .Union(MediaNavigationModel.GetMediaSkinOptionalMIATypes(MediaNavigationMode));
 
       _customRootViewSpecification = new MediaLibraryQueryViewSpecification(_viewName, null, _necessaryMias, optionalMias, true);
     }
