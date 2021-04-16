@@ -192,6 +192,10 @@
     <Compile Include="MediaExtensions\GamesLibrary.cs" />
     <Compile Include="MediaExtensions\GamesShowItemsScreenData.cs" />
     <Compile Include="MediaExtensions\MediaItemActions\SelectGoodMergeAction.cs" />
+    <Compile Include="MediaExtensions\MediaLists\UnplayedGameMediaListProvider.cs" />
+    <Compile Include="MediaExtensions\MediaLists\LastPlayedGameMediaListProvider.cs" />
+    <Compile Include="MediaExtensions\MediaLists\LatestGameMediaListProvider.cs" />
+    <Compile Include="MediaExtensions\MediaLists\FavoriteGameMediaListProvider.cs" />
     <Compile Include="Models\AbstractConfigurationModel.cs" />
     <Compile Include="Models\ClearGoodMergeCacheModel.cs" />
     <Compile Include="Models\EmulatorConfigurationModel.cs" />
