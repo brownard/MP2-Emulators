@@ -5,8 +5,7 @@
   xmlns:fanart="clr-namespace:MediaPortal.Extensions.UserServices.FanArtService.Client;assembly=FanArtService.Client"
   xmlns:media="clr-namespace:MediaPortal.UiComponents.Media.Models.AspectWrappers;assembly=Media"
   xmlns:emulators="clr-namespace:Emulators.MediaExtensions;assembly=Emulators"
-  Grid.Column="0" Grid.Row="0" x:Name="MediaItemDetails" Margin="30,220,20,0"
-  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+  x:Name="MediaItemDetails" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
   DataContext="{Binding Source={StaticResource FanArtBackgroundModel},Path=SelectedItem}">
 
   <Grid.Resources>
