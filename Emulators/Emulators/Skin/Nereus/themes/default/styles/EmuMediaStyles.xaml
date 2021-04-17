@@ -52,8 +52,8 @@
       <Grid.RowDefinitions>
         <RowDefinition Height="{StaticResource AUDIO_GRID_HEIGHT}"/>
       </Grid.RowDefinitions>
-      <Border VerticalAlignment="Stretch" HorizontalAlignment="Stretch" CornerRadius="4" BorderThickness="0"
-              IsVisible="{Binding ElementName=thumb, Path=!HasImage}">
+      <Border VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BorderThickness="0"
+              IsVisible="{Binding ElementName=thumb, Path=!HasImage}" Margin="3">
         <Border.Background>
           <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0} ? {1} : {2}">
             <Binding RelativeSource="{RelativeSource Mode=FindAncestor,AncestorType={x:Type Button}}" Path="!HasFocus"/>
@@ -69,14 +69,14 @@
   </ControlTemplate>
 
   <ControlTemplate x:Key="CoverViewGameItemTemplate">
-    <Grid x:Name="ItemControl" Width="{StaticResource VIDEO_COVER_WIDTH}">
+    <Grid x:Name="ItemControl" Width="{StaticResource VIDEO_COVER_WIDTH}" Margin="2">
       <Grid.RowDefinitions>
         <RowDefinition Height="*"/>
         <RowDefinition Height="Auto"/>
-        <RowDefinition Height="70"/>
+        <RowDefinition Height="100"/>
       </Grid.RowDefinitions>
 
-      <Grid Grid.Row="1" Name="PosterGrid" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,0"
+      <Grid Name="PosterGrid" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Panel.ZIndex="1"
             MaxHeight="{StaticResource VIDEO_COVER_HEIGHT}" Width="{StaticResource VIDEO_COVER_WIDTH}">
         <Grid.Background>
           <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0} ? {1} : {2}">
@@ -85,14 +85,22 @@
             <Binding Source="{ThemeResource NereusColorLight}"/>
           </MultiBinding>
         </Grid.Background>
-        <Image HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform" Margin="0,0,0,0"
-               Source="{Binding MediaItem}" FallbackSource="Game.png" >
-        </Image>
+        <Image HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform"
+               Source="{Binding MediaItem}" FallbackSource="Game.png"/>
         <Control Style="{ThemeResource ButtonBaseControlStyle}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
       </Grid>
 
+      <Border IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Button}},Path=HasFocus}"
+              BorderThickness="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Panel.ZIndex="2"
+              CornerRadius="{ThemeResource ButtonControlRadiusX}" Margin="0" Grid.Row="1"
+              BorderBrush="#80000000"/>
+      <Border IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Button}},Path=HasFocus}"
+              BorderThickness="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Panel.ZIndex="3"
+              CornerRadius="{ThemeResource ButtonControlRadiusX}" Margin="0" Grid.Row="1"
+              BorderBrush="{ThemeResource TileFocusedBorderBrush}"/>
+
       <Label x:Name="ItemLabel" Grid.Row="2" Grid.Column="0" Content="{Binding SimpleTitle}" Wrap="True"
-             Margin="8,10,8,0" TextTrimming="CharacterEllipsis" FontFamily="SegoeUIBold"
+             Margin="4,10,4,0" TextTrimming="CharacterEllipsis" FontFamily="SegoeUIBold"
              HorizontalAlignment="Center" FontSize="{ThemeResource SmallerFontSize}" Width="{StaticResource VIDEO_COVER_WIDTH}">
         <Label.Color>
           <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0} ? {1} : {2}">
