@@ -13,12 +13,21 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="{x:Type ListViewItem}">
-          <Button Style="{ThemeResource ButtonWideStyle}" Command="{Binding Command}">
+          <Button Style="{ThemeResource EmptyButtonStyle}" Command="{Binding Command}">
             <Button.Triggers>
               <Trigger Property="HasFocus" Value="True">
                 <Setter TargetName="ItemLabel" Property="Scroll" Value="Auto"/>
                 <Setter TargetName="ItemLabel2" Property="Scroll" Value="Auto"/>
                 <Setter TargetName="ItemLabel3" Property="Scroll" Value="Auto"/>
+                <Setter TargetName="ItemLabel" Property="FontFamily" Value="SegoeUIBold"/>
+                <Setter TargetName="ItemLabel2" Property="FontFamily" Value="SegoeUIBold"/>
+                <Setter TargetName="ItemLabel3" Property="FontFamily" Value="SegoeUIBold"/>
+                <Setter TargetName="ItemLabel" Property="Opacity" Value="1"/>
+                <Setter TargetName="ItemLabel2" Property="Opacity" Value="1"/>
+                <Setter TargetName="ItemLabel3" Property="Opacity" Value="1"/>
+                <Setter TargetName="Grid1" Property="Fill" Value="{ThemeResource NereusColorLight}"/>
+                <Setter TargetName="Grid2" Property="Fill" Value="{ThemeResource NereusColorLight}"/>
+                <Setter TargetName="Grid3" Property="Fill" Value="{ThemeResource NereusColorLight}"/>
                 <Setter Property="StackPanel.ZIndex" Value="100.0"/>
               </Trigger>
             </Button.Triggers>
@@ -100,21 +109,32 @@
   <DataTemplate x:Key="emuEmulatorItemDataTemplate" DataType="{x:Type collections:ListItem}">
     <Grid x:Name="ItemControl">
       <Grid.RowDefinitions>
-        <RowDefinition Height="*"/>
+        <RowDefinition Height="60"/>
       </Grid.RowDefinitions>
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="250"/>
         <ColumnDefinition Width="*"/>
-        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="500"/>
       </Grid.ColumnDefinitions>
+
+      <Rectangle Grid.ColumnSpan="3" StrokeThickness="0" Fill="Black" Margin="-2,-2.5,-2.5,-2.5" Stroke="Black"
+                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+
+      <Rectangle Grid.Column="0" StrokeThickness="2.5" Fill="{ThemeResource NereusColorMedium}" Margin="2.5" Stroke="Black"
+                 x:Name="Grid1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+      <Rectangle Grid.Column="1" StrokeThickness="2.5" Fill="{ThemeResource NereusColorMedium}" Margin="2.5" Stroke="Black"
+                 x:Name="Grid2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+      <Rectangle Grid.Column="3" StrokeThickness="2.5" Fill="{ThemeResource NereusColorMedium}" Margin="2.5" Stroke="Black"
+                 x:Name="Grid3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+      
       <Label x:Name="ItemLabel" Grid.Column="0" Content="{Binding [Name]}" FontSize="{ThemeResource SmallFontSize}"
-             HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,20,0"
+             HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,10,0" Opacity="0.7"
              Color="{ThemeResource TextColor}"/>
       <Label x:Name="ItemLabel2" Grid.Column="1" Content="{Binding [Path]}" FontSize="{ThemeResource SmallFontSize}"
-             HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20,0,20,0"
+             HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,10,0" Opacity="0.7"
              Color="{ThemeResource HintTextColor}"/>
       <Label x:Name="ItemLabel3" Grid.Column="2" Content="{Binding [Platforms]}" FontSize="{ThemeResource SmallFontSize}"
-             HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20,0,20,0"
+             HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,10,0" Opacity="0.7"
              Color="{ThemeResource HintTextColor}"/>
     </Grid>
   </DataTemplate>
@@ -219,13 +239,13 @@
               <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <ScrollViewer CanContentScroll="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                IsVisible="{Binding RelativeSource={RelativeSource TemplatedParent},Path=!IsEmpty}"
-                Background="{ThemeResource ItemsControlShadowBackgroundColor}">
+                          IsVisible="{Binding RelativeSource={RelativeSource TemplatedParent},Path=!IsEmpty}"
+                          Background="{ThemeResource ItemsControlShadowBackgroundColor}">
               <ItemsPresenter VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
             </ScrollViewer>
             <Label Content="{DynamicResource ResourceKey=Empty_List_Label}" IsVisible="{Binding RelativeSource={RelativeSource TemplatedParent},Path=IsEmpty}"
-                HorizontalAlignment="Center" VerticalAlignment="Center"
-                Color="{ThemeResource HintTextColor}" FontSize="{ThemeResource SmallFontSize}"/>
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Color="{ThemeResource HintTextColor}" FontSize="{ThemeResource SmallFontSize}"/>
           </Grid>
         </ControlTemplate>
       </Setter.Value>
@@ -233,6 +253,27 @@
     <Setter Property="ItemTemplate" Value="{ThemeResource emuDefaultItemDataTemplate}"/>
     <Setter Property="DataStringProvider" Value="{ThemeResource DefaultItemDataStringProvider}"/>
     <Setter Property="ItemContainerStyle" Value="{ThemeResource emuSelectableContainerStyle}"/>
+    <Setter Property="ItemsPanel">
+      <Setter.Value>
+        <ItemsPanelTemplate>
+          <AnimatedStackPanel x:Name="ListItemsHost" IsItemsHost="True" ScrollMargin="0,50,0,50" Margin="0,-10,0,100">
+            <AnimatedStackPanel.Resources>
+              <Storyboard x:Key="ScrollAnimation" FillBehavior="HoldEnd">
+                <DoubleAnimation BeginTime="00:00:00" From="0" To="1" Duration="00:00:00.700" 
+                                           FillBehavior="HoldEnd" Storyboard.TargetName="ListItemsHost" Storyboard.TargetProperty="ScrollOffsetMultiplier" />
+              </Storyboard>
+            </AnimatedStackPanel.Resources>
+            <AnimatedStackPanel.Triggers>
+              <EventTrigger RoutedEvent="AnimatedStackPanel.Scroll">
+                <EventTrigger.Actions>
+                  <BeginStoryboard Storyboard="{ThemeResource ScrollAnimation}"/>
+                </EventTrigger.Actions>
+              </EventTrigger>
+            </AnimatedStackPanel.Triggers>
+          </AnimatedStackPanel>
+        </ItemsPanelTemplate>
+      </Setter.Value>
+    </Setter>
   </Style>
 
   <Style x:Key="emuMultiMarkableListViewStyle" BasedOn="{ThemeResource emuDefaultConfigListViewStyle}">
