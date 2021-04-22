@@ -17,6 +17,14 @@
         </Control.TemplateControl>
       </Control>
     </ControlTemplate>
-    
+
+    <ControlTemplate x:Key="CoverDetails_Template">
+      <Control>
+        <Control.TemplateControl>
+          <Include Source="screens\MediaItemCoverGameDetails.inc"/>
+        </Control.TemplateControl>
+      </Control>
+    </ControlTemplate>
+
   </Include.Resources>
 </Include>

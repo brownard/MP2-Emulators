@@ -21,7 +21,7 @@
 
   <Label x:Name="MediaItemDescription" Wrap="True" TextTrimming="WordEllipsis" Opacity="0.6" Height="260" HorizontalContentAlignment="Right"
          HorizontalAlignment="Stretch" FontSize="32" Color="{ThemeResource TextColor}" Margin="60,4,40,2"
-         Content="{Binding [Emulators.Description]}" IsVisible="{Binding Path=[Emulators.Description],Converter={StaticResource ReferenceToBoolConverter}}"/>
+         Content="{Binding Description}" IsVisible="{Binding Path=[Emulators.Description],Converter={StaticResource ReferenceToBoolConverter}}"/>
   
   <emulators:GameAspectWrapper MediaItem="{Binding Source={StaticResource FanArtBackgroundModel},Path=MediaItem}" Grid.Column="1" >
     <emulators:GameAspectWrapper.Template>
