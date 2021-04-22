@@ -30,7 +30,7 @@
   <Label x:Name="MediaItemDescription" Wrap="True" Grid.Column="1" Grid.Row="1" Margin="30,0,35,25"
          TextTrimming="WordEllipsis" HorizontalAlignment="Stretch"
          Color="{ThemeResource TextColor}" Opacity="0.6"
-         Content="{Binding [Emulators.Description]}"/>
+         Content="{Binding Description}"/>
 
   <StackPanel Grid.Column="0" Grid.Row="1" Margin="-10,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 
