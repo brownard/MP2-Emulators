@@ -255,11 +255,16 @@
     <Content Include="Skin\BlueVision\images\A24958E2-538A-455E-A1DB-A7BB241AF7EC.jpg" />
     <Content Include="Skin\BlueVision\themes\Titanium Extended\screens\MediaItemGameDetails.inc" />
     <Content Include="Skin\BlueVision\themes\Titanium Extended\screens\MediaItemGameDetailsCover.inc" />
-    <Content Include="Skin\BlueVision\themes\Win10\screens\MediaItemGameDetails.inc" />
+    <Content Include="Skin\BlueVision\themes\Win10\screens\MediaItemGameDetails.inc">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Skin\default\workflow\Emulators-actions.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Skin\Nereus\screens\MediaItemGameDetails.inc" />
+    <Content Include="Skin\Nereus\screens\MediaItemCoverGameDetails.inc" />
+    <Content Include="Skin\Nereus\screens\MediaItemGameDetails.inc">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Skin\Titanium\images\A24958E2-538A-455E-A1DB-A7BB241AF7EC.jpg" />
     <Content Include="Skin\Titanium\screens\MediaItemGameDetails.inc" />
     <Content Include="Skin\WMCSkin\screens\MediaItemGameDetails.inc" />
@@ -311,7 +316,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Skin\BlueVision\screens\MediaItemGameDetails.inc" />
+    <Content Include="Skin\BlueVision\screens\MediaItemGameDetails.inc">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Skin\BlueVision\screens\GameShowItems.xaml">
@@ -543,6 +550,20 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Skin\Nereus\themes\default\styles\EmuMediaStyles.xaml">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Skin\Nereus\screens\emulator_config.xaml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\Nereus\screens\emulator_config_choose_path.xaml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\Nereus\screens\emulator_config_choose_type.xaml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\Nereus\screens\emulator_config_remove.xaml">
       <SubType>Designer</SubType>
     </Content>
   </ItemGroup>

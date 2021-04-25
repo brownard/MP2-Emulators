@@ -1,28 +1,20 @@
-﻿using Emulators.Common;
-using Emulators.Common.Games;
-using Emulators.Common.Settings;
-using Emulators.Emulator;
-using MediaPortal.Common;
+﻿using Emulators.Common.Games;
 using MediaPortal.Common.General;
 using MediaPortal.Common.MediaManagement;
-using MediaPortal.Common.MediaManagement.DefaultItemAspects;
-using MediaPortal.Common.Settings;
-using MediaPortal.Plugins.ServerSettings;
-using MediaPortal.UI.Presentation.DataObjects;
-using MediaPortal.UiComponents.Media.General;
 using MediaPortal.UiComponents.Media.Models.Navigation;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Emulators.Models.Navigation
 {
   public class GameItem : PlayableMediaItem
   {
-    public const string KEY_DESCRIPTION = "Emulators.Description";
-    protected AbstractProperty _platformProperty = new WProperty(typeof(string), string.Empty);
+    protected AbstractProperty _platformProperty = new WProperty(typeof(string));
+    protected AbstractProperty _yearProperty = new WProperty(typeof(int?));
+    protected AbstractProperty _descriptionProperty = new WProperty(typeof(string));
+    protected AbstractProperty _certificationProperty = new WProperty(typeof(string));
+    protected AbstractProperty _developerProperty = new WProperty(typeof(string));
+    protected AbstractProperty _ratingProperty = new WProperty(typeof(double?));
+    protected AbstractProperty _genresProperty = new WProperty(typeof(IEnumerable<string>));
 
     public GameItem(MediaItem mediaItem)
       : base(mediaItem)
@@ -37,7 +29,22 @@ namespace Emulators.Models.Navigation
       if (MediaItemAspect.TryGetAspect(mediaItem.Aspects, GameAspect.Metadata, out aspect))
       {
         Platform = aspect.GetAttributeValue<string>(GameAspect.ATTR_PLATFORM);
-        SetLabel(KEY_DESCRIPTION, aspect.GetAttributeValue<string>(GameAspect.ATTR_DESCRIPTION));
+        Year = aspect.GetAttributeValue<int?>(GameAspect.ATTR_YEAR);
+        Description = aspect.GetAttributeValue<string>(GameAspect.ATTR_DESCRIPTION);
+        Certification = aspect.GetAttributeValue<string>(GameAspect.ATTR_CERTIFICATION);
+        Developer = aspect.GetAttributeValue<string>(GameAspect.ATTR_DEVELOPER);
+        Rating = aspect.GetAttributeValue<double?>(GameAspect.ATTR_RATING);
+        Genres = aspect.GetCollectionAttribute<string>(GameAspect.ATTR_GENRES) ?? new string[0];
+      }
+      else
+      {
+        Platform = null;
+        Year = null;
+        Description = null;
+        Certification = null;
+        Developer = null;
+        Rating = null;
+        Genres = new string[0];
       }
     }
 
@@ -52,5 +59,70 @@ namespace Emulators.Models.Navigation
       set { _platformProperty.SetValue(value); }
     }
 
+    public AbstractProperty DeveloperProperty
+    {
+      get { return _developerProperty; }
+    }
+
+    public string Developer
+    {
+      get { return (string)_developerProperty.GetValue(); }
+      set { _developerProperty.SetValue(value); }
+    }
+
+    public AbstractProperty YearProperty
+    {
+      get { return _yearProperty; }
+    }
+
+    public int? Year
+    {
+      get { return (int?)_yearProperty.GetValue(); }
+      set { _yearProperty.SetValue(value); }
+    }
+
+    public AbstractProperty CertificationProperty
+    {
+      get { return _certificationProperty; }
+    }
+
+    public string Certification
+    {
+      get { return (string)_certificationProperty.GetValue(); }
+      set { _certificationProperty.SetValue(value); }
+    }
+
+    public AbstractProperty DescriptionProperty
+    {
+      get { return _descriptionProperty; }
+    }
+
+    public string Description
+    {
+      get { return (string)_descriptionProperty.GetValue(); }
+      set { _descriptionProperty.SetValue(value); }
+    }
+
+    public AbstractProperty RatingProperty
+    {
+      get { return _ratingProperty; }
+    }
+
+    public double? Rating
+    {
+      get { return (double?)_ratingProperty.GetValue(); }
+      set { _ratingProperty.SetValue(value); }
+    }
+
+    public AbstractProperty GenresProperty
+    {
+      get { return _genresProperty; }
+    }
+
+    public IEnumerable<string> Genres
+    {
+      get { return (IEnumerable<string>)_genresProperty.GetValue(); }
+      set { _genresProperty.SetValue(value); }
+    }
   }
 }

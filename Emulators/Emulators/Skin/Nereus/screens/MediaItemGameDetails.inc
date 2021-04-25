@@ -50,7 +50,7 @@
 
   <Label x:Name="MediaItemDescription" Wrap="True" Grid.Column="0" Grid.Row="1" TextTrimming="WordEllipsis" Opacity="0.6"
         HorizontalAlignment="Stretch" FontSize="{ThemeResource SmallFontSize}"
-        Content="{Binding [Emulators.Description]}" IsVisible="{Binding Path=[Emulators.Description],Converter={StaticResource ReferenceToBoolConverter}}"
+        Content="{Binding Description}" IsVisible="{Binding Path=[Emulators.Description],Converter={StaticResource ReferenceToBoolConverter}}"
         Color="{ThemeResource TextColor}" Margin="0,40,20,110"/>
   
   <emulators:GameAspectWrapper Grid.ColumnSpan="2" Grid.Row="0" VerticalAlignment="Stretch"
