@@ -142,6 +142,14 @@ namespace Emulators.LibRetro.Controllers.XInput
       get { return true; }
     }
 
+    public void BeginMapping()
+    {
+    }
+
+    public void EndMapping()
+    {
+    }
+
     public DeviceInput GetPressedInput()
     {
       State state;

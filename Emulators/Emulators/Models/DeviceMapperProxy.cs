@@ -76,6 +76,16 @@ namespace Emulators.Models
       set { _currentDeadZoneProperty.SetValue(value); }
     }
 
+    internal void BeginMapping()
+    {
+      _deviceMapper.BeginMapping();
+    }
+
+    internal void EndMapping()
+    {
+      _deviceMapper.EndMapping();
+    }
+
     public bool TryMap()
     {
       MappedInput selectedInput = SelectedInput;

@@ -1,24 +1,21 @@
-﻿using MediaPortal.UI.Presentation.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediaPortal.UI.Presentation.Workflow;
-using MediaPortal.UI.Presentation.DataObjects;
+﻿using Emulators.LibRetro.Controllers;
 using Emulators.LibRetro.Controllers.Mapping;
-using MediaPortal.Common;
-using System.Threading;
+using Emulators.LibRetro.Settings;
 using Emulators.Models.Navigation;
+using MediaPortal.Common;
 using MediaPortal.Common.Commands;
 using MediaPortal.Common.General;
-using MediaPortal.UI.Presentation.Screens;
-using MediaPortal.UiComponents.SkinBase.General;
 using MediaPortal.Common.Localization;
-using Emulators.LibRetro.Controllers;
 using MediaPortal.Common.Services.Settings;
-using Emulators.LibRetro.Settings;
+using MediaPortal.UI.Presentation.DataObjects;
+using MediaPortal.UI.Presentation.Models;
+using MediaPortal.UI.Presentation.Screens;
+using MediaPortal.UI.Presentation.Workflow;
+using MediaPortal.UiComponents.SkinBase.General;
 using MediaPortal.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace Emulators.Models
 {
@@ -321,6 +318,7 @@ namespace Emulators.Models
         return;
 
       Thread.Sleep(POLL_INITIAL_WAIT);
+      mapper.BeginMapping();
       while (_doPoll)
       {
         if (mapper.TryMap())
@@ -331,6 +329,7 @@ namespace Emulators.Models
         }
         Thread.Sleep(POLL_INTERVAL);
       }
+      mapper.EndMapping();
     }
     #endregion
 

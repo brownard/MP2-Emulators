@@ -22,6 +22,14 @@ namespace Emulators.LibRetro.Controllers.Keyboard
       _listener = new KeyboardListener();
     }
 
+    public void BeginMapping()
+    {
+    }
+
+    public void EndMapping()
+    {
+    }
+
     public DeviceInput GetPressedInput()
     {
       Keys key = _listener.GetPressedKey();

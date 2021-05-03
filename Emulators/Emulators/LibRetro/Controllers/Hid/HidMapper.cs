@@ -1,10 +1,9 @@
 ﻿using Emulators.LibRetro.Controllers.Mapping;
-using MediaPortal.UI.SkinEngine.SkinManagement;
+using MediaPortal.Common;
+using MediaPortal.Plugins.InputDeviceManager;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Emulators.LibRetro.Controllers.Hid
 {
@@ -12,16 +11,18 @@ namespace Emulators.LibRetro.Controllers.Hid
   {
     protected ushort _vendorId;
     protected ushort _productId;
+    protected string _mp2DeviceId;
     protected HidListener _hidListener;
     protected HidState _currentState;
 
-    public HidMapper(ushort vendorId, ushort productId)
+    public HidMapper(ushort vendorId, ushort productId, string mp2DeviceId)
     {
       _vendorId = vendorId;
       _productId = productId;
+      _mp2DeviceId = mp2DeviceId;
       _hidListener = new HidListener();
       _hidListener.StateChanged += HidListener_StateChanged;
-      _hidListener.Register(SkinContext.Form.Handle);
+      _hidListener.Init();
     }
 
     public bool SupportsDeadZone
@@ -34,6 +35,21 @@ namespace Emulators.LibRetro.Controllers.Hid
       HidState state = e.State;
       if (state.VendorId == _vendorId && state.ProductId == _productId)
         _currentState = e.State;
+    }
+
+    public void BeginMapping()
+    {
+      ServiceRegistration.Get<IInputDeviceManager>().RegisterExternalKeyHandling(ExternalKeyHandler);
+    }
+
+    public void EndMapping()
+    {
+      ServiceRegistration.Get<IInputDeviceManager>().UnRegisterExternalKeyHandling(ExternalKeyHandler);
+    }
+
+    private bool ExternalKeyHandler(object sender, string name, string device, IDictionary<string, long> pressedKeys)
+    {
+      return _mp2DeviceId == device;
     }
 
     public DeviceInput GetPressedInput()

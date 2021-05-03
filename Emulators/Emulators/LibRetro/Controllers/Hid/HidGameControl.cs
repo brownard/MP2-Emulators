@@ -23,6 +23,8 @@ namespace Emulators.LibRetro.Controllers.Hid
     protected ushort _productId;
     protected string _name;
     protected string _friendlyName;
+    protected string _mp2DeviceId;
+
     protected HidState _currentState;
     protected short _axisDeadZone = DEFAULT_DEADZONE;
     protected Dictionary<RETRO_DEVICE_ID_JOYPAD, ushort> _buttonToButtonMappings;
@@ -58,6 +60,11 @@ namespace Emulators.LibRetro.Controllers.Hid
       set { _axisDeadZone = value; }
     }
 
+    public string Mp2DeviceId
+    {
+      get { return _mp2DeviceId; }
+    }
+
     public HidGameControl(ushort vendorId, ushort productId, string friendlyName)
     {
       _vendorId = vendorId;
@@ -70,11 +77,17 @@ namespace Emulators.LibRetro.Controllers.Hid
       _analogToAnalogMappings = new Dictionary<RetroAnalogDevice, HidAxis>();
       _buttonToAnalogMappings = new Dictionary<RetroAnalogDevice, ushort>();
       _directionPadToAnalogMappings = new Dictionary<RetroAnalogDevice, DirectionPadState>();
+
+      // This is the same id used in the InputDeviceManager plugin,
+      // used to tell it not to handle events from this device.
+      // We could use this instead of our subDeviceId, but to preserve
+      // existing libretro mappings we'll keep it separate
+      _mp2DeviceId = ((vendorId << 16) | productId).ToString("X");
     }
 
     public IDeviceMapper CreateMapper()
     {
-      return new HidMapper(_vendorId, _productId);
+      return new HidMapper(_vendorId, _productId, _mp2DeviceId);
     }
 
     public void Map(RetroPadMapping mapping)

@@ -1,13 +1,12 @@
-﻿using SharpRetro.Controller;
+﻿using Emulators.LibRetro.Controllers.Hid;
+using Emulators.LibRetro.Controllers.Mapping;
+using MediaPortal.Common;
+using MediaPortal.Plugins.InputDeviceManager;
+using SharpRetro.Controller;
+using SharpRetro.LibRetro;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SharpRetro.LibRetro;
-using Emulators.LibRetro.Controllers.Hid;
-using MediaPortal.UI.SkinEngine.SkinManagement;
-using Emulators.LibRetro.Controllers.Mapping;
 
 namespace Emulators.LibRetro.Controllers
 {
@@ -82,10 +81,16 @@ namespace Emulators.LibRetro.Controllers
     {
       if (_hidDevices.Count > 0)
       {
+        ServiceRegistration.Get<IInputDeviceManager>().RegisterExternalKeyHandling(ExternalKeyHandler);
         _hidListener = new HidListener();
         _hidListener.StateChanged += HidListener_StateChanged;
-        _hidListener.Register(SkinContext.Form.Handle);
+        _hidListener.Init();
       }
+    }
+
+    private bool ExternalKeyHandler(object sender, string name, string device, IDictionary<string, long> pressedKeys)
+    {
+      return _hidDevices.Any(d => d.Mp2DeviceId == device);
     }
 
     private void HidListener_StateChanged(object sender, HidStateEventArgs e)
@@ -114,6 +119,7 @@ namespace Emulators.LibRetro.Controllers
     {
       if (_hidListener != null)
       {
+        ServiceRegistration.Get<IInputDeviceManager>().UnRegisterExternalKeyHandling(ExternalKeyHandler);
         _hidListener.Dispose();
         _hidListener = null;
       }

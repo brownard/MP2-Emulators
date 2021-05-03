@@ -9,6 +9,8 @@ namespace Emulators.LibRetro.Controllers.Mapping
   public interface IDeviceMapper
   {
     bool SupportsDeadZone { get; }
+    void BeginMapping();
+    void EndMapping();
     DeviceInput GetPressedInput();
   }
 }

@@ -8,6 +8,7 @@ namespace Emulators.LibRetro.Controllers.Hid
 {
   public interface IHidDevice
   {
+    string Mp2DeviceId { get; }
     bool UpdateState(HidState state);
   }
 }

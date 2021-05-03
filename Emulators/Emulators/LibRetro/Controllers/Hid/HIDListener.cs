@@ -1,17 +1,13 @@
-﻿using SharpLib.Win32;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MediaPortal.Common;
 using MediaPortal.Common.Logging;
-using MediaPortal.Common;
-using System.Runtime.InteropServices;
 using MediaPortal.Common.Messaging;
-using MediaPortal.UI.General;
-using System.Windows.Forms;
+using MediaPortal.Plugins.InputDeviceManager;
+using MediaPortal.Plugins.InputDeviceManager.Messaging;
 using SharpLib.Hid;
 using SharpLib.Hid.Usage;
+using SharpLib.Win32;
+using System;
+using System.Collections.Generic;
 
 namespace Emulators.LibRetro.Controllers.Hid
 {
@@ -33,7 +29,6 @@ namespace Emulators.LibRetro.Controllers.Hid
     }
     #endregion
 
-    protected Handler _handler;
     protected AsynchronousMessageQueue _messageQueue;
 
     public event EventHandler<HidStateEventArgs> StateChanged;
@@ -47,7 +42,7 @@ namespace Emulators.LibRetro.Controllers.Hid
     #region Message handling
     protected void SubscribeToMessages()
     {
-      _messageQueue = new AsynchronousMessageQueue(this, new[] { WindowsMessaging.CHANNEL });
+      _messageQueue = new AsynchronousMessageQueue(this, new[] { InputDeviceMessaging.CHANNEL });
       _messageQueue.MessageReceived += OnMessageReceived;
       _messageQueue.Start();
     }
@@ -62,42 +57,27 @@ namespace Emulators.LibRetro.Controllers.Hid
 
     void OnMessageReceived(AsynchronousMessageQueue queue, SystemMessage message)
     {
-      if (message.ChannelName == WindowsMessaging.CHANNEL)
+      if (message.ChannelName == InputDeviceMessaging.CHANNEL)
       {
-        WindowsMessaging.MessageType messageType = (WindowsMessaging.MessageType)message.MessageType;
+        InputDeviceMessaging.MessageType messageType = (InputDeviceMessaging.MessageType)message.MessageType;
         switch (messageType)
         {
-          case WindowsMessaging.MessageType.WindowsBroadcast:
-            Message msg = (Message)message.MessageData[WindowsMessaging.MESSAGE];
-            Handler handler = _handler;
-            if (handler != null)
-              handler.ProcessInput(ref msg);
+          case InputDeviceMessaging.MessageType.HidBroadcast:
+            Event hidEvent = message.MessageData[InputDeviceMessaging.HID_EVENT] as Event;
+            if (hidEvent != null)
+              OnHidEvent(hidEvent);
             break;
         }
       }
     }
     #endregion
 
-    public void Register(IntPtr Hwnd)
+    public void Init()
     {
-      RAWINPUTDEVICE[] rid = new RAWINPUTDEVICE[1];
-      rid[0].usUsagePage = (ushort)UsagePage.GenericDesktopControls;
-      rid[0].usUsage = (ushort)SharpLib.Hid.UsageCollection.GenericDesktop.GamePad;
-      rid[0].dwFlags = 0; // Const.RIDEV_EXINPUTSINK; //Handle background events
-      rid[0].hwndTarget = Hwnd;
-
-      int repeatDelay = -1;
-      int repeatSpeed = -1;
-      _handler = new Handler(rid, true, repeatDelay, repeatSpeed);
-      if (!_handler.IsRegistered)
-      {
-        Logger.Warn("Failed to register raw input devices: " + Marshal.GetLastWin32Error().ToString());
-      }
-      _handler.OnHidEvent += OnHidEvent;
       SubscribeToMessages();
     }
 
-    void OnHidEvent(object aSender, Event aHidEvent)
+    void OnHidEvent(Event aHidEvent)
     {
       if (!aHidEvent.Device.IsGamePad)
         return;
@@ -147,11 +127,6 @@ namespace Emulators.LibRetro.Controllers.Hid
     public void Dispose()
     {
       UnsubscribeFromMessages();
-      if (_handler != null)
-      {
-        _handler.Dispose();
-        _handler = null;
-      }
     }
   }
 }
