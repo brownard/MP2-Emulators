@@ -27,8 +27,8 @@
 
   <Label x:Name="MediaItemDescription" Wrap="True" Grid.Column="1" Grid.Row="1" Opacity="1.3" TextTrimming="WordEllipsis"
          HorizontalAlignment="Stretch" FontSize="{ThemeResource SmallFontSize}" 
-         IsVisible="{Binding Path=[Emulators.Description],Converter={StaticResource ReferenceToBoolConverter}}"
-         Content="{Binding [Emulators.Description]}" Color="{ThemeResource MenuTextBackground}" Margin="10,0,5,35"/>
+         IsVisible="{Binding Path=Description,Converter={StaticResource ReferenceToBoolConverter}}"
+         Content="{Binding Description}" Color="{ThemeResource MenuTextBackground}" Margin="10,0,5,35"/>
 
   <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,0,30,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
     <StackPanel Orientation="Horizontal">

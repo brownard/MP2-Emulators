@@ -6,10 +6,10 @@
     Copyright="GPL"
     Description="Frontend for the emulators plugin."
     AutoActivate="True">
-  
+
   <Version
-        PluginVersion="0.7"
-        ReleaseDate="2017-08-26 01:00:00 GMT+01:00"
+        PluginVersion="0.11"
+        ReleaseDate="2021-04-16 01:00:00 GMT+01:00"
         CurrentAPI="1"/>
   
   <Runtime>
@@ -62,6 +62,14 @@
 
   <Register Location="/Media/Extensions">
     <MediaItemActionBuilder Id="F6B516D8-E342-423D-ABE4-91ECD2E59446" Caption="[Emulators.SelectGoodmerge.Header]" Sort="A.01" ClassName="Emulators.MediaExtensions.MediaItemActions.SelectGoodMergeAction"/>
+  </Register>
+
+  <!--Media lists-->
+  <Register Location="/Content/MediaListProviders">
+    <ContentList Id="{DB8B6719-2786-4D79-BE4F-A84F157C464B}" Key="FavoriteGames" ClassName="Emulators.MediaExtensions.MediaLists.FavoriteGameMediaListProvider"/>
+    <ContentList Id="{8C0FAF1C-4562-43F2-BD67-EBAA1F76B9B1}" Key="LastPlayedGames" ClassName="Emulators.MediaExtensions.MediaLists.LastPlayedGameMediaListProvider"/>
+    <ContentList Id="{93766D29-CB51-45B8-B0B5-906BB31A0527}" Key="UnplayedGames" ClassName="Emulators.MediaExtensions.MediaLists.UnplayedGameMediaListProvider"/>
+    <ContentList Id="{80879082-26D5-464D-BD0A-62198A8B7A3E}" Key="LatestGames" ClassName="Emulators.MediaExtensions.MediaLists.LatestGameMediaListProvider"/>
   </Register>
 
   <Register Location="/Media/MetadataExtractors">

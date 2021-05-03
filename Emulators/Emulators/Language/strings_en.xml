@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="Emulators.MenuItem">Games</string>
+  <string name="Emulators.Help">Play emulated games natively in MediaPortal 2 by using Libretro cores, no need to launch external applications</string>
   <string name="Emulators.GamesRootViewName">Games library</string>
   <string name="Emulators.FilterGameItemsNavbarDisplayLabel">{0}</string>
   <string name="Emulators.ShowAllGameItemsMenuItem">Show all</string>

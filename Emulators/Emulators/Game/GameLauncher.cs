@@ -19,8 +19,6 @@ using MediaPortal.UiComponents.Media.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Emulators.Game
 {
@@ -62,7 +60,7 @@ namespace Emulators.Game
 
     protected void LaunchGame(string path, EmulatorConfiguration configuration)
     {
-      _emulatorProcess = new EmulatorProcess(path, configuration, _mappedKey);
+      _emulatorProcess = new EmulatorProcess(_mediaItem, path, configuration, _mappedKey);
       _emulatorProcess.Exited += ProcessExited;
       if (!_emulatorProcess.TryStart())
       {
@@ -75,7 +73,7 @@ namespace Emulators.Game
 
     protected void LaunchLibRetroGame(string path, EmulatorConfiguration configuration, bool isExtractedPath)
     {
-      LibRetroMediaItem mediaItem = new LibRetroMediaItem(configuration.Path, _mediaItem.Aspects);
+      LibRetroMediaItem mediaItem = new LibRetroMediaItem(configuration.Path, _mediaItem);
       if (isExtractedPath)
         mediaItem.ExtractedPath = path;
       else
