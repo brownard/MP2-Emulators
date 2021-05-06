@@ -152,11 +152,11 @@ namespace Emulators.LibRetro.Controllers.XInput
       ServiceRegistration.Get<IInputDeviceManager>().UnRegisterExternalKeyHandling(ExternalKeyHandler);
     }
 
-    private bool ExternalKeyHandler(object sender, string deviceName, string deviceFriendlyName, string deviceId, IDictionary<string, long> pressedKeys)
+    private bool ExternalKeyHandler(object sender, KeyPressHandlerEventArgs e)
     {
       // We cant tie a HID event to a specific XInput device, the best we can do is see if it came from
       // any XInput device, if that's the case assume its ours and tell MP2 to ignore the input.
-      return HidUtils.IsXInputDevice(deviceName);
+      return HidUtils.IsXInputDevice(e.DeviceName);
     }
 
     public DeviceInput GetPressedInput()

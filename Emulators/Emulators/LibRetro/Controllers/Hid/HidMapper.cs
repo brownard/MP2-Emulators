@@ -47,9 +47,9 @@ namespace Emulators.LibRetro.Controllers.Hid
       ServiceRegistration.Get<IInputDeviceManager>().UnRegisterExternalKeyHandling(ExternalKeyHandler);
     }
 
-    private bool ExternalKeyHandler(object sender, string deviceName, string deviceFriendlyName, string deviceId, IDictionary<string, long> pressedKeys)
+    private bool ExternalKeyHandler(object sender, KeyPressHandlerEventArgs e)
     {
-      return _mp2DeviceId == deviceId;
+      return _mp2DeviceId == e.DeviceId;
     }
 
     public DeviceInput GetPressedInput()

@@ -95,15 +95,15 @@ namespace Emulators.LibRetro.Controllers
       }
     }
 
-    private bool ExternalKeyHandler(object sender, string deviceName, string deviceFriendlyName, string deviceId, IDictionary<string, long> pressedKeys)
+    private bool ExternalKeyHandler(object sender, KeyPressHandlerEventArgs e)
     {
       // For HID devices we can check if the HID key handler was invoked for our device and mapped key.
-      IHidDevice hidDevice = _hidDevices.FirstOrDefault(d => d.Mp2DeviceId == deviceId);
+      IHidDevice hidDevice = _hidDevices.FirstOrDefault(d => d.Mp2DeviceId == e.DeviceId);
       if (hidDevice != null)
-        return pressedKeys.Any(kvp => hidDevice.IskeyCodeMapped(kvp.Value));
+        return e.PressedKeys.Any(kvp => hidDevice.IskeyCodeMapped(kvp.Value));
 
       // For XInput devices the best we can do is check whether the key handler was invoked for any XInput device.
-      return _xInputDevices.Count > 0 && HidUtils.IsXInputDevice(deviceName);
+      return _xInputDevices.Count > 0 && HidUtils.IsXInputDevice(e.DeviceName);
     }
 
     private void HidListener_StateChanged(object sender, HidStateEventArgs e)
