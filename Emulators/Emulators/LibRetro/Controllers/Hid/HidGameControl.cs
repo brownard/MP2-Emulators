@@ -1,15 +1,13 @@
-﻿using SharpRetro.Controller;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SharpRetro.LibRetro;
-using Emulators.LibRetro.Controllers.Mapping;
-using SharpLib.Hid;
-using System.Globalization;
+﻿using Emulators.LibRetro.Controllers.Mapping;
 using MediaPortal.Common;
 using MediaPortal.Common.Logging;
+using SharpLib.Hid;
+using SharpRetro.Controller;
+using SharpRetro.LibRetro;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 
 namespace Emulators.LibRetro.Controllers.Hid
 {
@@ -33,6 +31,8 @@ namespace Emulators.LibRetro.Controllers.Hid
     protected Dictionary<RetroAnalogDevice, HidAxis> _analogToAnalogMappings;
     protected Dictionary<RetroAnalogDevice, ushort> _buttonToAnalogMappings;
     protected Dictionary<RetroAnalogDevice, DirectionPadState> _directionPadToAnalogMappings;
+
+    protected Dictionary<long, bool> _knownMP2KeyCodes = new Dictionary<long, bool>();
 
     public Guid DeviceId
     {
@@ -145,6 +145,7 @@ namespace Emulators.LibRetro.Controllers.Hid
       _analogToAnalogMappings.Clear();
       _buttonToAnalogMappings.Clear();
       _directionPadToAnalogMappings.Clear();
+      _knownMP2KeyCodes.Clear();
     }
 
     public bool UpdateState(HidState state)
@@ -220,6 +221,32 @@ namespace Emulators.LibRetro.Controllers.Hid
       if (positivePosition == 0 && negativePosition != 0)
         return negativePosition;
       return 0;
+    }
+
+    /// <summary>
+    /// Returns whether the key code, as specified by the InputDeviceManager, is mapped to a libretro input for this HID device.
+    /// </summary>
+    /// <param name="keyCode">The InputDEviceManager key code.</param>
+    /// <returns><c>True</c> if the key code is mapped, else <c>false</c>.</returns>
+    public bool IskeyCodeMapped(long keyCode)
+    {
+      bool isMapped;
+
+      if (_knownMP2KeyCodes.TryGetValue(keyCode, out isMapped))
+        return isMapped;
+
+      if (keyCode >= 0)
+      {
+        ushort button = (ushort)(keyCode % 1000);
+        isMapped = _buttonToButtonMappings.Values.Contains(button) || _buttonToAnalogMappings.Values.Contains(button);
+      }
+      else
+      {
+        int directionPad = -(int)keyCode;
+        isMapped = _directionPadToButtonMappings.Any(kvp => (int)kvp.Value == directionPad) || _directionPadToAnalogMappings.Any(kvp => (int)kvp.Value == directionPad);
+      }
+
+      return _knownMP2KeyCodes[keyCode] = isMapped;
     }
 
     public static bool IsButtonPressed(ushort button, HidState state)

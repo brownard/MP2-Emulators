@@ -1,10 +1,10 @@
-﻿using Emulators.LibRetro.Controllers.Mapping;
+﻿using Emulators.LibRetro.Controllers.Hid;
+using Emulators.LibRetro.Controllers.Mapping;
+using MediaPortal.Common;
+using MediaPortal.Plugins.InputDeviceManager;
 using SharpDX.XInput;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Emulators.LibRetro.Controllers.XInput
 {
@@ -144,10 +144,19 @@ namespace Emulators.LibRetro.Controllers.XInput
 
     public void BeginMapping()
     {
+      ServiceRegistration.Get<IInputDeviceManager>().RegisterExternalKeyHandling(ExternalKeyHandler);
     }
 
     public void EndMapping()
     {
+      ServiceRegistration.Get<IInputDeviceManager>().UnRegisterExternalKeyHandling(ExternalKeyHandler);
+    }
+
+    private bool ExternalKeyHandler(object sender, string deviceName, string deviceFriendlyName, string deviceId, IDictionary<string, long> pressedKeys)
+    {
+      // We cant tie a HID event to a specific XInput device, the best we can do is see if it came from
+      // any XInput device, if that's the case assume its ours and tell MP2 to ignore the input.
+      return HidUtils.IsXInputDevice(deviceName);
     }
 
     public DeviceInput GetPressedInput()

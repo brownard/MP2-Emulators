@@ -1,17 +1,14 @@
-﻿using SharpRetro.Controller;
+﻿using Emulators.LibRetro.Controllers.Mapping;
+using SharpDX.XInput;
+using SharpRetro.Controller;
+using SharpRetro.LibRetro;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SharpDX.XInput;
-using SharpRetro.LibRetro;
-using Emulators.LibRetro.Controllers.Mapping;
 using System.Globalization;
 
 namespace Emulators.LibRetro.Controllers.XInput
 {
-  class XInputController : IRetroPad, IRetroAnalog, IRetroRumble, IMappableDevice
+  class XInputController : IRetroPad, IRetroAnalog, IRetroRumble, IMappableDevice, IXInputDevice
   {
     public static readonly Guid DEVICE_ID = new Guid("FD60533F-00E0-4301-8B97-F9681D6FC67D");
     public const string DEVICE_NAME = "Xbox 360 Controller (XInput)";

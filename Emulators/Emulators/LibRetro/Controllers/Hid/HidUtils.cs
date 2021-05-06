@@ -2,10 +2,7 @@
 using SharpLib.Win32;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Emulators.LibRetro.Controllers.Hid
 {
@@ -83,6 +80,20 @@ namespace Emulators.LibRetro.Controllers.Hid
         default:
           return null;
       }
+    }
+
+    /// <summary>
+    /// Returns whether the specified HID device name belongs to an XInput device.
+    /// </summary>
+    /// <remarks>
+    /// If the device name contains "IG_", e.g. "\\\\?\\HID#VID_045E&PID_02A1&IG_00#7&a222c90&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}", then it's an XInput device.
+    /// See https://docs.microsoft.com/en-us/windows/win32/xinput/xinput-and-directinput.
+    /// </remarks>
+    /// <param name="deviceName">The device name of the HID device.</param>
+    /// <returns><c>True</c> if the device name belongs to an XInput device.</returns>
+    public static bool IsXInputDevice(string deviceName)
+    {
+      return !string.IsNullOrEmpty(deviceName) && deviceName.Contains("IG_");
     }
   }
 }

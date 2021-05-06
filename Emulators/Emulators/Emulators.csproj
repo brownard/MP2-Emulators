@@ -152,6 +152,7 @@
     <Compile Include="LibRetro\Controllers\Mapping\MappingProxy.cs" />
     <Compile Include="LibRetro\Controllers\Mapping\RetroPadMapping.cs" />
     <Compile Include="LibRetro\Controllers\NumericUtils.cs" />
+    <Compile Include="LibRetro\Controllers\XInput\IXInputDevice.cs" />
     <Compile Include="LibRetro\Controllers\XInput\XInputAxis.cs" />
     <Compile Include="LibRetro\Controllers\XInput\XInputControllerCache.cs" />
     <Compile Include="LibRetro\Controllers\XInput\XInputMapper.cs" />
