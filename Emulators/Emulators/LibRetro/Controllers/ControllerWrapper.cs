@@ -86,7 +86,7 @@ namespace Emulators.LibRetro.Controllers
 
     public void Start()
     {
-      ServiceRegistration.Get<IInputDeviceManager>().RegisterExternalKeyHandling(ExternalKeyHandler);
+      ServiceRegistration.Get<IInputDeviceManager>().KeyPressed += ExternalKeyHandler;
       if (_hidDevices.Count > 0)
       {
         _hidListener = new HidListener();
@@ -95,15 +95,20 @@ namespace Emulators.LibRetro.Controllers
       }
     }
 
-    private bool ExternalKeyHandler(object sender, KeyPressHandlerEventArgs e)
+    private void ExternalKeyHandler(object sender, KeyPressHandlerEventArgs e)
     {
       // For HID devices we can check if the HID key handler was invoked for our device and mapped key.
       IHidDevice hidDevice = _hidDevices.FirstOrDefault(d => d.Mp2DeviceId == e.DeviceId);
       if (hidDevice != null)
-        return e.PressedKeys.Any(kvp => hidDevice.IskeyCodeMapped(kvp.Value));
+      {
+        if (e.PressedKeys.Any(kvp => hidDevice.IskeyCodeMapped(kvp.Value)))
+          e.Handled = true;
+        return;
+      }
 
       // For XInput devices the best we can do is check whether the key handler was invoked for any XInput device.
-      return _xInputDevices.Count > 0 && HidUtils.IsXInputDevice(e.DeviceName);
+      if (_xInputDevices.Count > 0 && HidUtils.IsXInputDevice(e.DeviceName))
+        e.Handled = true;
     }
 
     private void HidListener_StateChanged(object sender, HidStateEventArgs e)
@@ -130,7 +135,7 @@ namespace Emulators.LibRetro.Controllers
 
     public void Dispose()
     {
-      ServiceRegistration.Get<IInputDeviceManager>().UnRegisterExternalKeyHandling(ExternalKeyHandler);
+      ServiceRegistration.Get<IInputDeviceManager>().KeyPressed -= ExternalKeyHandler;
       if (_hidListener != null)
       {
         _hidListener.Dispose();
