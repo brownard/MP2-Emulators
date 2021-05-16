@@ -3,6 +3,7 @@ using Emulators.LibRetro.Controllers.Mapping;
 using Emulators.LibRetro.Controllers.XInput;
 using MediaPortal.Common;
 using MediaPortal.Plugins.InputDeviceManager;
+using SharpLib.Hid;
 using SharpRetro.Controller;
 using SharpRetro.LibRetro;
 using System;
@@ -97,8 +98,14 @@ namespace Emulators.LibRetro.Controllers
 
     private void ExternalKeyHandler(object sender, KeyPressHandlerEventArgs e)
     {
-      // For HID devices we can check if the HID key handler was invoked for our device and mapped key.
       IHidDevice hidDevice = _hidDevices.FirstOrDefault(d => d.Mp2DeviceId == e.DeviceId);
+
+      // If no device has the same id, check if the event contains
+      // keyboard key presses and see if we have a keyboard device.
+      if (hidDevice == null && e.PressedKeys.Any(kvp => kvp.Value > 0 && kvp.Value < 1000))
+        hidDevice = _hidDevices.FirstOrDefault(d => d is IKeyboard);
+
+      // For HID devices we can check if the HID key handler was invoked for our device and a mapped key.
       if (hidDevice != null)
       {
         if (e.PressedKeys.Any(kvp => hidDevice.IskeyCodeMapped(kvp.Value)))
@@ -111,10 +118,10 @@ namespace Emulators.LibRetro.Controllers
         e.Handled = true;
     }
 
-    private void HidListener_StateChanged(object sender, HidStateEventArgs e)
+    private void HidListener_StateChanged(object sender, Event hidEvent)
     {
       foreach (IHidDevice device in _hidDevices)
-        if (device.UpdateState(e.State))
+        if (device.UpdateState(hidEvent))
           return;
     }
 

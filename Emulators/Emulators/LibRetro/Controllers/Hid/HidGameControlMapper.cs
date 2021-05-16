@@ -1,59 +1,42 @@
 ﻿using Emulators.LibRetro.Controllers.Mapping;
-using MediaPortal.Common;
 using MediaPortal.Plugins.InputDeviceManager;
-using System;
-using System.Collections.Generic;
+using SharpLib.Hid;
 using System.Linq;
 
 namespace Emulators.LibRetro.Controllers.Hid
 {
-  class HidMapper : IDeviceMapper, IDisposable
+  class HidGameControlMapper : AbstractHidMapper
   {
     protected ushort _vendorId;
     protected ushort _productId;
     protected string _mp2DeviceId;
-    protected HidListener _hidListener;
     protected HidState _currentState;
 
-    public HidMapper(ushort vendorId, ushort productId, string mp2DeviceId)
+    public HidGameControlMapper(ushort vendorId, ushort productId, string mp2DeviceId)
     {
       _vendorId = vendorId;
       _productId = productId;
       _mp2DeviceId = mp2DeviceId;
-      _hidListener = new HidListener();
-      _hidListener.StateChanged += HidListener_StateChanged;
-      _hidListener.Init();
     }
 
-    public bool SupportsDeadZone
+    public override bool SupportsDeadZone
     {
       get { return true; }
     }
 
-    protected void HidListener_StateChanged(object sender, HidStateEventArgs e)
+    protected override void HidListener_StateChanged(object sender, Event hidEvent)
     {
-      HidState state = e.State;
-      if (state.VendorId == _vendorId && state.ProductId == _productId)
-        _currentState = e.State;
+      if ((hidEvent.Device?.VendorId ?? 0) == _vendorId && (hidEvent.Device?.ProductId ?? 0) == _productId)
+        _currentState = HidUtils.GetGamepadState(hidEvent);
     }
 
-    public void BeginMapping()
-    {
-      ServiceRegistration.Get<IInputDeviceManager>().KeyPressed += ExternalKeyHandler;
-    }
-
-    public void EndMapping()
-    {
-      ServiceRegistration.Get<IInputDeviceManager>().KeyPressed -= ExternalKeyHandler;
-    }
-
-    private void ExternalKeyHandler(object sender, KeyPressHandlerEventArgs e)
+    protected override void ExternalKeyHandler(object sender, KeyPressHandlerEventArgs e)
     {
       if (_mp2DeviceId == e.DeviceId)
         e.Handled = true;
     }
 
-    public DeviceInput GetPressedInput()
+    public override DeviceInput GetPressedInput()
     {
       HidState state = _currentState;
       if (state == null)
@@ -84,21 +67,12 @@ namespace Emulators.LibRetro.Controllers.Hid
       return null;
     }
 
-    protected bool IsDirectionPadStateValid(SharpLib.Hid.DirectionPadState directionPadState)
+    protected bool IsDirectionPadStateValid(DirectionPadState directionPadState)
     {
-      return directionPadState == SharpLib.Hid.DirectionPadState.Up
-        || directionPadState == SharpLib.Hid.DirectionPadState.Right
-        || directionPadState == SharpLib.Hid.DirectionPadState.Down
-        || directionPadState == SharpLib.Hid.DirectionPadState.Left;
-    }
-
-    public void Dispose()
-    {
-      if (_hidListener != null)
-      {
-        _hidListener.Dispose();
-        _hidListener = null;
-      }
+      return directionPadState == DirectionPadState.Up
+        || directionPadState == DirectionPadState.Right
+        || directionPadState == DirectionPadState.Down
+        || directionPadState == DirectionPadState.Left;
     }
   }
 }

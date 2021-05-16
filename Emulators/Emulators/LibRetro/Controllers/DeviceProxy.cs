@@ -1,5 +1,4 @@
 ﻿using Emulators.LibRetro.Controllers.Hid;
-using Emulators.LibRetro.Controllers.Keyboard;
 using Emulators.LibRetro.Controllers.Mapping;
 using Emulators.LibRetro.Controllers.XInput;
 using SharpDX.XInput;
@@ -8,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Emulators.LibRetro.Controllers
 {
@@ -22,7 +19,8 @@ namespace Emulators.LibRetro.Controllers
       List<IMappableDevice> deviceList = new List<IMappableDevice>();
       AddXInputDevices(deviceList, connectedOnly);
       AddHidDevices(deviceList);
-      deviceList.Add(new KeyboardController());
+      // Keyboard input is not tied to a specific HID device
+      deviceList.Add(new HidKeyboard());
       return deviceList;
     }
 

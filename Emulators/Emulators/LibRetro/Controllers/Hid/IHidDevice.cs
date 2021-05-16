@@ -1,9 +1,11 @@
-﻿namespace Emulators.LibRetro.Controllers.Hid
+﻿using SharpLib.Hid;
+
+namespace Emulators.LibRetro.Controllers.Hid
 {
   public interface IHidDevice
   {
     string Mp2DeviceId { get; }
-    bool UpdateState(HidState state);
+    bool UpdateState(Event hidEvent);
 
     /// <summary>
     /// Returns whether the key code, as specified by the InputDeviceManager is mapped to a libretro input for this HID device.

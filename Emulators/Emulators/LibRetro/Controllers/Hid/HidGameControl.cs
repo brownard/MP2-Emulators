@@ -1,27 +1,17 @@
 ﻿using Emulators.LibRetro.Controllers.Mapping;
-using MediaPortal.Common;
-using MediaPortal.Common.Logging;
 using SharpLib.Hid;
 using SharpRetro.Controller;
 using SharpRetro.LibRetro;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 namespace Emulators.LibRetro.Controllers.Hid
 {
-  class HidGameControl : IRetroPad, IRetroAnalog, IMappableDevice, IHidDevice
+  class HidGameControl : AbstractHidDevice, IRetroPad, IRetroAnalog, IMappableDevice
   {
     public const short DEFAULT_DEADZONE = 8192;
     public static readonly Guid DEVICE_ID = new Guid("93543458-6267-4E2B-8DD9-E97A021BBD55");
-
-    protected string _subDeviceId;
-    protected ushort _vendorId;
-    protected ushort _productId;
-    protected string _name;
-    protected string _friendlyName;
-    protected string _mp2DeviceId;
 
     protected HidState _currentState;
     protected short _axisDeadZone = DEFAULT_DEADZONE;
@@ -31,22 +21,10 @@ namespace Emulators.LibRetro.Controllers.Hid
     protected Dictionary<RetroAnalogDevice, HidAxis> _analogToAnalogMappings;
     protected Dictionary<RetroAnalogDevice, ushort> _buttonToAnalogMappings;
     protected Dictionary<RetroAnalogDevice, DirectionPadState> _directionPadToAnalogMappings;
-
-    protected Dictionary<long, bool> _knownMP2KeyCodes = new Dictionary<long, bool>();
-
+    
     public Guid DeviceId
     {
       get { return DEVICE_ID; }
-    }
-
-    public string SubDeviceId
-    {
-      get { return _subDeviceId; }
-    }
-
-    public string DeviceName
-    {
-      get { return _friendlyName; }
     }
 
     public RetroPadMapping DefaultMapping
@@ -60,34 +38,20 @@ namespace Emulators.LibRetro.Controllers.Hid
       set { _axisDeadZone = value; }
     }
 
-    public string Mp2DeviceId
-    {
-      get { return _mp2DeviceId; }
-    }
-
     public HidGameControl(ushort vendorId, ushort productId, string friendlyName)
+      : base(vendorId, productId, friendlyName)
     {
-      _vendorId = vendorId;
-      _productId = productId;
-      _subDeviceId = string.Format(CultureInfo.InvariantCulture, "{0}/{1}", vendorId, productId);
-      _friendlyName = friendlyName;
       _buttonToButtonMappings = new Dictionary<RETRO_DEVICE_ID_JOYPAD, ushort>();
       _analogToButtonMappings = new Dictionary<RETRO_DEVICE_ID_JOYPAD, HidAxis>();
       _directionPadToButtonMappings = new Dictionary<RETRO_DEVICE_ID_JOYPAD, DirectionPadState>();
       _analogToAnalogMappings = new Dictionary<RetroAnalogDevice, HidAxis>();
       _buttonToAnalogMappings = new Dictionary<RetroAnalogDevice, ushort>();
       _directionPadToAnalogMappings = new Dictionary<RetroAnalogDevice, DirectionPadState>();
-
-      // This is the same id used in the InputDeviceManager plugin,
-      // used to tell it not to handle events from this device.
-      // We could use this instead of our subDeviceId, but to preserve
-      // existing libretro mappings we'll keep it separate
-      _mp2DeviceId = ((vendorId << 16) | productId).ToString("X");
     }
 
     public IDeviceMapper CreateMapper()
     {
-      return new HidMapper(_vendorId, _productId, _mp2DeviceId);
+      return new HidGameControlMapper(_vendorId, _productId, _mp2DeviceId);
     }
 
     public void Map(RetroPadMapping mapping)
@@ -148,22 +112,9 @@ namespace Emulators.LibRetro.Controllers.Hid
       _knownMP2KeyCodes.Clear();
     }
 
-    public bool UpdateState(HidState state)
+    protected override void HandleEvent(Event hidEvent)
     {
-      if (_name != null)
-      {
-        if (state.Name != _name)
-          return false;
-      }
-      else
-      {
-        if (state.ProductId != _productId || state.VendorId != _vendorId)
-          return false;
-        _name = state.Name;
-        ServiceRegistration.Get<ILogger>().Debug("HidGameControl: Mapped Hid controller configuration to device {0}, {1}, {2}", state.Name, state.ProductId, state.VendorId);
-      }
-      _currentState = state;
-      return true;
+      _currentState = HidUtils.GetGamepadState(hidEvent);
     }
 
     public bool IsButtonPressed(uint port, RETRO_DEVICE_ID_JOYPAD button)
@@ -223,30 +174,18 @@ namespace Emulators.LibRetro.Controllers.Hid
       return 0;
     }
 
-    /// <summary>
-    /// Returns whether the key code, as specified by the InputDeviceManager, is mapped to a libretro input for this HID device.
-    /// </summary>
-    /// <param name="keyCode">The InputDEviceManager key code.</param>
-    /// <returns><c>True</c> if the key code is mapped, else <c>false</c>.</returns>
-    public bool IskeyCodeMapped(long keyCode)
+    protected override bool IsKeyCodeMappedOverride(long keyCode)
     {
-      bool isMapped;
-
-      if (_knownMP2KeyCodes.TryGetValue(keyCode, out isMapped))
-        return isMapped;
-
       if (keyCode >= 0)
       {
         ushort button = (ushort)(keyCode % 1000);
-        isMapped = _buttonToButtonMappings.Values.Contains(button) || _buttonToAnalogMappings.Values.Contains(button);
+        return _buttonToButtonMappings.Values.Contains(button) || _buttonToAnalogMappings.Values.Contains(button);
       }
       else
       {
         int directionPad = -(int)keyCode;
-        isMapped = _directionPadToButtonMappings.Any(kvp => (int)kvp.Value == directionPad) || _directionPadToAnalogMappings.Any(kvp => (int)kvp.Value == directionPad);
+        return _directionPadToButtonMappings.Any(kvp => (int)kvp.Value == directionPad) || _directionPadToAnalogMappings.Any(kvp => (int)kvp.Value == directionPad);
       }
-
-      return _knownMP2KeyCodes[keyCode] = isMapped;
     }
 
     public static bool IsButtonPressed(ushort button, HidState state)

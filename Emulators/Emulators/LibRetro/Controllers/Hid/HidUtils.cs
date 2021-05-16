@@ -1,4 +1,5 @@
 ﻿using SharpLib.Hid;
+using SharpLib.Hid.Usage;
 using SharpLib.Win32;
 using System;
 using System.Collections.Generic;
@@ -94,6 +95,51 @@ namespace Emulators.LibRetro.Controllers.Hid
     public static bool IsXInputDevice(string deviceName)
     {
       return !string.IsNullOrEmpty(deviceName) && deviceName.Contains("IG_");
+    }
+
+    public static HidState GetGamepadState(Event aHidEvent)
+    {
+      HashSet<ushort> buttons = new HashSet<ushort>();
+      foreach (ushort usage in aHidEvent.Usages)
+        buttons.Add(usage);
+
+      //For each axis
+      Dictionary<ushort, HidAxisState> axisStates = new Dictionary<ushort, HidAxisState>();
+      foreach (KeyValuePair<HIDP_VALUE_CAPS, uint> entry in aHidEvent.UsageValues)
+      {
+        //HatSwitch is handled separately as direction pad state
+        if (entry.Key.IsRange || entry.Key.NotRange.Usage == (ushort)GenericDesktop.HatSwitch)
+          continue;
+        //Get our usage type
+        Type usageType = UsageType((UsagePage)entry.Key.UsagePage);
+        if (usageType == null)
+          continue;
+        //Get the name of our axis
+        string name = Enum.GetName(usageType, entry.Key.NotRange.Usage);
+        ushort index = entry.Key.NotRange.DataIndex;
+        axisStates[index] = new HidAxisState(name, index, entry.Value, entry.Key.BitSize);
+      }
+
+      DirectionPadState directionPadState;
+      try
+      {
+        directionPadState = aHidEvent.GetDirectionPadState();
+      }
+      catch
+      {
+        directionPadState = DirectionPadState.Rest;
+      }
+
+      return new HidState
+      {
+        VendorId = aHidEvent.Device?.VendorId ?? 0,
+        ProductId = aHidEvent.Device?.ProductId ?? 0,
+        Name = aHidEvent.Device?.Name,
+        FriendlyName = aHidEvent.Device?.FriendlyName,
+        Buttons = buttons,
+        AxisStates = axisStates,
+        DirectionPadState = directionPadState
+      };
     }
   }
 }
