@@ -159,8 +159,6 @@ namespace Emulators.LibRetro.Controllers.XInput
 
     public short GetAnalog(uint port, RETRO_DEVICE_INDEX_ANALOG index, RETRO_DEVICE_ID_ANALOG direction)
     {
-      if (port != _controllerIndex)
-        return 0;
       Gamepad gamepad;
       if (!TryGetGamepad(out gamepad))
         return 0;
