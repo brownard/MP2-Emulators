@@ -85,6 +85,12 @@ namespace Emulators.LibRetro.SoundProviders
       return true;
     }
 
+    public bool CanFitInCurrentBuffer(int count)
+    {
+      AudioBuffer currentBuffer = _ringBuffer[_currentBuffer];
+      return currentBuffer.Stream.Position == 0 || currentBuffer.Stream.RemainingLength >= count;
+    }
+
     /// <summary>
     /// Cycles the <see cref="CurrentBuffer"/> to the next <see cref="AudioBuffer"/>
     /// in the ring and returns the previous buffer.

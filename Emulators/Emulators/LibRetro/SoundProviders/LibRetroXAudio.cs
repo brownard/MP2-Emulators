@@ -15,7 +15,6 @@ namespace Emulators.LibRetro.SoundProviders
     protected string _deviceId;
     protected XAudioPlayer _player;
     protected XAudioRingBuffer _buffer;
-    protected bool _batchMode = true;
 
     protected int _sampleRate;
     protected SynchronizationStrategy _strategy;
@@ -51,7 +50,7 @@ namespace Emulators.LibRetro.SoundProviders
     {
       // If in batch mode, the audio data was submitted in the call to
       // IAudioOutput.AudioSampleBatch, so doesn't need to be done here.
-      if (_batchMode || _player == null || _buffer.CurrentBuffer.Stream.Position == 0)
+      if (_player == null || _buffer.CurrentBuffer.Stream.Position == 0)
         return;
 
       // Check whether there's space in the buffer queue. If syncing to audio,
@@ -90,20 +89,27 @@ namespace Emulators.LibRetro.SoundProviders
     void IAudioOutput.AudioSample(short left, short right)
     {
       HasAudio = true;
-      _batchMode = false;
       _buffer?.WriteSamples(left, right);
     }
 
     uint IAudioOutput.AudioSampleBatch(IntPtr data, uint frames)
     {
       HasAudio = true;
-      _batchMode = true;
 
-      if (_player == null || !_player.CanSubmitBuffer(2, _strategy?.SyncToAudio == true))
+      if (_player == null)
         return frames;
 
-      _buffer.Write(data, 0, (int)(frames * 4));
-      _player.SubmitBuffer(_buffer.CycleCurrentBuffer());
+      int count = (int)(frames * 4);
+
+      if (!_buffer.CanFitInCurrentBuffer(count))
+      {
+        if (_player.CanSubmitBuffer(_bufferCount - 1, _strategy?.SyncToAudio == true))
+          _player.SubmitBuffer(_buffer.CycleCurrentBuffer());
+        else
+          return frames;
+      }
+
+      _buffer.Write(data, 0, count);
 
       return frames;
     }
