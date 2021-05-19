@@ -558,18 +558,21 @@ namespace SharpRetro.LibRetro
         case RETRO_ENVIRONMENT.SET_SERIALIZATION_QUIRKS:
           RETRO_SERIALIZATION_QUIRK quirks = (RETRO_SERIALIZATION_QUIRK)(*(ulong*)data.ToPointer());
           return false;
-        case RETRO_ENVIRONMENT.SET_HW_SHARED_CONTEXT | RETRO_ENVIRONMENT.EXPERIMENTAL:
+        case RETRO_ENVIRONMENT.SET_HW_SHARED_CONTEXT:
+          return true;
+        case RETRO_ENVIRONMENT.RETRO_ENVIRONMENT_GET_AUDIO_VIDEO_ENABLE:
+          // Enable video and audio
+          *(int*)data.ToPointer() = (int)(AUDIO_VIDEO_ENABLE.ENABLE_VIDEO | AUDIO_VIDEO_ENABLE.ENABLE_AUDIO);
           return true;
         default:
-          Log(RETRO_LOG_LEVEL.WARN, "Unknkown retro_environment command {0} - {1}", (int)cmd, cmd & (~RETRO_ENVIRONMENT.EXPERIMENTAL));
+          Log(RETRO_LOG_LEVEL.DEBUG, "Unknkown retro_environment command {0} - {1}", (int)cmd, cmd & (~RETRO_ENVIRONMENT.RETRO_ENVIRONMENT_EXPERIMENTAL));
           return false;
       }
     }
 
     protected bool SetMessage(IntPtr data)
     {
-      retro_message msg = new retro_message();
-      Marshal.PtrToStructure(data, msg);
+      retro_message msg = Marshal.PtrToStructure<retro_message>(data);
       if (!string.IsNullOrEmpty(msg.msg))
         Log(RETRO_LOG_LEVEL.DEBUG, "LibRetro Message: {0}", msg.msg);
       return true;
@@ -692,7 +695,8 @@ namespace SharpRetro.LibRetro
 
     protected void RetroVideoRefresh(IntPtr data, uint width, uint height, uint pitch)
     {
-      _videoOutput?.VideoRefresh(data, width, height, pitch);
+      if (width > 0 && height > 0)
+        _videoOutput?.VideoRefresh(data, width, height, pitch);
     }
 
     #endregion
@@ -706,7 +710,9 @@ namespace SharpRetro.LibRetro
 
     protected uint RetroAudioSampleBatch(IntPtr data, uint frames)
     {
-      return _audioOutput?.AudioSampleBatch(data, frames) ?? frames;
+      if (frames > 0)
+        frames = _audioOutput?.AudioSampleBatch(data, frames) ?? frames;
+      return frames;
     }
 
     #endregion

@@ -325,7 +325,7 @@ namespace SharpRetro.LibRetro
     SET_PROC_ADDRESS_CALLBACK = 33,
     SET_SUBSYSTEM_INFO = 34,
     SET_CONTROLLER_INFO = 35,
-    SET_MEMORY_MAPS = 36 | EXPERIMENTAL,
+    SET_MEMORY_MAPS = 36 | RETRO_ENVIRONMENT_EXPERIMENTAL,
     SET_GEOMETRY = 37,
     GET_USERNAME = 38,
     GET_LANGUAGE = 39,
@@ -348,10 +348,62 @@ namespace SharpRetro.LibRetro
     /// This will do nothing on its own until SET_HW_RENDER env callbacks are
     /// being used.
     /// </summary>
-    SET_HW_SHARED_CONTEXT = 44 | EXPERIMENTAL,
+    SET_HW_SHARED_CONTEXT = 44 | RETRO_ENVIRONMENT_EXPERIMENTAL,
 
-    EXPERIMENTAL = 0x10000
+    /// <summary>
+    /// int * --
+    /// Tells the core if the frontend wants audio or video.
+    /// If disabled, the frontend will discard the audio or video,
+    /// so the core may decide to skip generating a frame or generating audio.
+    /// This is mainly used for increasing performance.
+    /// Bit 0 (value 1): Enable Video
+    /// Bit 1 (value 2): Enable Audio
+    /// Bit 2 (value 4): Use Fast Savestates.
+    /// Bit 3 (value 8): Hard Disable Audio
+    /// Other bits are reserved for future use and will default to zero.
+    /// If video is disabled:
+    /// * The frontend wants the core to not generate any video,
+    ///   including presenting frames via hardware acceleration.
+    /// * The frontend's video frame callback will do nothing.
+    /// * After running the frame, the video output of the next frame should be
+    ///   no different than if video was enabled, and saving and loading state
+    ///   should have no issues.
+    /// If audio is disabled:
+    /// * The frontend wants the core to not generate any audio.
+    /// * The frontend's audio callbacks will do nothing.
+    /// * After running the frame, the audio output of the next frame should be
+    ///   no different than if audio was enabled, and saving and loading state
+    ///   should have no issues.
+    /// Fast Savestates:
+    /// * Guaranteed to be created by the same binary that will load them.
+    /// * Will not be written to or read from the disk.
+    /// * Suggest that the core assumes loading state will succeed.
+    /// * Suggest that the core updates its memory buffers in-place if possible.
+    /// * Suggest that the core skips clearing memory.
+    /// * Suggest that the core skips resetting the system.
+    /// * Suggest that the core may skip validation steps.
+    /// Hard Disable Audio:
+    /// * Used for a secondary core when running ahead.
+    /// * Indicates that the frontend will never need audio from the core.
+    /// * Suggests that the core may stop synthesizing audio, but this should not
+    ///   compromise emulation accuracy.
+    /// * Audio output for the next frame does not matter, and the frontend will
+    ///   never need an accurate audio state in the future.
+    /// * State will never be saved when using Hard Disable Audio.
+    /// </summary>
+    RETRO_ENVIRONMENT_GET_AUDIO_VIDEO_ENABLE = 47 | RETRO_ENVIRONMENT_EXPERIMENTAL,
+
+    RETRO_ENVIRONMENT_EXPERIMENTAL = 0x10000
   };
+
+  [Flags]
+  public enum AUDIO_VIDEO_ENABLE
+  {
+    ENABLE_VIDEO = 1,
+    ENABLE_AUDIO = 2,
+    USE_FAST_SAVESTATES = 4,
+    HARD_DISABLE_AUDIO = 8
+  }
 
   public enum retro_hw_context_type
   {
