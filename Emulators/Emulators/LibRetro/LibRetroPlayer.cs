@@ -190,13 +190,13 @@ namespace Emulators.LibRetro
 
     public TimeSpan CurrentTime
     {
-      get { return TimeSpan.Zero; }
-      set { }
+      get { return _retro.BufferedTime; }
+      set { _retro.SetTime(value); }
     }
 
     public TimeSpan Duration
     {
-      get { return TimeSpan.Zero; }
+      get { return _retro.BufferDuration; }
     }
 
     public double PlaybackRate

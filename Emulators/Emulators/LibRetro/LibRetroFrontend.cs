@@ -12,6 +12,7 @@ using MediaPortal.UI.SkinEngine.SkinManagement;
 using SharpDX.Direct3D9;
 using SharpRetro.Audio;
 using SharpRetro.LibRetro;
+using SharpRetro.State;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,6 +33,7 @@ namespace Emulators.LibRetro
     protected LibRetroThread _retroThread;
     protected LibRetroEmulator _retroEmulator;
     protected LibRetroSaveStateHandler _saveHandler;
+    protected SerializedStateBuffer _stateBuffer;
     protected ISoundOutput _soundOutput;
     protected TextureOutput _textureOutput;
     protected ControllerWrapper _controllerWrapper;
@@ -160,6 +162,22 @@ namespace Emulators.LibRetro
         _retroThread.EnqueueAction(_saveHandler.SaveState);
     }
 
+    public TimeSpan BufferDuration
+    {
+      get { return _stateBuffer?.Duration ?? TimeSpan.Zero; }
+    }
+
+    public TimeSpan BufferedTime
+    {
+      get { return _stateBuffer?.BufferedTime ?? TimeSpan.Zero; }
+    }
+
+    public void SetTime(TimeSpan time)
+    {
+      if (_retroThread != null && _stateBuffer != null)
+        _retroThread.EnqueueAction(() => _stateBuffer.SetCurrentPosition(time));
+    }
+
     #endregion
 
     #region Init
@@ -174,7 +192,8 @@ namespace Emulators.LibRetro
         
         _synchronizationStrategy = new SynchronizationStrategy(_retroEmulator.TimingInfo.FPS, _settings.SynchronizationType);
         _soundOutput.SetSynchronizationStrategy(_synchronizationStrategy);
-        
+
+        InitializeStateBuffer();
         InitializeSaveStateHandler();
         _retroThread.IsInit = true;
       }
@@ -207,6 +226,41 @@ namespace Emulators.LibRetro
       SetCoreVariables();
       _retroEmulator.Init();
       Logger.Debug("LibRetroFrontend: Libretro initialized");
+    }
+
+    protected void InitializeStateBuffer()
+    {
+      if (!_settings.EnableStateBuffer || _settings.StateBufferLengthSeconds <= 0)
+        return;
+
+      bool allocated = true;
+      try
+      {
+        // Check if core supports serialization
+        if (_retroEmulator.Core.SerializeSize() == 0)
+        {
+          Logger.Info("LibRetroFrontend: Not creating state buffer, core does not support serialization.");
+          return;
+        }
+        _stateBuffer = new SerializedStateBuffer(_retroEmulator.Core, (int)Math.Ceiling(_retroEmulator.TimingInfo.FPS), 1, TimeSpan.FromSeconds(_settings.StateBufferLengthSeconds));
+        _stateBuffer.Allocate();
+      }
+      catch (OutOfMemoryException)
+      {
+        allocated = false;
+        Logger.Error("LibRetroFrontend: Cannot create state buffer with length {0} seconds, there is not enough system memory available.", _settings.StateBufferLengthSeconds);
+      }
+      catch (Exception ex)
+      {
+        allocated = false;
+        Logger.Error("LibRetroFrontend: Error creating state buffer", ex);
+      }
+
+      if (!allocated)
+      {
+        _stateBuffer.Dispose();
+        _stateBuffer = null;
+      }
     }
 
     protected void InitializeSaveStateHandler()
@@ -295,6 +349,8 @@ namespace Emulators.LibRetro
       //reset this every frame in case we get a frame without audio
       _soundOutput.HasAudio = false;
       _retroEmulator.Run();
+      _stateBuffer?.AppendState();
+
       if (_autoSave)
         _saveHandler.AutoSave();
     }
@@ -384,6 +440,11 @@ namespace Emulators.LibRetro
       {
         _retroThread.Dispose();
         _retroThread = null;
+      }
+      if (_stateBuffer != null)
+      {
+        _stateBuffer.Dispose();
+        _stateBuffer = null;
       }
       if (_controllerWrapper != null)
       {

@@ -61,6 +61,14 @@ namespace SharpRetro.LibRetro
     #region Public Properties
 
     /// <summary>
+    /// The underlying core.
+    /// </summary>
+    public ICore Core
+    {
+      get { return _core; }
+    }
+
+    /// <summary>
     /// Gets or sets the <see cref="IAudioOutput"/>
     /// implementation to use to play audio samples.
     /// </summary>
@@ -443,7 +451,7 @@ namespace SharpRetro.LibRetro
     public bool Serialize(byte[] buffer)
     {
       uint size = _core.SerializeSize();
-      if (size == 0)
+      if (size == 0 || buffer.Length < size)
         return false;
       fixed (byte* p = &buffer[0])
         return _core.Serialize((IntPtr)p, size);

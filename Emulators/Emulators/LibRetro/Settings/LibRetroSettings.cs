@@ -89,6 +89,12 @@ namespace Emulators.LibRetro.Settings
     [Setting(SettingScope.User, 30)]
     public int AutoSaveInterval { get; set; }
 
+    [Setting(SettingScope.User, true)]
+    public bool EnableStateBuffer { get; set; }
+
+    [Setting(SettingScope.User, 30)]
+    public int StateBufferLengthSeconds { get; set; }
+
     [Setting(SettingScope.User, SynchronizationType.Audio)]
     public SynchronizationType SynchronizationType { get; set; }
 
