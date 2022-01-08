@@ -292,6 +292,16 @@
         Text="[Emulators.Config.LibRetro.AutoSave]"
         HelpText="[Emulators.Config.LibRetro.AutoSave.Help]"
         ClassName="Emulators.Settings.Configuration.LibRetro.AutoSaveSetting"/>
+    <ConfigSetting
+        Id="EnableStateBuffer"
+        Text="[Emulators.Config.LibRetro.EnableStateBuffer]"
+        HelpText="[Emulators.Config.LibRetro.EnableStateBuffer.Help]"
+        ClassName="Emulators.Settings.Configuration.LibRetro.StateBufferSetting"/>
+    <ConfigSetting
+        Id="StateBufferDuration"
+        Text="[Emulators.Config.LibRetro.StateBufferDuration]"
+        HelpText="[Emulators.Config.LibRetro.StateBufferDuration.Help]"
+        ClassName="Emulators.Settings.Configuration.LibRetro.StateBufferDurationSetting"/>
     
   </Register>
 

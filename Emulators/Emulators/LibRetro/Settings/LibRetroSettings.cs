@@ -5,10 +5,6 @@ using MediaPortal.Common;
 using MediaPortal.Common.PathManager;
 using MediaPortal.Common.Settings;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Emulators.LibRetro.Settings
 {
@@ -89,11 +85,11 @@ namespace Emulators.LibRetro.Settings
     [Setting(SettingScope.User, 30)]
     public int AutoSaveInterval { get; set; }
 
-    [Setting(SettingScope.User, true)]
+    [Setting(SettingScope.User, false)]
     public bool EnableStateBuffer { get; set; }
 
     [Setting(SettingScope.User, 30)]
-    public int StateBufferLengthSeconds { get; set; }
+    public int StateBufferDurationSeconds { get; set; }
 
     [Setting(SettingScope.User, SynchronizationType.Audio)]
     public SynchronizationType SynchronizationType { get; set; }

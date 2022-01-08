@@ -222,6 +222,8 @@
     <Compile Include="Settings\Configuration\ClearGoodMergeCache.cs" />
     <Compile Include="Settings\Configuration\EmulatorsConfigSetting.cs" />
     <Compile Include="Settings\Configuration\LibRetro\AudioDeviceSetting.cs" />
+    <Compile Include="Settings\Configuration\LibRetro\StateBufferDurationSetting.cs" />
+    <Compile Include="Settings\Configuration\LibRetro\StateBufferSetting.cs" />
     <Compile Include="Settings\Configuration\LibRetro\CoreInfoDirectorySetting.cs" />
     <Compile Include="Settings\Configuration\LibRetro\CoresDirectorySetting.cs" />
     <Compile Include="Settings\Configuration\LibRetro\SystemDirectorySetting.cs" />

@@ -109,7 +109,11 @@
   <string name="Emulators.Config.LibRetro.AudioDevice.Help">Select the audio device to you use for audio output</string>
   <string name="Emulators.Config.LibRetro.AudioBufferSize">Audio buffer size</string>
   <string name="Emulators.Config.LibRetro.AudioBufferSize.Help">The size in seconds of the audio buffer. A larger buffer reduces the chance of audio artifacts at the cost of increased latency</string>
-
+  <string name="Emulators.Config.LibRetro.EnableStateBuffer">Enable state buffer</string>
+  <string name="Emulators.Config.LibRetro.EnableStateBuffer.Help">Whether to enable the game state buffer to allow rewinding of a game up to the duration of the state buffer</string>
+  <string name="Emulators.Config.LibRetro.StateBufferDuration">State buffer duration</string>
+  <string name="Emulators.Config.LibRetro.StateBufferDuration.Help">The duration in seconds of game states to buffer. If the state buffer is disabled this setting has no effect</string>
+    
   <string name="Emulators.CoreUpdater.ProgressHeader">Updating</string>
   <string name="Emulators.CoreUpdater.UpdatingCores">Updating cores</string>
   <string name="Emulators.CoreUpdater.Downloading">Downloading {0}</string>

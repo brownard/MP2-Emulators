@@ -230,7 +230,7 @@ namespace Emulators.LibRetro
 
     protected void InitializeStateBuffer()
     {
-      if (!_settings.EnableStateBuffer || _settings.StateBufferLengthSeconds <= 0)
+      if (!_settings.EnableStateBuffer || _settings.StateBufferDurationSeconds <= 0)
         return;
 
       bool allocated = true;
@@ -242,13 +242,13 @@ namespace Emulators.LibRetro
           Logger.Info("LibRetroFrontend: Not creating state buffer, core does not support serialization.");
           return;
         }
-        _stateBuffer = new SerializedStateBuffer(_retroEmulator.Core, (int)Math.Ceiling(_retroEmulator.TimingInfo.FPS), 1, TimeSpan.FromSeconds(_settings.StateBufferLengthSeconds));
+        _stateBuffer = new SerializedStateBuffer(_retroEmulator.Core, (int)Math.Ceiling(_retroEmulator.TimingInfo.FPS), 1, TimeSpan.FromSeconds(_settings.StateBufferDurationSeconds));
         _stateBuffer.Allocate();
       }
       catch (OutOfMemoryException)
       {
         allocated = false;
-        Logger.Error("LibRetroFrontend: Cannot create state buffer with length {0} seconds, there is not enough system memory available.", _settings.StateBufferLengthSeconds);
+        Logger.Error("LibRetroFrontend: Cannot create state buffer with length {0} seconds, there is not enough system memory available.", _settings.StateBufferDurationSeconds);
       }
       catch (Exception ex)
       {
