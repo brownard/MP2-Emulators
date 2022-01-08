@@ -2,9 +2,7 @@
 <ResourceDictionary
     xmlns="www.team-mediaportal.com/2008/mpf/directx"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:system="clr-namespace:System"
     xmlns:collections="clr-namespace:MediaPortal.UI.Presentation.DataObjects;assembly=MediaPortal.UI"
-    xmlns:mp_special_controls="clr-namespace:MediaPortal.UI.SkinEngine.SpecialElements.Controls;assembly=SkinEngine"
     DependsOnStyleResources="Colors,Buttons,Consts,Brushes,OtherControls"
     >
 
@@ -19,15 +17,17 @@
                 <Setter TargetName="ItemLabel" Property="Scroll" Value="Auto"/>
                 <Setter TargetName="ItemLabel2" Property="Scroll" Value="Auto"/>
                 <Setter TargetName="ItemLabel3" Property="Scroll" Value="Auto"/>
-                <Setter TargetName="ItemLabel" Property="FontFamily" Value="SegoeUIBold"/>
-                <Setter TargetName="ItemLabel2" Property="FontFamily" Value="SegoeUIBold"/>
-                <Setter TargetName="ItemLabel3" Property="FontFamily" Value="SegoeUIBold"/>
                 <Setter TargetName="ItemLabel" Property="Opacity" Value="1"/>
                 <Setter TargetName="ItemLabel2" Property="Opacity" Value="1"/>
                 <Setter TargetName="ItemLabel3" Property="Opacity" Value="1"/>
                 <Setter TargetName="Grid1" Property="Fill" Value="{ThemeResource NereusColorLight}"/>
                 <Setter TargetName="Grid2" Property="Fill" Value="{ThemeResource NereusColorLight}"/>
                 <Setter TargetName="Grid3" Property="Fill" Value="{ThemeResource NereusColorLight}"/>
+                <Setter TargetName="ItemControl" Property="Background">
+                  <Setter.Value>
+                    <SolidColorBrush Color="{ThemeResource PassiveFocusBackgroundColor}"/>
+                  </Setter.Value>
+                </Setter>
                 <Setter Property="StackPanel.ZIndex" Value="100.0"/>
               </Trigger>
             </Button.Triggers>
@@ -253,27 +253,6 @@
     <Setter Property="ItemTemplate" Value="{ThemeResource emuDefaultItemDataTemplate}"/>
     <Setter Property="DataStringProvider" Value="{ThemeResource DefaultItemDataStringProvider}"/>
     <Setter Property="ItemContainerStyle" Value="{ThemeResource emuSelectableContainerStyle}"/>
-    <Setter Property="ItemsPanel">
-      <Setter.Value>
-        <ItemsPanelTemplate>
-          <AnimatedStackPanel x:Name="ListItemsHost" IsItemsHost="True" ScrollMargin="0,50,0,50" Margin="0,-10,0,100">
-            <AnimatedStackPanel.Resources>
-              <Storyboard x:Key="ScrollAnimation" FillBehavior="HoldEnd">
-                <DoubleAnimation BeginTime="00:00:00" From="0" To="1" Duration="00:00:00.700" 
-                                           FillBehavior="HoldEnd" Storyboard.TargetName="ListItemsHost" Storyboard.TargetProperty="ScrollOffsetMultiplier" />
-              </Storyboard>
-            </AnimatedStackPanel.Resources>
-            <AnimatedStackPanel.Triggers>
-              <EventTrigger RoutedEvent="AnimatedStackPanel.Scroll">
-                <EventTrigger.Actions>
-                  <BeginStoryboard Storyboard="{ThemeResource ScrollAnimation}"/>
-                </EventTrigger.Actions>
-              </EventTrigger>
-            </AnimatedStackPanel.Triggers>
-          </AnimatedStackPanel>
-        </ItemsPanelTemplate>
-      </Setter.Value>
-    </Setter>
   </Style>
 
   <Style x:Key="emuMultiMarkableListViewStyle" BasedOn="{ThemeResource emuDefaultConfigListViewStyle}">

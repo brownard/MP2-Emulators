@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary
+    xmlns="www.team-mediaportal.com/2008/mpf/directx"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    >
+
+  <!-- Config screen margin -->
+  <ResourceWrapper x:Key="EmuConfigScreenMargin" Resource="20,10,20,110"/>
+
+</ResourceDictionary>

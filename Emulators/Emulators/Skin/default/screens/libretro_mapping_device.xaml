@@ -17,7 +17,7 @@
 
     <!-- Contents -->
     <ControlTemplate x:Key="Contents_Template">
-      <Grid DataContext="{Binding Source={StaticResource Model}}">
+      <Grid Margin="{ThemeResource EmuConfigScreenMargin}" DataContext="{Binding Source={StaticResource Model}}">
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="*"/>
@@ -26,8 +26,8 @@
           <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Row="0" Orientation="Vertical">
-          <Label Margin="10" Content="[Emulators.LibRetro.InputDevice]" Color="{ThemeResource TextColor}"/>
-          <Button Margin="10" Style="{ThemeResource ButtonWideStyle}" FontSize="{ThemeResource SmallFontSize}"
+          <Label Margin="0,0,0,10" Content="[Emulators.LibRetro.InputDevice]" Color="{ThemeResource TextColor}"/>
+          <Button Margin="0,10" Style="{ThemeResource ButtonWideStyle}" FontSize="{ThemeResource SmallFontSize}"
                 Command="{Command Source={StaticResource Model}, Path=ShowDeviceDialog}">
             <Button.Content>
               <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0} != {null} ? {0} : {1}">
