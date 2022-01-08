@@ -182,6 +182,7 @@
     <Compile Include="LibRetro\LibRetroPlayer.cs" />
     <Compile Include="LibRetro\LibRetroPlayerBuilder.cs" />
     <Compile Include="LibRetro\SoundProviders\LibRetroXAudio.cs" />
+    <Compile Include="LibRetro\SoundProviders\SoundBufferMonitor.cs" />
     <Compile Include="LibRetro\SoundProviders\XAudioPlayer.cs" />
     <Compile Include="LibRetro\SoundProviders\XAudioRingBuffer.cs" />
     <Compile Include="LibRetro\VideoProviders\DxTextureRenderContext.cs" />
