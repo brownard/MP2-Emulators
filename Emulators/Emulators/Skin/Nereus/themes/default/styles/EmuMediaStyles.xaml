@@ -6,6 +6,7 @@
     xmlns:collections="clr-namespace:MediaPortal.UI.Presentation.DataObjects;assembly=MediaPortal.UI"
     xmlns:mp_special_controls="clr-namespace:MediaPortal.UI.SkinEngine.SpecialElements.Controls;assembly=SkinEngine"
     xmlns:emu="clr-namespace:Emulators.Models.Navigation;assembly=Emulators"
+    xmlns:emulators="clr-namespace:Emulators.MediaExtensions;assembly=Emulators"
     DependsOnStyleResources="MediaStyles,MediaButtons,MediaColors,Consts,Colors,Buttons,OtherControls"
     >
 
@@ -18,29 +19,126 @@
       </Grid.ColumnDefinitions>
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
       </Grid.RowDefinitions>
-      <DockPanel  Margin="5,0,5,0">
-        <Image x:Name="ItemTypeSmall" Stretch="Uniform" Source="{Binding MediaItem}" 
+
+        <emulators:GameAspectWrapper MediaItem="{Binding Source={StaticResource FanArtBackgroundModel},Path=MediaItem}" Grid.Row="1" Grid.Column="1">
+          <emulators:GameAspectWrapper.IsVisible>
+            <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}({0} == {LayoutSize}.{Large}) &amp;&amp; {1} &amp;&amp; ({2} == &quot;False&quot;)">
+              <Binding Source="{StaticResource ViewModeModel}" Path="LayoutSize"/>
+              <Binding RelativeSource="{RelativeSource Mode=FindAncestor,AncestorType={x:Type Button}}" Path="HasFocus"/>
+              <Binding Source="{StaticResource ViewModeModel}" Path="AdditionalProperties[extEnableListDetails].Value"/>
+            </MultiBinding>
+          </emulators:GameAspectWrapper.IsVisible>
+          <emulators:GameAspectWrapper.Template>
+            <ControlTemplate>
+              <StackPanel Orientation="Horizontal" DataContext="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+                <Grid>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                  </Grid.RowDefinitions>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                  </Grid.ColumnDefinitions>
+                  <Image x:Name="YearIcon" Source="HomeContentIcons\year.png" Stretch="Uniform" Height="25" VerticalAlignment="Center" Margin="0,-1,0,1"
+                         IsVisible="{Binding Path=Year,Converter={StaticResource ReferenceToBoolConverter}}"/>
+                  <Label x:Name="Year" Grid.Column="1" FontSize="{ThemeResource SmallerFontSize}" Color="{ThemeResource TextColor}" VerticalAlignment="Center"
+                         IsVisible="{Binding Path=Year,Converter={StaticResource ReferenceToBoolConverter}}"
+                         Content="{Binding Year}" Margin="5,0,30,0" Opacity="0.6"/>
+                </Grid>
+
+                <Grid>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                  </Grid.RowDefinitions>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                  </Grid.ColumnDefinitions>
+                  <Image x:Name="RatingIcon" Source="HomeContentIcons\Star.png" Stretch="Uniform" Height="25" VerticalAlignment="Center" Margin="0,-1,0,1"
+                         IsVisible="{Binding ElementName=RatingCountLabel, Path=Content, Converter={StaticResource EmptyStringToFalseConverter}}"/>
+                  <Label x:Name="RatingCountLabel" Margin="5,0,30,0" VerticalAlignment="Center" Grid.Column="1"
+                         FontSize="{ThemeResource SmallerFontSize}" Color="{ThemeResource TextColor}" Opacity="0.6"
+                         IsVisible="{Binding Path=Rating,Converter={StaticResource ReferenceToBoolConverter}}">
+                    <Label.Content>
+                      <Binding Path="Rating" Converter="{StaticResource StringFormatConverter}" ConverterParameter="{}{0:F1}"/>
+                    </Label.Content>
+                  </Label>
+                </Grid>
+              
+                <Grid>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                  </Grid.RowDefinitions>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                  </Grid.ColumnDefinitions>
+                  <Image x:Name="GenreIcon" Source="HomeContentIcons\genre.png" Stretch="Uniform" Height="25" VerticalAlignment="Center" Margin="0,-1,0,1"
+                         IsVisible="{Binding ElementName=GenreLabel, Path=Content, Converter={StaticResource EmptyStringToFalseConverter}}"/>
+                  <Label x:Name="GenreLabel" Margin="5,0,30,0" VerticalAlignment="Center" Grid.Column="1" Content="{Binding Genres}"
+                         FontSize="{ThemeResource SmallerFontSize}" Color="{ThemeResource TextColor}" Opacity="0.6"
+                         IsVisible="{Binding Path=Genres,Converter={StaticResource ReferenceToBoolConverter}}"/>
+                </Grid>
+                
+                <Grid>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                  </Grid.RowDefinitions>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                  </Grid.ColumnDefinitions>
+                  <Image x:Name="PlatformIcon" Source="HomeContentIcons\game.png" Stretch="Uniform" Height="25" VerticalAlignment="Center" Margin="0,-1,0,1"
+                         IsVisible="{Binding ElementName=PlatformLabel, Path=Content, Converter={StaticResource EmptyStringToFalseConverter}}"/>
+                  <Label x:Name="PlatformLabel" Margin="5,0,30,0" VerticalAlignment="Center" Grid.Column="1" Content="{Binding Platform}"
+                         FontSize="{ThemeResource SmallerFontSize}" Color="{ThemeResource TextColor}" Opacity="0.6"
+                         IsVisible="{Binding Path=Platform,Converter={StaticResource ReferenceToBoolConverter}}"/>
+                </Grid>
+              
+                <Grid>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                  </Grid.RowDefinitions>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                  </Grid.ColumnDefinitions>
+                  <Image x:Name="DeveloperIcon" Source="HomeContentIcons\brand.png" Stretch="Uniform" Height="25" VerticalAlignment="Center" Margin="0,-1,0,1"
+                         IsVisible="{Binding ElementName=DeveloperLabel, Path=Content, Converter={StaticResource EmptyStringToFalseConverter}}"/>
+                  <Label x:Name="DeveloperLabel" Margin="5,0,30,0" VerticalAlignment="Center" Grid.Column="1" Content="{Binding Developer}"
+                         FontSize="{ThemeResource SmallerFontSize}" Color="{ThemeResource TextColor}" Opacity="0.6"
+                         IsVisible="{Binding Path=Developer,Converter={StaticResource ReferenceToBoolConverter}}"/>
+                </Grid>  
+            
+              </StackPanel>
+            </ControlTemplate>
+          </emulators:GameAspectWrapper.Template>
+        </emulators:GameAspectWrapper>
+
+      <Label x:Name="ItemLabel" Content="{Binding Title}" FontSize="{ThemeResource SmallFontSize}" Grid.Column="1" Margin="0,0,10,0"
+             Color="{ThemeResource MediaItemUnwatchedColor}" FontFamily="SegoeUIBold"/>
+      
+        <Image x:Name="ItemTypeSmall" Stretch="Uniform" Source="{Binding MediaItem}" Grid.RowSpan="2"
                FallbackSource="Game.png" Width="{StaticResource MEDIA_THUMB_WIDTH_S}" Height="{StaticResource MEDIA_THUMB_HEIGHT_S}">
           <Image.IsVisible>
             <Binding Source="{StaticResource ViewModeModel}" Path="LayoutSize" Converter="{StaticResource ExpressionValueConverter}" ConverterParameter="{}{0} == {LayoutSize}.{Small}"/>
           </Image.IsVisible>
         </Image>
-        <Image x:Name="ItemTypeMedium" Stretch="Uniform" Source="{Binding MediaItem}" 
+        <Image x:Name="ItemTypeMedium" Stretch="Uniform" Source="{Binding MediaItem}"  Grid.RowSpan="2"
                FallbackSource="Game.png" Width="{StaticResource MEDIA_THUMB_WIDTH_M}" Height="{StaticResource MEDIA_THUMB_HEIGHT_M}">
           <Image.IsVisible>
             <Binding Source="{StaticResource ViewModeModel}" Path="LayoutSize" Converter="{StaticResource ExpressionValueConverter}" ConverterParameter="{}{0} == {LayoutSize}.{Medium}"/>
           </Image.IsVisible>
         </Image>
-        <Image x:Name="ItemTypeLarge" Stretch="Uniform" Source="{Binding MediaItem}" Margin="0,0,0,10"
+        <Image x:Name="ItemTypeLarge" Stretch="Uniform" Source="{Binding MediaItem}" Margin="0,2,20,10" Grid.RowSpan="2"
                FallbackSource="Game.png" Width="{StaticResource MEDIA_THUMB_WIDTH_L}" Height="{StaticResource MEDIA_THUMB_HEIGHT_L}">
           <Image.IsVisible>
             <Binding Source="{StaticResource ViewModeModel}" Path="LayoutSize" Converter="{StaticResource ExpressionValueConverter}" ConverterParameter="{}{0} == {LayoutSize}.{Large}"/>
           </Image.IsVisible>
-        </Image>
-      </DockPanel>
-      <Label x:Name="ItemLabel" Content="{Binding Title}" FontSize="{ThemeResource SmallFontSize}" Grid.Column="1"
-             Color="{ThemeResource MediaItemUnwatchedColor}" FontFamily="SegoeUIBold"/>
+        </Image>    
+  
     </Grid>
   </ControlTemplate>
 
