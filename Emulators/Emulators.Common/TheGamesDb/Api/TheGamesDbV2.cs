@@ -27,7 +27,7 @@ namespace Emulators.Common.TheGamesDb.Api
     protected const string GAME_FIELDS = "players,publishers,genres,overview,last_updated,rating,platform,coop,youtube,os,processor,ram,hdd,video,sound,alternates";
     protected const string GAME_INCLUDE = "boxart,platform";
 
-    protected const string BASE_URL = "https://api.thegamesdb.net/";
+    protected const string BASE_URL = "https://api.thegamesdb.net";
 
     protected const string SEARCH_GAME_PATH = "/v1.1/Games/ByGameName";
     protected const string GET_GAME_PATH = "/v1/Games/ByGameID";
@@ -59,8 +59,8 @@ namespace Emulators.Common.TheGamesDb.Api
       string query = "name=" + Uri.EscapeDataString(searchName) + "&" + _gameFieldsAndIncludeQuery;
       if (!string.IsNullOrEmpty(platform))
       {
-        string filter = Uri.EscapeDataString("platform=" + platform);
-        query += "&filter=" + filter;
+        string filter = Uri.EscapeDataString("[platform]") + "=" + Uri.EscapeDataString(platform);
+        query += "&filter" + filter;
       }
       string url = BuildRequestUrl(SEARCH_GAME_PATH, query);
       return _downloader.DownloadAsync<GameResult>(url);
