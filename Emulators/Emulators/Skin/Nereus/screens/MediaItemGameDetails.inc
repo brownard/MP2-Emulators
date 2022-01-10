@@ -31,8 +31,7 @@
       <ColumnDefinition Width="*"/>
       <ColumnDefinition Width="Auto"/>
     </Grid.ColumnDefinitions>
-    <Image Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Stretch" Stretch="Uniform"
-           Margin="0,10,10,0">
+    <Image Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Stretch" Stretch="Uniform" Margin="0,10,10,0">
       <Image.Source>
         <ImageSourceWrapper Delay="0.5" DelayInOut="true" Transition="transitions\dissolve" TransitionDuration="0.5"
                             HorizontalTextureAlignment="Right" VerticalTextureAlignment="Top"
@@ -49,9 +48,9 @@
   </Grid>
 
   <Label x:Name="MediaItemDescription" Wrap="True" Grid.Column="0" Grid.Row="1" TextTrimming="WordEllipsis" Opacity="0.6"
-        HorizontalAlignment="Stretch" FontSize="{ThemeResource SmallFontSize}"
-        Content="{Binding Description}" IsVisible="{Binding Path=[Emulators.Description],Converter={StaticResource ReferenceToBoolConverter}}"
-        Color="{ThemeResource TextColor}" Margin="0,40,20,110"/>
+         HorizontalAlignment="Stretch" FontSize="{ThemeResource SmallFontSize}"
+         Content="{Binding [Emulators.Description]}" IsVisible="{Binding Path=[Emulators.Description],Converter={StaticResource ReferenceToBoolConverter}}"
+         Color="{ThemeResource TextColor}" Margin="0,40,20,110"/>
   
   <emulators:GameAspectWrapper Grid.ColumnSpan="2" Grid.Row="0" VerticalAlignment="Stretch"
                                MediaItem="{Binding Source={StaticResource FanArtBackgroundModel},Path=MediaItem}">
