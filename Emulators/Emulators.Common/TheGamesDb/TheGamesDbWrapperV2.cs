@@ -239,8 +239,12 @@ namespace Emulators.Common.TheGamesDb
       if (!IsValid(result))
         return null;
 
-      Game game = result.Data.Games.FirstOrDefault(g => NameProcessor.AreStringsEqual(g.GameTitle, gameInfo.GameName, MAX_SEARCH_DISTANCE) ||
-        (g.Alternates != null && g.Alternates.Any(a => NameProcessor.AreStringsEqual(a, gameInfo.GameName, MAX_SEARCH_DISTANCE))));
+      // First try matching all games against primary game name, if that fails try matching against alternate names.
+      // Previous implementation was to check both primary and alternate names concurrently which resulted in alternate
+      // versions, e.g. Japanese, being matched when the correct original game was further down the results.
+      Game game =
+        result.Data.Games.FirstOrDefault(g => NameProcessor.AreStringsEqual(g.GameTitle, gameInfo.GameName, MAX_SEARCH_DISTANCE)) ??
+        result.Data.Games.FirstOrDefault(g => g.Alternates != null && g.Alternates.Any(a => NameProcessor.AreStringsEqual(a, gameInfo.GameName, MAX_SEARCH_DISTANCE)));
 
       if (game != null)
       {
