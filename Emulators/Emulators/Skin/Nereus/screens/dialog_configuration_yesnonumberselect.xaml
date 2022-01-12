@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Include
+    xmlns="www.team-mediaportal.com/2008/mpf/directx"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Source="screens\master_configuration_entry.xaml"
+    >
+  <Include.Resources>
+    <!-- Configuration model -->
+    <Model x:Key="Model" Id="545674F1-D92A-4383-B6C1-D758CECDBDF5"/>
+
+    <ControlTemplate x:Key="Config_Entry_Template">
+      <Grid x:Name="ContentsGrid">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!--Enabled/Disabled checkbox-->
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1" Grid.Row="1">
+          <CheckBox Margin="10,0,10,10" Style="{ThemeResource DefaultCheckBoxStyle}"
+                    IsChecked="{Binding Source={StaticResource Model},Path=CurrentConfigController.Yes,Mode=TwoWay}"
+                    Content="[Emulators.Config.Setting.NumberSelectEnabled]"/>
+        </StackPanel>
+
+        <!--Number select-->
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1" Grid.Row="2">
+          <TextBox x:Name="NumberSelectContent" Margin="10,0,10,0" PreferredTextLength="{Binding Source={StaticResource Model},Path=CurrentConfigController.DisplayLength}"
+                   Text="{Binding Source={StaticResource Model},Path=CurrentConfigController.Value,Mode=TwoWay}"
+                   IsEnabled="{Binding Source={StaticResource Model},Path=CurrentConfigController.Yes}"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Button Style="{ThemeResource ChapterUpButtonStyle}" Height="30" Margin="0,0,0,2"
+                    Command="{Command Source={StaticResource Model},Path=CurrentConfigController.Up}">
+              <Button.IsEnabled>
+                <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0} &amp;&amp; {1}">
+                  <Binding Source="{StaticResource Model}" Path="CurrentConfigController.IsUpEnabled"/>
+                  <Binding Source="{StaticResource Model}" Path="CurrentConfigController.Yes"/>
+                </MultiBinding>
+              </Button.IsEnabled>
+            </Button>
+            <Button Style="{ThemeResource ChapterDownButtonStyle}" Height="30"
+                    Command="{Command Source={StaticResource Model},Path=CurrentConfigController.Down}">
+              <Button.IsEnabled>
+                <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0} &amp;&amp; {1}">
+                  <Binding Source="{StaticResource Model}" Path="CurrentConfigController.IsDownEnabled"/>
+                  <Binding Source="{StaticResource Model}" Path="CurrentConfigController.Yes"/>
+                </MultiBinding>
+              </Button.IsEnabled>
+            </Button>
+          </StackPanel>
+        </StackPanel>
+      </Grid>
+    </ControlTemplate>
+
+  </Include.Resources>
+</Include>

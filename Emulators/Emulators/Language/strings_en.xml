@@ -27,6 +27,8 @@
   <string name="Emulators.Config.Setting.LibRetro">Libretro</string>
   <string name="Emulators.Config.Setting.LibRetro.Paths">Paths</string>
   <string name="Emulators.Config.Setting.Advanced">Advanced</string>
+
+  <string name="Emulators.Config.Setting.NumberSelectEnabled">Enabled</string>
   
   <string name="Emulators.Config.Setting.ConfigureEmulators">Configure emulators</string>
   <string name="Emulators.Config.Setting.ConfigureEmulators.Help">Add, edit and remove emulators</string>

@@ -58,6 +58,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Configuration">
+      <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\$(Configuration)\Plugins\Configuration\Configuration.dll</HintPath>
+    </Reference>
     <Reference Include="FanArtService.Client, Version=2.1.1711.10774, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\MediaPortal-2\MediaPortal\Bin\MP2-Client\bin\$(Configuration)\Plugins\FanArtService.Client\FanArtService.Client.dll</HintPath>
@@ -220,6 +223,8 @@
     <Compile Include="Models\Sorting\SortByRatingDesc.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\Configuration\ClearGoodMergeCache.cs" />
+    <Compile Include="Settings\Configuration\ConfigurationClasses\YesNoNumberSelect.cs" />
+    <Compile Include="Settings\Configuration\ConfigurationControllers\YesNoNumberSelectController.cs" />
     <Compile Include="Settings\Configuration\EmulatorsConfigSetting.cs" />
     <Compile Include="Settings\Configuration\LibRetro\AudioDeviceSetting.cs" />
     <Compile Include="Settings\Configuration\LibRetro\StateBufferDurationSetting.cs" />
@@ -587,6 +592,16 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Skin\Nereus\screens\emulator_config_choose_core.xaml">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Skin\default\screens\dialog_configuration_yesnonumberselect.xaml">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Skin\Nereus\screens\dialog_configuration_yesnonumberselect.xaml">
       <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
