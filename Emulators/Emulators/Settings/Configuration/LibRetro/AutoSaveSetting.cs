@@ -1,23 +1,25 @@
 ﻿using Emulators.LibRetro.Settings;
-using MediaPortal.Common.Configuration.ConfigurationClasses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Emulators.Settings.Configuration.ConfigurationClasses;
 
 namespace Emulators.Settings.Configuration.LibRetro
 {
-  public class AutoSaveSetting : YesNo
+  public class AutoSaveSetting : YesNoNumberSelect
   {
     public override void Load()
     {
-      _yes = SettingsManager.Load<LibRetroSettings>().AutoSave;
+      LibRetroSettings settings = SettingsManager.Load<LibRetroSettings>();
+      _type = NumberType.Integer;
+      _step = 1;
+      _lowerLimit = 1;
+      _upperLimit = int.MaxValue;
+      _value = settings.AutoSaveInterval;
+      _yes = settings.AutoSave;
     }
 
     public override void Save()
     {
       LibRetroSettings settings = SettingsManager.Load<LibRetroSettings>();
+      settings.AutoSaveInterval = (int)_value;
       settings.AutoSave = _yes;
       SettingsManager.Save(settings);
     }

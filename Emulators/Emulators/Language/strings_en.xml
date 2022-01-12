@@ -102,19 +102,15 @@
   <string name="Emulators.Config.LibRetro.MapInputDevices">Map input devices</string>
   <string name="Emulators.Config.LibRetro.MapInputDevices.Help">Edit the device and button mappings to use for each player</string>
   <string name="Emulators.Config.LibRetro.AutoSave">Auto save</string>
-  <string name="Emulators.Config.LibRetro.AutoSave.Help">Whether to periodically save the Libretro core's save states during gameplay</string>
-  <string name="Emulators.Config.LibRetro.AutoSaveInterval">Auto save interval</string>
-  <string name="Emulators.Config.LibRetro.AutoSaveInterval.Help">The number of seconds between auto saves</string>
+  <string name="Emulators.Config.LibRetro.AutoSave.Help">Whether to save the Libretro core's save state automatically at the specified interval in seconds</string>
   <string name="Emulators.Config.LibRetro.EnableVSync">Enable VSync</string>
   <string name="Emulators.Config.LibRetro.EnableVSync.Help">Whether to synchronize playback rate to the monitor refresh rate</string>
   <string name="Emulators.Config.LibRetro.AudioDevice">Audio device</string>
   <string name="Emulators.Config.LibRetro.AudioDevice.Help">Select the audio device to you use for audio output</string>
   <string name="Emulators.Config.LibRetro.AudioBufferSize">Audio buffer size</string>
   <string name="Emulators.Config.LibRetro.AudioBufferSize.Help">The size in seconds of the audio buffer. A larger buffer reduces the chance of audio artifacts at the cost of increased latency</string>
-  <string name="Emulators.Config.LibRetro.EnableStateBuffer">Enable state buffer</string>
-  <string name="Emulators.Config.LibRetro.EnableStateBuffer.Help">Whether to enable the game state buffer to allow rewinding of a game up to the duration of the state buffer</string>
-  <string name="Emulators.Config.LibRetro.StateBufferDuration">State buffer duration</string>
-  <string name="Emulators.Config.LibRetro.StateBufferDuration.Help">The duration in seconds of game states to buffer. If the state buffer is disabled this setting has no effect</string>
+  <string name="Emulators.Config.LibRetro.StateBuffer">State buffer</string>
+  <string name="Emulators.Config.LibRetro.StateBuffer.Help">Whether to enable the game state buffer to allow rewinding of a game up to the specified number of seconds</string>
     
   <string name="Emulators.CoreUpdater.ProgressHeader">Updating</string>
   <string name="Emulators.CoreUpdater.UpdatingCores">Updating cores</string>
