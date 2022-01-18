@@ -94,7 +94,7 @@ namespace Emulators.LibRetro.SoundProviders
       _player?.SetSourceFormat(newSampleRate, 16, 2);
 
       if (_dynamicRateControlDelta > 0)
-        _rateControl = new DynamicAudioRateControl(_bufferCount * _bufferSize / 4, 0.005);
+        _rateControl = new DynamicAudioRateControl(_bufferCount * _bufferSize / 4, _dynamicRateControlDelta);
     }
 
     void IAudioOutput.AudioSample(short left, short right)
