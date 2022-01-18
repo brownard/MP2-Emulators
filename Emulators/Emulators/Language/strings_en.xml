@@ -105,6 +105,8 @@
   <string name="Emulators.Config.LibRetro.AutoSave.Help">Whether to save the Libretro core's save state automatically at the specified interval in seconds</string>
   <string name="Emulators.Config.LibRetro.EnableVSync">Enable VSync</string>
   <string name="Emulators.Config.LibRetro.EnableVSync.Help">Whether to synchronize playback rate to the monitor refresh rate</string>
+  <string name="Emulators.Config.LibRetro.AudioRateControl">Dynmaic audio rate control</string>
+  <string name="Emulators.Config.LibRetro.AudioRateControl.Help">Whether to enable dynamic audio rate control to adjust audio playback speed to match the video framerate when VSync is enabled to avoid buffer over/underruns. The rate will be adjusted only up to the maximum specified ratio, a maximum ratio of 0.05 is recommended to avoid audible pitch changes.</string>
   <string name="Emulators.Config.LibRetro.AudioDevice">Audio device</string>
   <string name="Emulators.Config.LibRetro.AudioDevice.Help">Select the audio device to you use for audio output</string>
   <string name="Emulators.Config.LibRetro.AudioBufferSize">Audio buffer size</string>

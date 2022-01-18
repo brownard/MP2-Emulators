@@ -282,6 +282,12 @@
         Text="[Emulators.Config.LibRetro.EnableVSync]"
         HelpText="[Emulators.Config.LibRetro.EnableVSync.Help]"
         ClassName="Emulators.Settings.Configuration.LibRetro.EnableVSyncSetting"/>
+    <CustomConfigSetting
+        Id="AudioRateControl"
+        Text="[Emulators.Config.LibRetro.AudioRateControl]"
+        HelpText="[Emulators.Config.LibRetro.AudioRateControl.Help]"
+        ClassName="Emulators.Settings.Configuration.LibRetro.AudioRateControlSetting"
+        AdditionalTypes="CustomConfigController=Emulators.Settings.Configuration.ConfigurationControllers.YesNoNumberSelectController,ConfAppPanel=..."/>
     <ConfigSetting
         Id="AudioDevice"
         Text="[Emulators.Config.LibRetro.AudioDevice]"

@@ -117,7 +117,7 @@ namespace Emulators.LibRetro.SoundProviders
     {
       _ringBuffer = new AudioBuffer[_bufferCount];
       for (int i = 0; i < _ringBuffer.Length; i++)
-        _ringBuffer[i] = new AudioBuffer(new DataStream(_bufferSize, true, true));
+        _ringBuffer[i] = new AudioBuffer(new DataStream(_bufferSize, true, true)) { Flags = BufferFlags.None };
     }
 
     /// <summary>

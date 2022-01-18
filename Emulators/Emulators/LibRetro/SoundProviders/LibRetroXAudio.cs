@@ -1,5 +1,6 @@
 ﻿using Emulators.LibRetro.Render;
-using SharpDX.XAudio2;
+using MediaPortal.Common;
+using MediaPortal.Common.Logging;
 using SharpRetro.Audio;
 using SharpRetro.LibRetro;
 using System;
@@ -19,13 +20,18 @@ namespace Emulators.LibRetro.SoundProviders
     protected int _sampleRate;
     protected SynchronizationStrategy _strategy;
 
+    protected double _dynamicRateControlDelta;
+    protected DynamicAudioRateControl _rateControl;
+    protected bool _doDynamicRateControl;
+
     public bool HasAudio { get; set; }
 
-    public LibRetroXAudio(Guid audioDeviceId)
+    public LibRetroXAudio(Guid audioDeviceId, double dynamicRateControlDelta)
     {
       _deviceId = GetDeviceId(audioDeviceId);
       _player = new XAudioPlayer(_deviceId);
       _buffer = new XAudioRingBuffer(_bufferCount, _bufferSize);
+      _dynamicRateControlDelta = dynamicRateControlDelta;
     }
 
     public bool Play()
@@ -48,6 +54,8 @@ namespace Emulators.LibRetro.SoundProviders
 
     public void Update()
     {
+      UpdateDynamicRateControl();
+
       // If in batch mode, the audio data was submitted in the call to
       // IAudioOutput.AudioSampleBatch, so doesn't need to be done here.
       if (_player == null || _buffer.CurrentBuffer.Stream.Position == 0)
@@ -84,6 +92,9 @@ namespace Emulators.LibRetro.SoundProviders
         return;
       _sampleRate = newSampleRate;
       _player?.SetSourceFormat(newSampleRate, 16, 2);
+
+      if (_dynamicRateControlDelta > 0)
+        _rateControl = new DynamicAudioRateControl(_bufferCount * _bufferSize / 4, 0.005);
     }
 
     void IAudioOutput.AudioSample(short left, short right)
@@ -126,6 +137,55 @@ namespace Emulators.LibRetro.SoundProviders
     //  }
     //}
 
+    /// <summary>
+    /// Attempts to dynamically adjust the audio playback rate to match the video playback rate.
+    /// </summary>
+    protected void UpdateDynamicRateControl()
+    {
+      if (_rateControl == null || _player == null)
+        return;
+
+      if (_strategy == null || _strategy.SyncToAudio)
+      {
+        // Dynamic rate control not active, just return
+        if (!_doDynamicRateControl)
+          return;
+        //Dynamic rate control active, reset and disable it
+        _doDynamicRateControl = false;
+        Logger.Debug("LibRetroXAudio: Disabling dynamic rate control");
+      }
+      else if (!_doDynamicRateControl)
+      {
+        _doDynamicRateControl = true;
+        Logger.Debug("LibRetroXAudio: Enabling dynamic rate control with maximum delta {0}", _dynamicRateControlDelta);
+      }
+
+      double adjustment;
+      if (_doDynamicRateControl)
+      {
+        int playerBuffered = _player.GetBufferedSampleCount();
+        int bufferBuffered = _buffer.CurrentBuffer.AudioBytes / 4;
+        adjustment = _rateControl.Update(playerBuffered + bufferBuffered);
+        //Logger.Debug("Current playback rate: {0} ({1})", adjustment, playerBuffered + bufferBuffered);
+      }
+      else
+      {
+        // Resetting rate control, set frequency ratio back to 1
+        adjustment = 1;
+      }
+
+      try
+      {
+        float currentRatio;
+        _player.SetFrequencyRatio((float)adjustment, out currentRatio);
+        //Logger.Debug("Current frequency ratio {0}", currentRatio);
+      }
+      catch (Exception ex)
+      {
+        Logger.Error("Error setting audio frequency ratio", ex);
+      }
+    }
+
     protected string GetDeviceId(Guid driverId)
     {
       string moduleName = SharpDX.DirectSound.DirectSound.GetDevices()?
@@ -145,6 +205,11 @@ namespace Emulators.LibRetro.SoundProviders
         _buffer.Dispose();
         _buffer = null;
       }
+    }
+
+    protected static ILogger Logger
+    {
+      get { return ServiceRegistration.Get<ILogger>(); }
     }
   }
 }

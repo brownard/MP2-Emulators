@@ -212,7 +212,7 @@ namespace Emulators.LibRetro
     {
       _textureOutput = new TextureOutput(SkinContext.Device);
       //_soundOutput = new LibRetroDirectSound(SkinContext.Form.Handle, _settings.AudioDeviceId, _settings.AudioBufferSize);
-      _soundOutput = new LibRetroXAudio(_settings.AudioDeviceId);
+      _soundOutput = new LibRetroXAudio(_settings.AudioDeviceId, _settings.EnableAudioRateControl ? _settings.AudioRateControlDelta : -1);
       _retroEmulator = new LibRetroEmulator(_corePath)
       {
         SaveDirectory = _settings.SavesDirectory,

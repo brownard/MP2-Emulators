@@ -185,7 +185,7 @@
     <Compile Include="LibRetro\LibRetroPlayer.cs" />
     <Compile Include="LibRetro\LibRetroPlayerBuilder.cs" />
     <Compile Include="LibRetro\SoundProviders\LibRetroXAudio.cs" />
-    <Compile Include="LibRetro\SoundProviders\SoundBufferMonitor.cs" />
+    <Compile Include="LibRetro\SoundProviders\DynamicAudioRateControl.cs" />
     <Compile Include="LibRetro\SoundProviders\XAudioPlayer.cs" />
     <Compile Include="LibRetro\SoundProviders\XAudioRingBuffer.cs" />
     <Compile Include="LibRetro\VideoProviders\DxTextureRenderContext.cs" />
@@ -227,6 +227,7 @@
     <Compile Include="Settings\Configuration\ConfigurationControllers\YesNoNumberSelectController.cs" />
     <Compile Include="Settings\Configuration\EmulatorsConfigSetting.cs" />
     <Compile Include="Settings\Configuration\LibRetro\AudioDeviceSetting.cs" />
+    <Compile Include="Settings\Configuration\LibRetro\AudioRateControlSetting.cs" />
     <Compile Include="Settings\Configuration\LibRetro\StateBufferSetting.cs" />
     <Compile Include="Settings\Configuration\LibRetro\CoreInfoDirectorySetting.cs" />
     <Compile Include="Settings\Configuration\LibRetro\CoresDirectorySetting.cs" />

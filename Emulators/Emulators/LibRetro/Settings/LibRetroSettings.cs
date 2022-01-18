@@ -97,6 +97,12 @@ namespace Emulators.LibRetro.Settings
     [Setting(SettingScope.User, LibRetroDirectSound.DEFAULT_BUFFER_SIZE_SECONDS)]
     public double AudioBufferSize { get; set; }
 
+    [Setting(SettingScope.User, false)]
+    public bool EnableAudioRateControl { get; set; }
+
+    [Setting(SettingScope.User, 0.005)]
+    public double AudioRateControlDelta { get; set; }
+
     [Setting(SettingScope.User)]
     public Guid AudioDeviceId { get; set; }
   }

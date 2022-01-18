@@ -19,6 +19,8 @@ namespace Emulators.LibRetro.SoundProviders
 
     protected float _volume = 1.0f;
 
+    protected long _totalSamplesSubmitted;
+
     /// <summary>
     /// Creates a new <see cref="XAudioPlayer"/> that uses the audio device
     /// with the specified <paramref name="deviceId"/> for playback.
@@ -97,8 +99,10 @@ namespace Emulators.LibRetro.SoundProviders
     /// <param name="buffer"><see cref="AudioBuffer"/> to add to the playback queue.</param>
     public void SubmitBuffer(AudioBuffer buffer)
     {
-      if (IsSourceVoiceValid)
-        _sourceVoice.SubmitSourceBuffer(buffer, null);
+      if (!IsSourceVoiceValid)
+        return;
+      _sourceVoice.SubmitSourceBuffer(buffer, null);
+      _totalSamplesSubmitted += buffer.AudioBytes / 4;
     }
 
     /// <summary>
@@ -124,6 +128,25 @@ namespace Emulators.LibRetro.SoundProviders
       return WaitForQueuedBuffers(maxQueuedBuffers, 100);
     }
 
+    public int GetBufferedSampleCount()
+    {
+      if (!IsSourceVoiceValid)
+        return 0;
+
+      return (int)(_totalSamplesSubmitted - _sourceVoice.State.SamplesPlayed);
+    }
+
+    public void SetFrequencyRatio(float ratio, out float currentRatio)
+    {
+      if (!IsSourceVoiceValid)
+      {
+        currentRatio = 1;
+        return;
+      }
+      _sourceVoice.SetFrequencyRatio(ratio);
+      _sourceVoice.GetFrequencyRatio(out currentRatio);
+    }
+
     protected void CreateXAudio()
     {
       _xAudio = new XAudio2();
@@ -138,7 +161,7 @@ namespace Emulators.LibRetro.SoundProviders
       DestroySourceVoice();
       _bufferEndEvent = new AutoResetEvent(false);
       var format = new WaveFormat(sampleRate, bits, channels);
-      _sourceVoice = new SourceVoice(_xAudio, format);
+      _sourceVoice = new SourceVoice(_xAudio, format, VoiceFlags.None);
       _sourceVoice.BufferEnd += OnBufferEnd;
       if (wasPlaying)
         Play();
@@ -181,6 +204,7 @@ namespace Emulators.LibRetro.SoundProviders
       _bufferEndEvent = null;
 
       _isPlaying = false;
+      _totalSamplesSubmitted = 0;
     }
 
     protected void DestroyXAudio()
