@@ -46,6 +46,7 @@ namespace Emulators.LibRetro
     protected string _gamePath;
     protected string _saveName;
     protected bool _autoSave;
+    protected double _targetFps;
     #endregion
 
     #region Ctor
@@ -172,6 +173,11 @@ namespace Emulators.LibRetro
       get { return _stateBuffer?.BufferedTime ?? TimeSpan.Zero; }
     }
 
+    public double TargetFps
+    {
+      get { return _targetFps; }
+    }
+
     public void SetTime(TimeSpan time)
     {
       if (_retroThread != null && _stateBuffer != null)
@@ -189,7 +195,8 @@ namespace Emulators.LibRetro
         
         if (!LoadGame())
           return;
-        
+
+        _targetFps = _retroEmulator.TimingInfo.FPS;
         _synchronizationStrategy = new SynchronizationStrategy(_retroEmulator.TimingInfo.FPS, _settings.SynchronizationType);
         _soundOutput.SetSynchronizationStrategy(_synchronizationStrategy);
 

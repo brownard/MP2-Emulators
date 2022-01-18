@@ -1,5 +1,7 @@
 ﻿using MediaPortal.Common;
 using MediaPortal.Common.Logging;
+using MediaPortal.Common.MediaManagement;
+using MediaPortal.Common.MediaManagement.DefaultItemAspects;
 using MediaPortal.Common.ResourceAccess;
 using MediaPortal.Common.Threading;
 using MediaPortal.UI.Presentation.Geometries;
@@ -90,12 +92,16 @@ namespace Emulators.LibRetro
 
       _retro = new LibRetroFrontend(mediaItem.LibRetroPath, gamePath, saveName);
       _isLibretroInit = _retro.Init();
-      //if (_isLibretroInit)
-      //{
-      //  TimingInfo timingInfo = _retro.GetTimingInfo();
-      //  if (timingInfo != null)
-      //    MediaItemAspect.SetAttribute(mediaItem.Aspects, VideoAspect.ATTR_FPS, (int)timingInfo.FPS);
-      //}
+      if (_isLibretroInit)
+      {
+        float targetFps = (float)_retro.TargetFps;
+        if (targetFps > 0)
+        {
+          var videoStreamAspect = new MultipleMediaItemAspect(VideoStreamAspect.Metadata);
+          videoStreamAspect.SetAttribute(VideoStreamAspect.ATTR_FPS, targetFps);
+          MediaItemAspect.AddOrUpdateAspect(mediaItem.Aspects, videoStreamAspect);
+        }
+      }
     }
 
     protected void ShowLoadErrorDialog()
