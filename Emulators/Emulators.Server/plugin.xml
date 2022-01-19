@@ -7,8 +7,8 @@
     Description="Backend for the emulators plugin">
 
   <Version
-        PluginVersion="0.7"
-        ReleaseDate="2017-08-26 01:00:00 GMT+01:00"
+        PluginVersion="0.11"
+        ReleaseDate="2022-01-19 01:00:00 GMT+01:00"
         CurrentAPI="1"/>
 
   <Runtime>
