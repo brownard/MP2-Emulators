@@ -84,11 +84,12 @@ namespace Emulators.LibRetro.Render
 
     protected void SetVSyncStrategy()
     {
-      if (SkinContext.RenderStrategy.Name.Contains("VSync"))
-        return;
-      _renderMode = SkinContext.RenderStrategy.Name;
-      while (!SkinContext.RenderStrategy.Name.Contains("VSync"))
-        SkinContext.NextRenderStrategy();
+      if (!SkinContext.RenderStrategy.Name.Contains("VSync"))
+      {
+        _renderMode = SkinContext.RenderStrategy.Name;
+        while (!SkinContext.RenderStrategy.Name.Contains("VSync"))
+          SkinContext.NextRenderStrategy();
+      }
       _doVSync = true;
     }
 
