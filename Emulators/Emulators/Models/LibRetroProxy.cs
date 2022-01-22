@@ -22,6 +22,7 @@ namespace Emulators.Models
   {
     public const string KEY_OPTION_VALUE = "OptionValue";
     public const string KEY_VARIABLE_NAME = "LibRetroVariableName";
+    public const string KEY_VARIABLE_INFO = "LibRetroVariableInfo";
     public const string DIALOG_OPTION_SELECT = "dialog_libretro_option_select";
 
     protected AbstractProperty _selectedVariableNameProperty = new WProperty(typeof(string), null);
@@ -141,13 +142,13 @@ namespace Emulators.Models
     {
       var sm = ServiceRegistration.Get<ISettingsManager>();
       CoreSetting coreSetting;
-      if (!sm.Load<LibRetroCoreSettings>().TryGetCoreSetting(_corePath, out coreSetting) || coreSetting.Variables == null)
+      if (!sm.Load<LibRetroCoreSettings>().TryGetCoreSetting(_corePath, out coreSetting) || coreSetting.Options == null)
         return;
-      foreach (VariableDescription variable in coreSetting.Variables)
+      foreach (CoreOption option in coreSetting.Options)
       {
-        VariableDescription coreVariable = _variables.FirstOrDefault(v => v.Name == variable.Name);
+        VariableDescription coreVariable = _variables.FirstOrDefault(v => v.Name == option.Name);
         if (coreVariable != null)
-          coreVariable.SelectedOption = variable.SelectedOption;
+          coreVariable.SelectedOption = option.Value;
       }
     }
 
@@ -161,6 +162,7 @@ namespace Emulators.Models
           ListItem item = new ListItem(Consts.KEY_NAME, variable.Description);
           item.SetLabel(KEY_OPTION_VALUE, variable.SelectedOption);
           item.SetLabel(KEY_VARIABLE_NAME, variable.Name);
+          item.SetLabel(KEY_VARIABLE_INFO, variable.Info ?? string.Empty);
           item.Command = new MethodDelegateCommand(() => VariableItemSelected(item));
           _variableItems.Add(item);
         }

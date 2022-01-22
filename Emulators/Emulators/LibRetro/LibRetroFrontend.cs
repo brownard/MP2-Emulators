@@ -282,10 +282,10 @@ namespace Emulators.LibRetro
     {
       var sm = ServiceRegistration.Get<ISettingsManager>();
       CoreSetting coreSetting;
-      if (!sm.Load<LibRetroCoreSettings>().TryGetCoreSetting(_corePath, out coreSetting) || coreSetting.Variables == null)
+      if (!sm.Load<LibRetroCoreSettings>().TryGetCoreSetting(_corePath, out coreSetting) || coreSetting.Options == null)
         return;
-      foreach (VariableDescription variable in coreSetting.Variables)
-        _retroEmulator.Variables.AddOrUpdate(variable);
+      foreach (CoreOption option in coreSetting.Options)
+        _retroEmulator.Variables.AddOrUpdate(option.Name, option.Value);
     }
 
     protected void InitializeControllerWrapper()

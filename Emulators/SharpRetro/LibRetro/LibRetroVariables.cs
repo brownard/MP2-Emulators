@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SharpRetro.LibRetro
 {
@@ -57,6 +54,7 @@ namespace SharpRetro.LibRetro
   public class VariableDescription
   {
     protected string _selectedOption;
+    protected string _defaultOption;
 
     public VariableDescription() { }
 
@@ -70,23 +68,50 @@ namespace SharpRetro.LibRetro
       Options = parts[1].TrimStart(' ').Split('|');
     }
 
+    public VariableDescription(ref retro_core_option_definition option)
+    {
+      Name = option.key;
+      Description = option.desc;
+      Info = option.info;
+      Options = option.values.TakeWhile(v => v.value != null).Select(v => v.value).ToArray();
+      _defaultOption = option.default_value;
+    }
+
+    public VariableDescription(ref retro_core_option_v2_definition option)
+    {
+      Name = option.key;
+      Description = option.desc;
+      Info = option.info;
+      Options = option.values.TakeWhile(v => v.value != null).Select(v => v.value).ToArray();
+      _defaultOption = option.default_value;
+    }
+
     public string Name { get; set; }
     public string Description { get; set; }
+    public string Info { get; set; }
     public string[] Options { get; set; }
 
     public string DefaultOption
     {
-      get { return Options != null && Options.Length > 0 ? Options[0] : ""; }
+      get 
+      { 
+        return IsValidOption(_defaultOption) ? _defaultOption :
+          Options != null && Options.Length > 0 ? Options[0] : ""; 
+      }
     }
 
     public string SelectedOption
     {
-      get { return string.IsNullOrEmpty(_selectedOption) ? DefaultOption : _selectedOption; }
-      set
+      get
       {
-        if (Options != null && Options.Contains(value))
-          _selectedOption = value;
+        return IsValidOption(_selectedOption) ? _selectedOption : DefaultOption;
       }
+      set { _selectedOption = value; }
+    }
+
+    protected bool IsValidOption(string option)
+    {
+      return option != null && Options != null && Options.Contains(option);
     }
 
     public override string ToString()

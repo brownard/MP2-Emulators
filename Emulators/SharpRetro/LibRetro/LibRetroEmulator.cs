@@ -20,6 +20,7 @@ namespace SharpRetro.LibRetro
     retro_log_printf_t retro_log_printf_cb;
     retro_perf_callback retro_perf_callback = new retro_perf_callback();
     retro_rumble_interface retro_rumble_interface = new retro_rumble_interface();
+    retro_core_options_update_display_callback_t retro_core_options_update_display_cb;
     #endregion
 
     #region Protected Members
@@ -572,6 +573,23 @@ namespace SharpRetro.LibRetro
           // Enable video and audio
           *(int*)data.ToPointer() = (int)(AUDIO_VIDEO_ENABLE.ENABLE_VIDEO | AUDIO_VIDEO_ENABLE.ENABLE_AUDIO);
           return true;
+        case RETRO_ENVIRONMENT.RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION:
+          *(uint*)data.ToPointer() = 2;
+          return true;
+        case RETRO_ENVIRONMENT.RETRO_ENVIRONMENT_SET_CORE_OPTIONS:
+          return SetCoreOptions(data);
+        case RETRO_ENVIRONMENT.RETRO_ENVIRONMENT_SET_CORE_OPTIONS_INTL:
+          return SetCoreOptionsIntl(data);
+        case RETRO_ENVIRONMENT.RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY:
+          return true;
+        case RETRO_ENVIRONMENT.RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2:
+          return SetCoreOptionsV2(data);
+        case RETRO_ENVIRONMENT.RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2_INTL:
+          return SetCoreOptionsIntlV2(data);
+        case RETRO_ENVIRONMENT.RETRO_ENVIRONMENT_SET_CORE_OPTIONS_UPDATE_DISPLAY_CALLBACK:
+          retro_core_options_update_display_callback cb = Marshal.PtrToStructure<retro_core_options_update_display_callback>(data);
+          retro_core_options_update_display_cb = cb.callback;
+          return true;
         default:
           Log(RETRO_LOG_LEVEL.DEBUG, "Unknkown retro_environment command {0} - {1}", (int)cmd, cmd & (~RETRO_ENVIRONMENT.RETRO_ENVIRONMENT_EXPERIMENTAL));
           return false;
@@ -657,6 +675,47 @@ namespace SharpRetro.LibRetro
         Log(RETRO_LOG_LEVEL.DEBUG, "Set variable: {0}", variable);
       }
       return true;
+    }
+
+    protected bool SetCoreOptions(IntPtr data)
+    {
+      PointerUtils.EnumerateUnmanagedArray(data, (ref retro_core_option_definition option) =>
+      {
+        if (option.key == null)
+          return false;
+        VariableDescription variable = new VariableDescription(ref option);
+        _variables.AddOrUpdate(variable);
+        Log(RETRO_LOG_LEVEL.DEBUG, "Set core option: {0}", variable);
+        return true;
+      });
+      return true;
+    }
+
+    protected bool SetCoreOptionsIntl(IntPtr data)
+    {
+      retro_core_options_intl intl = Marshal.PtrToStructure<retro_core_options_intl>(data);
+      return SetCoreOptions(intl.us);
+    }
+
+    protected bool SetCoreOptionsV2(IntPtr data)
+    {
+      retro_core_options_v2 options = Marshal.PtrToStructure<retro_core_options_v2>(data);
+      PointerUtils.EnumerateUnmanagedArray(options.definitions, (ref retro_core_option_v2_definition option) =>
+      {
+        if (option.key == null)
+          return false;
+        VariableDescription variable = new VariableDescription(ref option);
+        _variables.AddOrUpdate(variable);
+        Log(RETRO_LOG_LEVEL.DEBUG, "Set core option v2: {0}", variable);
+        return true;
+      });
+      return true;
+    }
+
+    protected bool SetCoreOptionsIntlV2(IntPtr data)
+    {
+      retro_core_options_v2_intl intl = Marshal.PtrToStructure<retro_core_options_v2_intl>(data);
+      return SetCoreOptionsV2(intl.us);
     }
 
     protected bool SetSubsystemInfo(IntPtr data)

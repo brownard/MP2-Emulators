@@ -77,6 +77,7 @@
     <Compile Include="Info\Firmware.cs" />
     <Compile Include="Info\CoreInfo.cs" />
     <Compile Include="State\SerializedStateBuffer.cs" />
+    <Compile Include="Utils\PointerUtils.cs" />
     <Compile Include="Video\IHardwareRenderer.cs" />
     <Compile Include="Video\IVideoOutput.cs" />
     <Compile Include="LibRetro\Libretro.cs" />

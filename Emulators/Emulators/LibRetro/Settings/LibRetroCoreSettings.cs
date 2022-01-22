@@ -1,10 +1,7 @@
 ﻿using MediaPortal.Common.Settings;
 using SharpRetro.LibRetro;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Emulators.LibRetro.Settings
 {
@@ -31,27 +28,34 @@ namespace Emulators.LibRetro.Settings
 
     public void AddOrUpdateCoreSetting(string corePath, List<VariableDescription> variables)
     {
+      List<CoreOption> options = variables.Select(v => new CoreOption { Name = v.Name, Value = v.SelectedOption }).ToList();
       CoreSetting coreSetting = CoreSettings.FirstOrDefault(s => s.CorePath == corePath);
       if (coreSetting != null)
-        coreSetting.Variables = variables;
+        coreSetting.Options = options;
       else
-        CoreSettings.Add(new CoreSetting() { CorePath = corePath, Variables = variables });
+        CoreSettings.Add(new CoreSetting() { CorePath = corePath, Options = options });
     }
   }
 
   public class CoreSetting
   {
-    protected List<VariableDescription> _variables;
+    protected List<CoreOption> _options;
     public string CorePath { get; set; }
-    public List<VariableDescription> Variables
+    public List<CoreOption> Options
     {
       get
       {
-        if (_variables == null)
-          _variables = new List<VariableDescription>();
-        return _variables;
+        if (_options == null)
+          _options = new List<CoreOption>();
+        return _options;
       }
-      set { _variables = value; }
+      set { _options = value; }
     }
+  }
+
+  public class CoreOption
+  {
+    public string Name { get; set; }
+    public string Value { get; set; }
   }
 }
