@@ -16,15 +16,90 @@
     <ControlTemplate x:Key="Contents_Template">
       <Grid Margin="{ThemeResource EmuConfigScreenMargin}" DataContext="{Binding Source={StaticResource Model}}">
         <Grid.RowDefinitions>
-          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="44"/>
+          <RowDefinition Height="4"/>
           <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <Label Grid.Row="0" Margin="0,0,0,10" Content="[Emulators.Config.EmulatorConfigurations.Label]" Color="{ThemeResource TextColor}"/>
-        <Border VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Margin="0,-20,30,10" Background="White" BorderThickness="0" Height="4"/>
-        <ListView Name="EmulatorList" Margin="0,10,30,0" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+
+        <StackPanel Orientation="Horizontal">
+          <Image Source="game_icon.png" Margin="0,7,5,6" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Left"
+                 IsVisible="{Binding Converter={StaticResource ReferenceToBoolConverter}}" Width="40"/>
+          <Label Content="[Emulators.Config.EmulatorConfigurations.Label]" VerticalAlignment="Center" HorizontalAlignment="Left"
+                 FontSize="{ThemeResource SmallFontSize}" Color="{ThemeResource TextColor}"/>
+        </StackPanel>
+
+        <!-- ListIndex header -->
+        <Grid x:Name="IndexLabel" Grid.Column="1" HorizontalAlignment="Right" Margin="10,5,15,0" VerticalAlignment="Center" Panel.ZIndex="1">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
+          <Grid.IsVisible>
+            <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0} &gt; 0 ">
+              <Binding ElementName="EmulatorList" Path="ItemsCount" />
+            </MultiBinding>
+          </Grid.IsVisible>
+          <Label Grid.Column="0" Margin="0,0,10,0" Color="Black" FontSize="{ThemeResource SmallerFontSize}">
+            <Label.Content>
+              <MultiBinding Converter="{StaticResource GetIndexMultiConverter}" ConverterParameter="1">
+                <Binding ElementName="EmulatorList" Path="CurrentItem"/>
+                <Binding ElementName="EmulatorList" Path="ItemsSource"/>
+              </MultiBinding>
+            </Label.Content>
+          </Label>
+          <Label Grid.Column="1" Color="Black" Content="| " FontSize="{ThemeResource SmallerFontSize}"/>
+          <Label Grid.Column="2" Color="Black" FontSize="{ThemeResource SmallerFontSize}">
+            <Label.Content>
+              <Binding ElementName="EmulatorList" Path="ItemsCount" />
+            </Label.Content>
+          </Label>
+        </Grid>
+
+        <!-- ListIndex header background -->
+        <Rectangle Grid.Column="1" HorizontalAlignment="Right" RadiusX="17" RadiusY="17" VerticalAlignment="Stretch" Fill="White" Margin="0,6,10,0" Panel.ZIndex="0">
+          <Rectangle.Width>
+            <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0}+20">
+              <Binding ElementName="IndexLabel" Path="ActualWidth" />
+            </MultiBinding>
+          </Rectangle.Width>
+          <Rectangle.IsVisible>
+            <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0} &gt; 0 ">
+              <Binding ElementName="EmulatorList" Path="ItemsCount" />
+            </MultiBinding>
+          </Rectangle.IsVisible>
+        </Rectangle>
+        <Rectangle Grid.Column="1" HorizontalAlignment="Right" RadiusY="0" VerticalAlignment="Stretch" Fill="White" Margin="0,6,10,0">
+          <Rectangle.Width>
+            <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0}-18">
+              <Binding ElementName="IndexLabel" Path="ActualWidth" />
+            </MultiBinding>
+          </Rectangle.Width>
+          <Rectangle.IsVisible>
+            <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0} &gt; 0 ">
+              <Binding ElementName="EmulatorList" Path="ItemsCount" />
+            </MultiBinding>
+          </Rectangle.IsVisible>
+        </Rectangle>
+        <Rectangle Grid.Column="1" HorizontalAlignment="Right" RadiusY="0" VerticalAlignment="Stretch" Fill="White" Margin="0,19,10,0">
+          <Rectangle.Width>
+            <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0}+20">
+              <Binding ElementName="IndexLabel" Path="ActualWidth" />
+            </MultiBinding>
+          </Rectangle.Width>
+          <Rectangle.IsVisible>
+            <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0} &gt; 0 ">
+              <Binding ElementName="EmulatorList" Path="ItemsCount" />
+            </MultiBinding>
+          </Rectangle.IsVisible>
+        </Rectangle>
+
+        <Border Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Margin="0,0,10,0" Background="White" BorderThickness="0" Height="4"/>
+        
+        <ListView Name="EmulatorList" Margin="0,30,10,0" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                   Style="{ThemeResource emuEmulatorsConfigListViewStyle}"
                   ItemsSource="{Binding Path=Configurations,Mode=OneTime}"/>
       </Grid>

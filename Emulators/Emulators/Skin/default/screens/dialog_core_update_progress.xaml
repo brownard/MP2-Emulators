@@ -12,7 +12,7 @@
     <ResourceWrapper x:Key="Dialog_Header_Text" Resource="[Emulators.CoreUpdater.ProgressHeader]"/>
 
     <ControlTemplate x:Key="Contents_Template">
-      <DockPanel Width="600" Height="50" LastChildFill="True"  Margin="20">
+      <DockPanel Width="600" Height="70" LastChildFill="True"  Margin="20">
         <Label DockPanel.Dock="Center" Content="{Binding Source={StaticResource Model}, Path=ProgressLabel}"
                Color="{ThemeResource TextColor}" Wrap="True" Margin="0,0,0,10"/>
       </DockPanel>
