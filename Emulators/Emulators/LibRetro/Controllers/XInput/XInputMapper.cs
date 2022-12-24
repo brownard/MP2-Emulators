@@ -1,14 +1,12 @@
 ﻿using Emulators.LibRetro.Controllers.Hid;
 using Emulators.LibRetro.Controllers.Mapping;
-using MediaPortal.Common;
-using MediaPortal.Plugins.InputDeviceManager;
 using SharpDX.XInput;
 using System;
 using System.Collections.Generic;
 
 namespace Emulators.LibRetro.Controllers.XInput
 {
-  class XInputMapper : IDeviceMapper
+  class XInputMapper : AbstractHidMapper
   {
     #region Available Inputs
     static readonly DeviceInput DPAD_LEFT = new DeviceInput("D-Pad Left", GamepadButtonFlags.DPadLeft.ToString(), InputType.Button);
@@ -137,38 +135,18 @@ namespace Emulators.LibRetro.Controllers.XInput
       InitializeInputs();
     }
 
-    public bool SupportsDeadZone
+    public override bool SupportsDeadZone
     {
       get { return true; }
     }
 
-    public void BeginMapping()
+    public override DeviceInput GetPressedInput()
     {
-      ServiceRegistration.Get<IInputDeviceManager>().KeyPressed += ExternalKeyHandler;
-    }
-
-    public void EndMapping()
-    {
-      ServiceRegistration.Get<IInputDeviceManager>().KeyPressed -= ExternalKeyHandler;
-    }
-
-    private void ExternalKeyHandler(object sender, KeyPressHandlerEventArgs e)
-    {
-      // We cant tie a HID event to a specific XInput device, the best we can do is see if it came from
-      // any XInput device, if that's the case assume its ours and tell MP2 to ignore the input.
-      if (HidUtils.IsXInputDevice(e.DeviceName))
-        e.Handled = true;
-    }
-
-    public DeviceInput GetPressedInput()
-    {
-      State state;
-      if (!_controller.GetState(out state))
+      if (!_controller.GetState(out State state))
         return null;
       Gamepad gamepad = state.Gamepad;
 
-      DeviceInput pressedInput;
-      if (_buttonInputs.TryGetValue(gamepad.Buttons, out pressedInput))
+      if (_buttonInputs.TryGetValue(gamepad.Buttons, out DeviceInput pressedInput))
         return pressedInput;
 
       foreach (AxisDeviceInput axisInput in _axisInputs)
@@ -183,22 +161,28 @@ namespace Emulators.LibRetro.Controllers.XInput
       _buttonInputs = new Dictionary<GamepadButtonFlags, DeviceInput>();
       foreach (DeviceInput input in AVAILABLE_BUTTONS)
       {
-        GamepadButtonFlags buttonFlag;
-        if (Enum.TryParse(input.Id, out buttonFlag))
+        if (Enum.TryParse(input.Id, out GamepadButtonFlags buttonFlag))
           _buttonInputs.Add(buttonFlag, input);
       }
 
       _axisInputs = new List<AxisDeviceInput>();
       foreach (DeviceInput input in AVAILABLE_AXIS)
       {
-        XInputAxisType axisType;
-        if (Enum.TryParse(input.Id, out axisType))
+        if (Enum.TryParse(input.Id, out XInputAxisType axisType))
           _axisInputs.Add(new AxisDeviceInput()
           {
             DeviceInput = input,
             Axis = new XInputAxis(axisType, input.PositiveValues)
           });
       }
+    }
+
+    protected override void HidListener_StateChanged(object sender, StateChangedEventArgs e)
+    {
+      // We cant tie a HID event to a specific XInput device, the best we can do is see if it came from
+      // any XInput device, if that's the case assume its ours and tell MP2 to ignore the input.
+      if (HidUtils.IsXInputDevice(e.HidEvent.Device?.Name))
+        e.Handled = true;
     }
   }
 }

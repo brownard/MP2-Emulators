@@ -1,12 +1,23 @@
-﻿using MediaPortal.Common;
+﻿using HidInput.Messaging;
+using MediaPortal.Common;
 using MediaPortal.Common.Logging;
 using MediaPortal.Common.Messaging;
-using MediaPortal.Plugins.InputDeviceManager.Messaging;
 using SharpLib.Hid;
 using System;
 
 namespace Emulators.LibRetro.Controllers.Hid
 {
+  public class StateChangedEventArgs : EventArgs
+  {
+    public StateChangedEventArgs(Event hidEvent)
+    {
+      HidEvent = hidEvent;
+    }
+
+    public Event HidEvent { get; }
+    public bool Handled { get; set; }
+  }
+
   public class HidListener : IDisposable
   {
     #region Logger
@@ -16,45 +27,51 @@ namespace Emulators.LibRetro.Controllers.Hid
     }
     #endregion
 
-    protected AsynchronousMessageQueue _messageQueue;
+    protected SynchronousMessageQueue _messageQueue;
 
-    public event EventHandler<Event> StateChanged;
-    protected virtual void OnStateChanged(Event hidEvent)
+    public event EventHandler<StateChangedEventArgs> StateChanged;
+    protected virtual void OnStateChanged(StateChangedEventArgs e)
     {
-      StateChanged?.Invoke(this, hidEvent);
+      StateChanged?.Invoke(this, e);
     }
 
     #region Message handling
+
     protected void SubscribeToMessages()
     {
-      _messageQueue = new AsynchronousMessageQueue(this, new[] { InputDeviceMessaging.CHANNEL });
-      _messageQueue.MessageReceived += OnMessageReceived;
-      _messageQueue.Start();
+      _messageQueue = new SynchronousMessageQueue(this, new[] { HidMessaging.PREVIEW_CHANNEL });
+      _messageQueue.MessagesAvailable += OnMessageReceived;
+      _messageQueue.RegisterAtAllMessageChannels();
+    }
+
+    private void OnMessageReceived(SynchronousMessageQueue queue)
+    {
+      SystemMessage message;
+      while ((message = queue.Dequeue()) != null)
+      {
+        if (message.ChannelName == HidMessaging.PREVIEW_CHANNEL)
+        {
+          HidMessaging.MessageType messageType = (HidMessaging.MessageType)message.MessageType;
+          switch (messageType)
+          {
+            case HidMessaging.MessageType.HidEvent:
+              Event hidEvent = message.MessageData[HidMessaging.EVENT] as Event;
+              if (hidEvent != null)
+                message.MessageData[HidMessaging.HANDLED] = OnHidEvent(hidEvent);
+              break;
+          }
+        }
+      }
     }
 
     protected virtual void UnsubscribeFromMessages()
     {
       if (_messageQueue == null)
         return;
-      _messageQueue.Shutdown();
+      _messageQueue.Dispose();
       _messageQueue = null;
     }
 
-    void OnMessageReceived(AsynchronousMessageQueue queue, SystemMessage message)
-    {
-      if (message.ChannelName == InputDeviceMessaging.CHANNEL)
-      {
-        InputDeviceMessaging.MessageType messageType = (InputDeviceMessaging.MessageType)message.MessageType;
-        switch (messageType)
-        {
-          case InputDeviceMessaging.MessageType.HidBroadcast:
-            Event hidEvent = message.MessageData[InputDeviceMessaging.HID_EVENT] as Event;
-            if (hidEvent != null)
-              OnHidEvent(hidEvent);
-            break;
-        }
-      }
-    }
     #endregion
 
     public void Init()
@@ -62,10 +79,10 @@ namespace Emulators.LibRetro.Controllers.Hid
       SubscribeToMessages();
     }
 
-    void OnHidEvent(Event hidEvent)
+    bool OnHidEvent(Event hidEvent)
     {
-      if (!hidEvent.Device.IsGamePad && !hidEvent.IsKeyboard)
-        return;
+      if (!hidEvent.Device?.IsGamePad == true && !hidEvent.IsKeyboard)
+        return false;
 
 #if DEBUG
       if (hidEvent.IsRepeat)
@@ -73,8 +90,17 @@ namespace Emulators.LibRetro.Controllers.Hid
         Logger.Debug("HID: Repeat");
       }
 #endif
-      
-      OnStateChanged(hidEvent);
+
+      StateChangedEventArgs e = new StateChangedEventArgs(hidEvent);
+      try
+      {
+        OnStateChanged(e);
+      }
+      catch (Exception ex)
+      {
+        Logger.Error($"{nameof(HidListener)}: Exception handling Hid event", ex);
+      }
+      return e.Handled;
     }
 
     public void Dispose()

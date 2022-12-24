@@ -21,7 +21,11 @@ namespace Emulators.LibRetro.Controllers.Hid
     protected Dictionary<RetroAnalogDevice, HidAxis> _analogToAnalogMappings;
     protected Dictionary<RetroAnalogDevice, ushort> _buttonToAnalogMappings;
     protected Dictionary<RetroAnalogDevice, DirectionPadState> _directionPadToAnalogMappings;
-    
+
+    protected HashSet<ushort> _mappedHidButtons;
+    protected HashSet<ushort> _mappedHidAxis;
+    protected HashSet<DirectionPadState> _mappedHidDirectionPadStates;
+
     public Guid DeviceId
     {
       get { return DEVICE_ID; }
@@ -47,11 +51,15 @@ namespace Emulators.LibRetro.Controllers.Hid
       _analogToAnalogMappings = new Dictionary<RetroAnalogDevice, HidAxis>();
       _buttonToAnalogMappings = new Dictionary<RetroAnalogDevice, ushort>();
       _directionPadToAnalogMappings = new Dictionary<RetroAnalogDevice, DirectionPadState>();
+
+      _mappedHidButtons = new HashSet<ushort>();
+      _mappedHidAxis = new HashSet<ushort>();
+      _mappedHidDirectionPadStates = new HashSet<DirectionPadState>();
     }
 
     public IDeviceMapper CreateMapper()
     {
-      return new HidGameControlMapper(_vendorId, _productId, _mp2DeviceId);
+      return new HidGameControlMapper(_vendorId, _productId);
     }
 
     public void Map(RetroPadMapping mapping)
@@ -65,18 +73,24 @@ namespace Emulators.LibRetro.Controllers.Hid
         DeviceInput deviceInput = kvp.Value;
         if (deviceInput.InputType == InputType.Button)
         {
-          ushort button;
-          DirectionPadState directionPadState;
-          if (ushort.TryParse(deviceInput.Id, out button))
+          if (ushort.TryParse(deviceInput.Id, out ushort button))
+          {
             _buttonToButtonMappings.Add(kvp.Key, button);
-          else if (Enum.TryParse(deviceInput.Id, out directionPadState))
+            _mappedHidButtons.Add(button);
+          }
+          else if (Enum.TryParse(deviceInput.Id, out DirectionPadState directionPadState))
+          {
             _directionPadToButtonMappings.Add(kvp.Key, directionPadState);
+            _mappedHidDirectionPadStates.Add(directionPadState);
+          }
         }
         else if (deviceInput.InputType == InputType.Axis)
         {
-          ushort axis;
-          if (ushort.TryParse(deviceInput.Id, out axis))
+          if (ushort.TryParse(deviceInput.Id, out ushort axis))
+          {
             _analogToButtonMappings.Add(kvp.Key, new HidAxis(axis, deviceInput.PositiveValues));
+            _mappedHidAxis.Add(axis);
+          }
         }
       }
 
@@ -85,18 +99,24 @@ namespace Emulators.LibRetro.Controllers.Hid
         DeviceInput deviceInput = kvp.Value;
         if (deviceInput.InputType == InputType.Button)
         {
-          ushort button;
-          DirectionPadState directionPadState;
-          if (ushort.TryParse(deviceInput.Id, out button))
+          if (ushort.TryParse(deviceInput.Id, out ushort button))
+          {
             _buttonToAnalogMappings.Add(kvp.Key, button);
-          else if (Enum.TryParse(deviceInput.Id, out directionPadState))
+            _mappedHidButtons.Add(button);
+          }
+          else if (Enum.TryParse(deviceInput.Id, out DirectionPadState directionPadState))
+          {
             _directionPadToAnalogMappings.Add(kvp.Key, directionPadState);
+            _mappedHidDirectionPadStates.Add(directionPadState);
+          }
         }
         else if (deviceInput.InputType == InputType.Axis)
         {
-          ushort axis;
-          if (ushort.TryParse(deviceInput.Id, out axis))
+          if (ushort.TryParse(deviceInput.Id, out ushort axis))
+          {
             _analogToAnalogMappings.Add(kvp.Key, new HidAxis(axis, deviceInput.PositiveValues));
+            _mappedHidAxis.Add(axis);
+          }
         }
       }
     }
@@ -109,12 +129,31 @@ namespace Emulators.LibRetro.Controllers.Hid
       _analogToAnalogMappings.Clear();
       _buttonToAnalogMappings.Clear();
       _directionPadToAnalogMappings.Clear();
-      _knownMP2KeyCodes.Clear();
+
+      _mappedHidButtons.Clear();
+      _mappedHidAxis.Clear();
+      _mappedHidDirectionPadStates.Clear();
     }
 
-    protected override void HandleEvent(Event hidEvent)
+    protected override bool HandleEvent(Event hidEvent)
     {
-      _currentState = HidUtils.GetGamepadState(hidEvent);
+      HidState state = HidUtils.GetGamepadState(hidEvent);
+      _currentState = state;
+      return IsAnyMappedInputPressed(state);
+    }
+
+    protected bool IsAnyMappedInputPressed(HidState state)
+    {
+      if (state.Buttons.Any(b => _mappedHidButtons.Contains(b)))
+        return true;
+
+      if (_mappedHidDirectionPadStates.Contains(state.DirectionPadState))
+          return true;
+
+      if (state.AxisStates.Values.Any(a => (a.Value > _axisDeadZone || a.Value < -_axisDeadZone) && _mappedHidAxis.Contains(a.Index)))
+        return true;
+
+      return false;
     }
 
     public bool IsButtonPressed(uint port, RETRO_DEVICE_ID_JOYPAD button)
@@ -123,16 +162,13 @@ namespace Emulators.LibRetro.Controllers.Hid
       if (state == null)
         return false;
 
-      ushort hidButton;
-      if (_buttonToButtonMappings.TryGetValue(button, out hidButton))
+      if (_buttonToButtonMappings.TryGetValue(button, out ushort hidButton))
         return IsButtonPressed(hidButton, state);
 
-      DirectionPadState directionPadState;
-      if (_directionPadToButtonMappings.TryGetValue(button, out directionPadState))
+      if (_directionPadToButtonMappings.TryGetValue(button, out DirectionPadState directionPadState))
         return IsDirectionPadPressed(directionPadState, state);
 
-      HidAxis axis;
-      if (_analogToButtonMappings.TryGetValue(button, out axis))
+      if (_analogToButtonMappings.TryGetValue(button, out HidAxis axis))
         return IsAxisPressed(axis, state, _axisDeadZone);
 
       return false;
@@ -174,20 +210,6 @@ namespace Emulators.LibRetro.Controllers.Hid
       return 0;
     }
 
-    protected override bool IsKeyCodeMappedOverride(long keyCode)
-    {
-      if (keyCode >= 0)
-      {
-        ushort button = (ushort)(keyCode % 1000);
-        return _buttonToButtonMappings.Values.Contains(button) || _buttonToAnalogMappings.Values.Contains(button);
-      }
-      else
-      {
-        int directionPad = -(int)keyCode;
-        return _directionPadToButtonMappings.Any(kvp => (int)kvp.Value == directionPad) || _directionPadToAnalogMappings.Any(kvp => (int)kvp.Value == directionPad);
-      }
-    }
-
     public static bool IsButtonPressed(ushort button, HidState state)
     {
       return state.Buttons.Contains(button);
@@ -200,8 +222,7 @@ namespace Emulators.LibRetro.Controllers.Hid
 
     public static bool IsAxisPressed(HidAxis axis, HidState state, short deadZone)
     {
-      HidAxisState axisState;
-      if (!state.AxisStates.TryGetValue(axis.Axis, out axisState))
+      if (!state.AxisStates.TryGetValue(axis.Axis, out HidAxisState axisState))
         return false;
       short value = NumericUtils.UIntToShort(axisState.Value);
       return axis.PositiveValues ? value > deadZone : value < -deadZone;
@@ -209,8 +230,7 @@ namespace Emulators.LibRetro.Controllers.Hid
 
     public static short GetAxisPosition(HidAxis axis, HidState state)
     {
-      HidAxisState axisState;
-      if (!state.AxisStates.TryGetValue(axis.Axis, out axisState))
+      if (!state.AxisStates.TryGetValue(axis.Axis, out HidAxisState axisState))
         return 0;
       return NumericUtils.UIntToShort(axisState.Value);
     }

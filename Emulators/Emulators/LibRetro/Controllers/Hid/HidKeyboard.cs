@@ -4,7 +4,6 @@ using SharpRetro.Controller;
 using SharpRetro.LibRetro;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Emulators.LibRetro.Controllers.Hid
@@ -17,12 +16,16 @@ namespace Emulators.LibRetro.Controllers.Hid
     protected Dictionary<RETRO_DEVICE_ID_JOYPAD, Keys> _buttonMappings;
     protected Dictionary<RetroAnalogDevice, Keys> _analogMappings;
 
+    protected HashSet<Keys> _mappedKeys;
+
     public HidKeyboard()
       : base(0, 0, "Keyboard")
     {
       _pressedkeys = new HashSet<Keys>();
       _buttonMappings = new Dictionary<RETRO_DEVICE_ID_JOYPAD, Keys>();
       _analogMappings = new Dictionary<RetroAnalogDevice, Keys>();
+
+      _mappedKeys = new HashSet<Keys>();
     }
 
     public Guid DeviceId
@@ -42,25 +45,40 @@ namespace Emulators.LibRetro.Controllers.Hid
 
     public void Map(RetroPadMapping mapping)
     {
+      ClearMappings();
+      if (mapping == null)
+        return;
+
       foreach (var kvp in mapping.ButtonMappings)
       {
-        Keys key;
-        if (Enum.TryParse(kvp.Value.Id, out key))
+        if (Enum.TryParse(kvp.Value.Id, out Keys key))
+        {
           _buttonMappings[kvp.Key] = key;
+          _mappedKeys.Add(key);
+        }
       }
 
       foreach (var kvp in mapping.AnalogMappings)
       {
-        Keys key;
-        if (Enum.TryParse(kvp.Value.Id, out key))
+        if (Enum.TryParse(kvp.Value.Id, out Keys key))
+        {
           _analogMappings[kvp.Key] = key;
+          _mappedKeys.Add(key);
+        }
       }
+    }
+
+    protected void ClearMappings()
+    {
+      _buttonMappings.Clear();
+      _analogMappings.Clear();
+
+      _mappedKeys.Clear();
     }
 
     public bool IsButtonPressed(uint port, RETRO_DEVICE_ID_JOYPAD button)
     {
-      Keys key;
-      return _buttonMappings.TryGetValue(button, out key) && _pressedkeys.Contains(key);
+      return _buttonMappings.TryGetValue(button, out Keys key) && _pressedkeys.Contains(key);
     }
 
     public short GetAnalog(uint port, RETRO_DEVICE_INDEX_ANALOG index, RETRO_DEVICE_ID_ANALOG direction)
@@ -89,27 +107,20 @@ namespace Emulators.LibRetro.Controllers.Hid
     {
       if (!hidEvent.IsKeyboard)
         return false;
-      HandleEvent(hidEvent);
-      return true;
+      return HandleEvent(hidEvent);
     }
 
-    protected override void HandleEvent(Event hidEvent)
+    protected override bool HandleEvent(Event hidEvent)
     {
-      if (hidEvent.VirtualKey <= 0)
-        return;
+      Keys key = hidEvent.VirtualKey;
+      if (key <= 0 || !_mappedKeys.Contains(key))
+        return false;
 
       if (hidEvent.IsButtonDown)
-        _pressedkeys.Add(hidEvent.VirtualKey);
+        _pressedkeys.Add(key);
       else
-        _pressedkeys.Remove(hidEvent.VirtualKey);
-    }
-
-    protected override bool IsKeyCodeMappedOverride(long keyCode)
-    {
-      if (keyCode < 1 || keyCode > 1000 || !Enum.IsDefined(typeof(Keys), (int)keyCode))
-        return false;
-      Keys key = (Keys)keyCode;
-      return _buttonMappings.Any(kvp => kvp.Value == key) || _analogMappings.Any(kvp => kvp.Value == key);
+        _pressedkeys.Remove(key);
+      return true;
     }
   }
 }

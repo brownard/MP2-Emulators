@@ -1,7 +1,4 @@
 ﻿using Emulators.LibRetro.Controllers.Mapping;
-using MediaPortal.Plugins.InputDeviceManager;
-using SharpLib.Hid;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Emulators.LibRetro.Controllers.Hid
@@ -28,20 +25,20 @@ namespace Emulators.LibRetro.Controllers.Hid
       return new DeviceInput(_pressedkey.ToString(), _pressedkey.ToString(), InputType.Button);
     }
 
-    protected override void HidListener_StateChanged(object sender, Event e)
+    protected override void HidListener_StateChanged(object sender, StateChangedEventArgs e)
     {
-      if (!e.IsKeyboard || e.VirtualKey <= 0)
+      if (!e.HidEvent.IsKeyboard)
         return;
-      if (e.IsButtonDown)
-        _pressedkey = e.VirtualKey;
-      else if (e.VirtualKey == _pressedkey)
-        _pressedkey = null;
-    }
 
-    protected override void ExternalKeyHandler(object sender, KeyPressHandlerEventArgs e)
-    {
-      if (e.PressedKeys.Any(kvp => kvp.Value > 0 && kvp.Value < 1000))
-        e.Handled = true;
+      Keys key = e.HidEvent.VirtualKey;
+      if (key <= 0)
+        return;
+
+      if (e.HidEvent.IsButtonDown)
+        _pressedkey = key;
+      else if (key == _pressedkey)
+        _pressedkey = null;
+      e.Handled = true;
     }
   }
 }

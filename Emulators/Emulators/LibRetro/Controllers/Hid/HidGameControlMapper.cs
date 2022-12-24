@@ -1,5 +1,4 @@
 ﻿using Emulators.LibRetro.Controllers.Mapping;
-using MediaPortal.Plugins.InputDeviceManager;
 using SharpLib.Hid;
 using System.Linq;
 
@@ -9,14 +8,12 @@ namespace Emulators.LibRetro.Controllers.Hid
   {
     protected ushort _vendorId;
     protected ushort _productId;
-    protected string _mp2DeviceId;
     protected HidState _currentState;
 
-    public HidGameControlMapper(ushort vendorId, ushort productId, string mp2DeviceId)
+    public HidGameControlMapper(ushort vendorId, ushort productId)
     {
       _vendorId = vendorId;
       _productId = productId;
-      _mp2DeviceId = mp2DeviceId;
     }
 
     public override bool SupportsDeadZone
@@ -24,16 +21,10 @@ namespace Emulators.LibRetro.Controllers.Hid
       get { return true; }
     }
 
-    protected override void HidListener_StateChanged(object sender, Event hidEvent)
+    public override void EndMapping()
     {
-      if ((hidEvent.Device?.VendorId ?? 0) == _vendorId && (hidEvent.Device?.ProductId ?? 0) == _productId)
-        _currentState = HidUtils.GetGamepadState(hidEvent);
-    }
-
-    protected override void ExternalKeyHandler(object sender, KeyPressHandlerEventArgs e)
-    {
-      if (_mp2DeviceId == e.DeviceId)
-        e.Handled = true;
+      base.EndMapping();
+      _currentState = null;
     }
 
     public override DeviceInput GetPressedInput()
@@ -65,6 +56,15 @@ namespace Emulators.LibRetro.Controllers.Hid
       }
 
       return null;
+    }
+
+    protected override void HidListener_StateChanged(object sender, StateChangedEventArgs e)
+    {
+      if ((e.HidEvent.Device?.VendorId ?? 0) == _vendorId && (e.HidEvent.Device?.ProductId ?? 0) == _productId)
+      {
+        _currentState = HidUtils.GetGamepadState(e.HidEvent);
+        e.Handled = true;
+      }
     }
 
     protected bool IsDirectionPadStateValid(DirectionPadState directionPadState)
