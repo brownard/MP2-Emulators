@@ -1,14 +1,10 @@
 ﻿using Emulators.LibRetro.Controllers.Hid;
 using Emulators.LibRetro.Controllers.Mapping;
 using Emulators.LibRetro.Controllers.XInput;
-using MediaPortal.Common;
-using MediaPortal.Plugins.InputDeviceManager;
-using SharpLib.Hid;
 using SharpRetro.Controller;
 using SharpRetro.LibRetro;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Emulators.LibRetro.Controllers
 {
@@ -87,42 +83,23 @@ namespace Emulators.LibRetro.Controllers
 
     public void Start()
     {
-      ServiceRegistration.Get<IInputDeviceManager>().KeyPressed += ExternalKeyHandler;
-      if (_hidDevices.Count > 0)
-      {
         _hidListener = new HidListener();
         _hidListener.StateChanged += HidListener_StateChanged;
         _hidListener.Init();
-      }
     }
 
-    private void ExternalKeyHandler(object sender, KeyPressHandlerEventArgs e)
-    {
-      IHidDevice hidDevice = _hidDevices.FirstOrDefault(d => d.Mp2DeviceId == e.DeviceId);
-
-      // If no device has the same id, check if the event contains
-      // keyboard key presses and see if we have a keyboard device.
-      if (hidDevice == null && e.PressedKeys.Any(kvp => kvp.Value > 0 && kvp.Value < 1000))
-        hidDevice = _hidDevices.FirstOrDefault(d => d is IKeyboard);
-
-      // For HID devices we can check if the HID key handler was invoked for our device and a mapped key.
-      if (hidDevice != null)
-      {
-        if (e.PressedKeys.Any(kvp => hidDevice.IskeyCodeMapped(kvp.Value)))
-          e.Handled = true;
-        return;
-      }
-
-      // For XInput devices the best we can do is check whether the key handler was invoked for any XInput device.
-      if (_xInputDevices.Count > 0 && HidUtils.IsXInputDevice(e.DeviceName))
-        e.Handled = true;
-    }
-
-    private void HidListener_StateChanged(object sender, Event hidEvent)
+    private void HidListener_StateChanged(object sender, StateChangedEventArgs e)
     {
       foreach (IHidDevice device in _hidDevices)
-        if (device.UpdateState(hidEvent))
+        if (device.UpdateState(e.HidEvent))
+        {
+          e.Handled = true;
           return;
+        }
+
+      // No Hid devices handled the event. see if the device is an XInput device and mark it as handled if any XInput devices are in use.
+      if (_xInputDevices.Count > 0 && HidUtils.IsXInputDevice(e.HidEvent.Device?.Name))
+        e.Handled = true;
     }
 
     public bool IsButtonPressed(uint port, RETRO_DEVICE_ID_JOYPAD button)
@@ -142,7 +119,6 @@ namespace Emulators.LibRetro.Controllers
 
     public void Dispose()
     {
-      ServiceRegistration.Get<IInputDeviceManager>().KeyPressed -= ExternalKeyHandler;
       if (_hidListener != null)
       {
         _hidListener.Dispose();
