@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Include
+    xmlns="www.team-mediaportal.com/2008/mpf/directx"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Source="screens\master_dialog_bare.xaml"
+    >
+  <Include.Resources>
+
+    <!-- Mapping model -->
+    <Model x:Key="Model" Id="FD908F54-B37E-408F-9D53-EB72A2912617"/>
+
+    <!-- Header -->
+    <ResourceWrapper x:Key="Dialog_Header_Text" Resource="[Emulators.LibRetro.PressInput]"/>
+
+    <ControlTemplate x:Key="Contents_Template">
+      <DockPanel HorizontalAlignment="Stretch" DataContext="{Binding Source={StaticResource Model}}">
+        <Label DockPanel.Dock="Top" HorizontalAlignment="Center" Color="{ThemeResource TextColor}" Margin="0,15,0,0"
+               Content="[InputDevices.Dialog.SelectDevice.Help]" Wrap="True"/>
+        <Image DockPanel.Dock="Center" Source="press.png" Height="200" Stretch="Uniform" Margin="0,30,0,30"/>
+      </DockPanel>
+    </ControlTemplate>
+    
+  </Include.Resources>
+</Include>

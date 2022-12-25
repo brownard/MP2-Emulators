@@ -47,6 +47,7 @@
                   </Setter.Value>
                 </Setter>
                 <Setter Property="StackPanel.ZIndex" Value="100.0"/>
+                <Setter TargetName="ItemLabel" Property="Margin" Value="10,0,10,0"/>
               </Trigger>
             </CheckBox.Triggers>
           </CheckBox>
@@ -74,6 +75,7 @@
                   </Setter.Value>
                 </Setter>
                 <Setter Property="StackPanel.ZIndex" Value="100.0"/>
+                <Setter TargetName="ItemLabel" Property="Margin" Value="10,0,10,0"/>
               </Trigger>
             </RadioButton.Triggers>
           </RadioButton>
@@ -91,8 +93,8 @@
         <ColumnDefinition Width="*"/>
       </Grid.ColumnDefinitions>
       <Label x:Name="ItemLabel" Content="{Binding [Name]}" FontSize="{ThemeResource SmallFontSize}"
-          HorizontalAlignment="Left" VerticalAlignment="Center"
-          Color="{ThemeResource TextColor}"/>
+             HorizontalAlignment="Left" VerticalAlignment="Center"
+             Color="{ThemeResource TextColor}"/>
     </Grid>
   </DataTemplate>
   
@@ -108,14 +110,14 @@
         <ColumnDefinition Width="300"/>
       </Grid.ColumnDefinitions>
       <Label x:Name="ItemLabel" Grid.Column="0" Content="{Binding [Name]}" FontSize="{ThemeResource SmallFontSize}"
-          HorizontalAlignment="Left" VerticalAlignment="Center"
-          Color="{ThemeResource TextColor}"/>
+             HorizontalAlignment="Left" VerticalAlignment="Center"
+             Color="{ThemeResource TextColor}"/>
       <Label x:Name="ItemLabel2" Grid.Column="1" Content="{Binding [Path]}" FontSize="{ThemeResource SmallFontSize}"
-          HorizontalAlignment="Left" VerticalAlignment="Center"
-          Color="{ThemeResource HintTextColor}"/>
+             HorizontalAlignment="Left" VerticalAlignment="Center"
+             Color="{ThemeResource HintTextColor}"/>
       <Label x:Name="ItemLabel3" Grid.Column="2" Content="{Binding [Platforms]}" FontSize="{ThemeResource SmallFontSize}"
-          HorizontalAlignment="Right" VerticalAlignment="Center"
-          Color="{ThemeResource HintTextColor}"/>
+             HorizontalAlignment="Right" VerticalAlignment="Center"
+             Color="{ThemeResource HintTextColor}"/>
     </Grid>
   </DataTemplate>
 
@@ -131,11 +133,11 @@
         <ColumnDefinition Width="*"/>
       </Grid.ColumnDefinitions>
       <Label x:Name="ItemLabel" Grid.Column="0" Content="{Binding [Name]}" FontSize="{ThemeResource SmallFontSize}"
-          HorizontalAlignment="Left" VerticalAlignment="Center"
-          Color="{ThemeResource TextColor}"/>
+             HorizontalAlignment="Left" VerticalAlignment="Center"
+             Color="{ThemeResource TextColor}"/>
       <Label x:Name="ItemLabel2" Grid.Column="2" Content="{Binding [OptionValue]}" FontSize="{ThemeResource SmallFontSize}"
-          HorizontalAlignment="Right" VerticalAlignment="Center"
-          Color="{ThemeResource HintTextColor}"/>
+             HorizontalAlignment="Right" VerticalAlignment="Center"
+             Color="{ThemeResource HintTextColor}"/>
     </Grid>
   </DataTemplate>
 
@@ -151,11 +153,11 @@
         <ColumnDefinition Width="*"/>
       </Grid.ColumnDefinitions>
       <Label x:Name="ItemLabel" Grid.Column="0" Content="{Binding [Name]}" FontSize="{ThemeResource SmallFontSize}"
-          HorizontalAlignment="Left" VerticalAlignment="Center"
-          Color="{ThemeResource TextColor}"/>
+             HorizontalAlignment="Left" VerticalAlignment="Center"
+             Color="{ThemeResource TextColor}"/>
       <Label x:Name="ItemLabel2" Grid.Column="2" Content="{Binding [MappedDevice]}" FontSize="{ThemeResource SmallFontSize}"
-          HorizontalAlignment="Right" VerticalAlignment="Center"
-          Color="{ThemeResource HintTextColor}"/>
+             HorizontalAlignment="Right" VerticalAlignment="Center"
+             Color="{ThemeResource HintTextColor}"/>
     </Grid>
   </DataTemplate>
 
@@ -171,11 +173,11 @@
         <ColumnDefinition Width="*"/>
       </Grid.ColumnDefinitions>
       <Label x:Name="ItemLabel" Grid.Column="0" Content="{Binding [Name]}" FontSize="{ThemeResource SmallFontSize}"
-          HorizontalAlignment="Left" VerticalAlignment="Center"
-          Color="{ThemeResource TextColor}"/>
+             HorizontalAlignment="Left" VerticalAlignment="Center"
+             Color="{ThemeResource TextColor}"/>
       <Label x:Name="ItemLabel2" Grid.Column="2" Content="{Binding [MappedInput]}" FontSize="{ThemeResource SmallFontSize}"
-          HorizontalAlignment="Right" VerticalAlignment="Center"
-          Color="{ThemeResource HintTextColor}"/>
+             HorizontalAlignment="Right" VerticalAlignment="Center"
+             Color="{ThemeResource HintTextColor}"/>
     </Grid>
   </DataTemplate>
 
@@ -191,7 +193,7 @@
         <ColumnDefinition Width="*"/>
       </Grid.ColumnDefinitions>
       <Label x:Name="ItemLabel" Content="{Binding [Name]}" FontSize="{ThemeResource SmallFontSize}"
-          HorizontalAlignment="Left" VerticalAlignment="Center">
+             HorizontalAlignment="Left" VerticalAlignment="Center">
         <Label.Color>
           <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0} ? {1} : {2}">
             <Binding Path="Downloaded"/>
@@ -201,8 +203,8 @@
         </Label.Color>
       </Label>
       <Label x:Name="ItemLabel2" Grid.Column="2" Content="{Binding [CoreName]}" FontSize="{ThemeResource SmallFontSize}"
-          HorizontalAlignment="Right" VerticalAlignment="Center"
-          Color="{ThemeResource HintTextColor}"/>
+             HorizontalAlignment="Right" VerticalAlignment="Center"
+             Color="{ThemeResource HintTextColor}"/>
     </Grid>
   </DataTemplate>
 
@@ -219,13 +221,13 @@
               <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <ScrollViewer CanContentScroll="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                IsVisible="{Binding RelativeSource={RelativeSource TemplatedParent},Path=!IsEmpty}"
-                Background="{ThemeResource ItemsControlShadowBackgroundColor}">
+                          IsVisible="{Binding RelativeSource={RelativeSource TemplatedParent},Path=!IsEmpty}"
+                          Background="{ThemeResource ItemsControlShadowBackgroundColor}">
               <ItemsPresenter VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
             </ScrollViewer>
             <Label Content="{DynamicResource ResourceKey=Empty_List_Label}" IsVisible="{Binding RelativeSource={RelativeSource TemplatedParent},Path=IsEmpty}"
-                HorizontalAlignment="Center" VerticalAlignment="Center"
-                Color="{ThemeResource HintTextColor}" FontSize="{ThemeResource SmallFontSize}"/>
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Color="{ThemeResource HintTextColor}" FontSize="{ThemeResource SmallFontSize}"/>
           </Grid>
         </ControlTemplate>
       </Setter.Value>

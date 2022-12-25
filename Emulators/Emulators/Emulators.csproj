@@ -273,6 +273,8 @@
     <Content Include="Skin\default\workflow\Emulators-actions.xml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Skin\Nereus\images\Gamepad_button.png" />
+    <Content Include="Skin\Nereus\images\SettingsMenu\Plugins_Emulators_LibRetro_LibRetroMapping.jpg" />
     <Content Include="Skin\Nereus\screens\MediaItemCoverGameDetails.inc" />
     <Content Include="Skin\Nereus\screens\MediaItemGameDetails.inc">
       <SubType>Designer</SubType>

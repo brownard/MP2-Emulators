@@ -31,9 +31,9 @@
                  FontSize="{ThemeResource SmallFontSize}" Color="{ThemeResource TextColor}"/>
         </StackPanel>
 
-        <Border Grid.Row="1" Margin="0,-10,10,0" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Background="White" BorderThickness="0" Height="4"/>
+        <Border Grid.Row="1" Margin="0,-10,0,0" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Background="White" BorderThickness="0" Height="4"/>
 
-        <ListView Name="DeviceList" Margin="0,20,0,0" Grid.Row="12" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        <ListView Name="DeviceList" Margin="0,20,0,0" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                   Style="{ThemeResource emuLibRetroPlayerPortListViewStyle}"
                   ItemsSource="{Binding Path=Ports,Mode=OneTime}">
         </ListView>
