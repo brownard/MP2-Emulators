@@ -241,9 +241,11 @@
                           Background="{ThemeResource ItemsControlShadowBackgroundColor}">
               <ItemsPresenter VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
             </ScrollViewer>
-            <Label Content="{DynamicResource ResourceKey=Empty_List_Label}" IsVisible="{Binding RelativeSource={RelativeSource TemplatedParent},Path=IsEmpty}"
-                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                   Color="{ThemeResource HintTextColor}" FontSize="{ThemeResource SmallFontSize}"/>
+            <StackPanel Orientation="Vertical" IsVisible="{Binding RelativeSource={RelativeSource TemplatedParent},Path=IsEmpty}"
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+              <Image Source="empty.png" Height="100" Stretch="Uniform" IsVisible="{Binding IsItemsEmpty}"/>
+              <Label Content="{DynamicResource ResourceKey=Empty_List_Label}" Color="{ThemeResource HintTextColor}"/>
+            </StackPanel>
           </Grid>
         </ControlTemplate>
       </Setter.Value>
