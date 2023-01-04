@@ -34,7 +34,7 @@
         <!--Number select-->
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1" Grid.Row="2">
           <TextBox x:Name="NumberSelectContent" Margin="10,0,10,0" PreferredTextLength="{Binding Source={StaticResource Model},Path=CurrentConfigController.DisplayLength}"
-                   Text="{Binding Source={StaticResource Model},Path=CurrentConfigController.Value,Mode=TwoWay}"
+                   Text="{Binding Source={StaticResource Model},Path=CurrentConfigController.Value,Mode=TwoWay}" Style="{ThemeResource SymbolTextBoxStyle}"
                    IsEnabled="{Binding Source={StaticResource Model},Path=CurrentConfigController.Yes}"
                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
           <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">

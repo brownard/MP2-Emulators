@@ -40,22 +40,7 @@
 
         <Border Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Background="White" BorderThickness="0" Height="4"/>
 
-        <Grid Grid.Row="3" Margin="0,10,0,0">
-          <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-          </Grid.RowDefinitions>
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-          </Grid.ColumnDefinitions>
-          <TextBox Text="{Binding Path=EmulatorProxy.Name,Mode=TwoWay}" PreferredTextLength="30"/>
-          <Image x:Name="editsymbol" Source="keyboard.png" VerticalAlignment="Center" HorizontalAlignment="Right" Opacity="0.5"
-                 Stretch="Uniform" Height="30" Margin="0,0,15,0"/>
-          <Grid.Triggers>
-            <Trigger Property="IsKeyboardFocusWithin" Value="True">
-              <Setter TargetName="editsymbol" Property="Opacity" Value="1"/>
-            </Trigger>
-          </Grid.Triggers>
-        </Grid>
+        <TextBox Grid.Row="3" Margin="0,10,0,0" Text="{Binding Path=EmulatorProxy.Name,Mode=TwoWay}" PreferredTextLength="30" Style="{ThemeResource SymbolTextBoxStyle}"/>
         
         <Grid Grid.Row="6" Margin="10,10,10,0">
           <Grid.RowDefinitions>
@@ -67,11 +52,11 @@
             <ColumnDefinition Width="*"/>
           </Grid.ColumnDefinitions>
           <Button x:Name="BackButton" Grid.Column="0" Style="{ThemeResource WizardButtonStyle}"
-              Content="[System.Back]"
-              Command="{Command Source={Service WorkflowManager},Path=NavigatePop,Parameters=1}"/>
+                  Content="[System.Back]"
+                  Command="{Command Source={Service WorkflowManager},Path=NavigatePop,Parameters=1}"/>
           <Button x:Name="ContinueButton" Grid.Column="2" Style="{ThemeResource WizardButtonStyle}"
-              Content="[System.Continue]" IsEnabled="{Binding EmulatorProxy.IsEmulatorNameValid}"
-              Command="{Command Source={Service WorkflowManager},Path=NavigatePush,Parameters={StaticResource ChooseEmulatorCategoryStateId}}"/>
+                  Content="[System.Continue]" IsEnabled="{Binding EmulatorProxy.IsEmulatorNameValid}"
+                  Command="{Command Source={Service WorkflowManager},Path=NavigatePush,Parameters={StaticResource ChooseEmulatorCategoryStateId}}"/>
         </Grid>
       </Grid>
     </ControlTemplate>
