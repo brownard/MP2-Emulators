@@ -1,21 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+<Project>
 
-  <PropertyGroup>
-    <PluginDestination>$(SolutionDir)MediaPortal-2\MediaPortal\Bin\MP2-Server\$(OutDir)Plugins\$(ProjectName)\</PluginDestination>
-  </PropertyGroup>
+  <Target Name="CopyFiles" AfterTargets="Build" Condition="'$(IsCrossTargetingBuild)' != 'true'">
 
-  <ItemGroup>
-    <PluginFiles Include="$(TargetDir)$(ProjectName).dll" />
-    <PluginFiles Include="$(ProjectDir)plugin.xml" />
-  </ItemGroup>
+    <PropertyGroup>
+      <PluginDestination>$(SolutionDir)MediaPortal-2\MediaPortal\Bin\MP2-Server\$(OutDir)Plugins\$(ProjectName)\</PluginDestination>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <References Include="$(TargetDir)Emulators.Common.dll" />
-    <References Include="$(TargetDir)SharpCompress.dll" />
-  </ItemGroup>
+    <ItemGroup>
+      <PluginFiles Include="$(TargetDir)$(ProjectName).dll" />
+      <PluginFiles Include="$(ProjectDir)plugin.xml" />
+    </ItemGroup>
 
-  <Target Name="AfterBuild">
+    <ItemGroup>
+      <References Include="$(TargetDir)Emulators.Common.dll" />
+      <References Include="$(TargetDir)SharpCompress.dll" />
+    </ItemGroup>
+
     <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(PluginDestination)" />
     <Copy SourceFiles="@(References)" DestinationFolder="$(PluginDestination)" />
   </Target>

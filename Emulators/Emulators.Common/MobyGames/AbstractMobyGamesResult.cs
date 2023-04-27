@@ -1,10 +1,5 @@
 ﻿using Emulators.Common.WebRequests;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web;
+using System.Net;
 
 namespace Emulators.Common.MobyGames
 {
@@ -14,7 +9,7 @@ namespace Emulators.Common.MobyGames
         
     protected string Decode(string input)
     {
-      return HttpUtility.HtmlDecode(input).Trim();
+      return WebUtility.HtmlDecode(input).Trim();
     }
   }
 }

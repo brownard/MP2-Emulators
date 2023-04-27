@@ -1,33 +1,20 @@
 ﻿using MediaPortal.Common;
 using MediaPortal.Common.Logging;
-using SharpRetro.LibRetro;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Emulators.LibRetro
 {
   public class LibRetroCoreInstanceManager : ILibRetroCoreInstanceManager
   {
-    SynchronizedCollection<string> _loadedCores = new SynchronizedCollection<string>();
+    const byte DUMMY = 0;
+    protected ConcurrentDictionary<string, byte> _loadedCores = new ConcurrentDictionary<string, byte>();
 
     public bool TrySetCoreLoading(string corePath)
     {
       if (corePath == null)
         return false;
 
-      bool loaded = false;
-      lock (_loadedCores.SyncRoot)
-      {
-        if (!_loadedCores.Contains(corePath))
-        {
-          _loadedCores.Add(corePath);
-          loaded = true;
-        }
-      }
+      bool loaded = _loadedCores.TryAdd(corePath, DUMMY);
       if (!loaded)
         ServiceRegistration.Get<ILogger>().Warn("LibRetroCoreInstanceManager: Attempt to load a core that was already loaded '{0}'", corePath);
       return loaded;
@@ -35,7 +22,7 @@ namespace Emulators.LibRetro
 
     public void SetCoreUnloaded(string corePath)
     {
-      _loadedCores.Remove(corePath);
+      _loadedCores.TryRemove(corePath, out _);
     }
   }
 }

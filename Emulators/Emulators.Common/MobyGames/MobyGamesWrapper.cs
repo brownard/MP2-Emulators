@@ -10,9 +10,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace Emulators.Common.MobyGames
 {
@@ -128,7 +128,7 @@ namespace Emulators.Common.MobyGames
       results = null;
       if (string.IsNullOrEmpty(searchTerm) || string.IsNullOrEmpty(platform))
         return false;
-      string query = string.Format(SEARCH_PATH, HttpUtility.UrlEncode(searchTerm), 9);
+      string query = string.Format(SEARCH_PATH, WebUtility.UrlEncode(searchTerm), 9);
       string url = string.Format("{0}/{1}", BASE_URL, query);
       MobyGamesSearchResults searchResults = _downloader.Download<MobyGamesSearchResults>(url);
       if (searchResults != null && searchResults.Results.Count > 0)
