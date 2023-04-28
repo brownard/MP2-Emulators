@@ -14,6 +14,8 @@ namespace Emulators.LibRetro.Cores
     //Fibers make .net fail hard!
     public static readonly string[] DEFAULT_UNSUPPORTED =
     {
+#if NET6_0_OR_GREATER
+#else
       "mupen64plus_libretro.dll",
       "bnes_libretro.dll",
       "bsnes_accuracy_libretro.dll",
@@ -31,6 +33,7 @@ namespace Emulators.LibRetro.Cores
       "mess2014_libretro.dll",
       "ume2014_libretro.dll",
       "gpsp_libretro.dll"
+#endif
     };
 
     public static readonly CustomCore[] DEFAULT_CUSTOM_CORES =
