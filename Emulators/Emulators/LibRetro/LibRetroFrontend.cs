@@ -389,8 +389,6 @@ namespace Emulators.LibRetro
 
     private void RetroThreadFinished(object sender, EventArgs e)
     {
-      _retroEmulator.Dispose();
-      _retroEmulator = null;
       if (_textureOutput != null)
       {
         _textureOutput.Dispose();
@@ -401,6 +399,8 @@ namespace Emulators.LibRetro
         _soundOutput.Dispose();
         _soundOutput = null;
       }
+      _retroEmulator.Dispose();
+      _retroEmulator = null;
       Logger.Debug("LibRetroFrontend: Libretro thread finished");
     }
 
