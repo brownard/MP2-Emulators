@@ -97,7 +97,7 @@ namespace Emulators.Models
       }
       finally
       {
-        _retro.Dispose();
+        _retro?.Dispose();
         _retro = null;
         ServiceRegistration.Get<ILibRetroCoreInstanceManager>().SetCoreUnloaded(_corePath);
       }
