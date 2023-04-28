@@ -728,7 +728,7 @@ namespace SharpRetro.LibRetro
 
   #region callback prototypes
   [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-  public unsafe delegate void retro_log_printf_t(RETRO_LOG_LEVEL level, string fmt, IntPtr a0, IntPtr a1, IntPtr a2, IntPtr a3, IntPtr a4, IntPtr a5, IntPtr a6, IntPtr a7, IntPtr a8, IntPtr a9, IntPtr a10, IntPtr a11, IntPtr a12, IntPtr a13, IntPtr a14, IntPtr a15);
+  public delegate void retro_log_printf_t(RETRO_LOG_LEVEL level, string fmt, IntPtr args);
   [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
   [return: MarshalAs(UnmanagedType.U1)]
   public delegate bool retro_environment_t(RETRO_ENVIRONMENT cmd, IntPtr data);
