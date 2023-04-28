@@ -198,12 +198,6 @@ namespace SharpRetro.LibRetro
     {
       _corePath = corePath;
       _core = new Core(corePath);
-      _core.SetEnvironment(RetroEnvironment);
-      _core.SetVideoRefresh(RetroVideoRefresh);
-      _core.SetAudioSample(RetroAudioSample);
-      _core.SetAudioSampleBatch(RetroAudioSampleBatch);
-      _core.SetInputPoll(RetroInputPoll);
-      _core.SetInputStateCallback(RetroInputState);
     }
     #endregion
 
@@ -217,6 +211,7 @@ namespace SharpRetro.LibRetro
       {
         InitInterfaces();
         InitPaths();
+        SetCoreCallbacks();
         _core.Init();
         UpdateSystemInfo();
       }
@@ -235,6 +230,16 @@ namespace SharpRetro.LibRetro
       //Mupen64 crashes if deinit is called when run hasn't been called
       if (!_firstRun)
         _core.Deinit();
+    }
+
+    protected void SetCoreCallbacks()
+    {
+      _core.SetEnvironment(RetroEnvironment);
+      _core.SetVideoRefresh(RetroVideoRefresh);
+      _core.SetAudioSample(RetroAudioSample);
+      _core.SetAudioSampleBatch(RetroAudioSampleBatch);
+      _core.SetInputPoll(RetroInputPoll);
+      _core.SetInputStateCallback(RetroInputState);
     }
 
     protected void InitInterfaces()
