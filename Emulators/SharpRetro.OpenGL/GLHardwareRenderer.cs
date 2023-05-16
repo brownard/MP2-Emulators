@@ -86,6 +86,8 @@ namespace SharpRetro.OpenGL
         return;
 
       CreateBuffers(_currentWidth, _currentHeight);
+      if (_sharedGlContext != null)
+        _sharedGlContext.MakeCurrent();
       OnContextReset();
     }
 
@@ -102,9 +104,12 @@ namespace SharpRetro.OpenGL
       // called and the dimensions are valid
       if (!_created || width < 1 || height < 1)
         return;
-      
+
+      _glContext.MakeCurrent();
       DestroyBuffers();
       CreateBuffers(width, height);
+      if(_sharedGlContext != null)
+        _sharedGlContext.MakeCurrent();
       OnContextReset();
     }
 
@@ -113,9 +118,12 @@ namespace SharpRetro.OpenGL
       if (!_created || _currentWidth < width || _currentHeight < height)
         return;
 
+      _glContext.MakeCurrent();
       _frontendContext.BeginRender(width, height);
       _renderStrategy.Render(width, height, _libretroContext.BottomLeftOrigin, _libretroContext.TextureBuffer.Id);
       _frontendContext.EndRender();
+      if(_sharedGlContext != null)
+        _sharedGlContext.MakeCurrent();
     }
 
     public void Destroy()
@@ -123,9 +131,12 @@ namespace SharpRetro.OpenGL
       if (_libretroContext == null)
         return;
       _created = false;
+      //OnContextDestroy();
       DestroyBuffers();
       _renderStrategy.Destroy();
-      OnContextDestroy();
+      _sharedGlContext?.Dispose();
+      _glContext.Dispose();
+      _deviceContext.Dispose();
     }
 
     public bool SetHWRender(ref retro_hw_render_callback hwRenderCallback)
