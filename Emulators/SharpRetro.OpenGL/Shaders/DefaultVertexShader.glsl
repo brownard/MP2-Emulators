@@ -9,5 +9,5 @@ varying vec2 vTexCoord;
 
 void main(){
 	vTexCoord = texCoords;
-	gl_Position = modelViewProjection * vec4(position.xyz, 1);
+	gl_Position = modelViewProjection * vec4(position.xy, 0.0, 1.0);
 }

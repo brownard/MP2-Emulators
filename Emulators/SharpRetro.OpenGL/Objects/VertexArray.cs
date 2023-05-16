@@ -1,15 +1,12 @@
 ﻿using OpenGL;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SharpRetro.OpenGL.Objects
 {
   public class VertexArray : GLObject
   {
     protected uint _vertexBuffer;
+    protected uint _indexBuffer;
 
     public uint VertexBuffer
     {
@@ -36,12 +33,17 @@ namespace SharpRetro.OpenGL.Objects
     /// <param name="texLocaton">The location of the texture vertex attribute.</param>
     /// <param name="texSize">The number of floats in each texture vertex.</param>
     /// <param name="buffer">Interleved buffer of position and texture vertices.</param>
-    public void SetInterleavedBuffer(uint positionLocation, int positionSize, uint texLocaton, int texSize, float[] buffer)
+    /// <param name="indices">Array of vertex indices..</param>
+    public void SetInterleavedBuffer(uint positionLocation, int positionSize, uint texLocaton, int texSize, float[] buffer, uint[] indices)
     {
+      Bind();
       // Store the raw vertices
       _vertexBuffer = Gl.GenBuffer();
       Gl.BindBuffer(BufferTarget.ArrayBuffer, _vertexBuffer);
       Gl.BufferData(BufferTarget.ArrayBuffer, (uint)(buffer.Length * sizeof(float)), buffer, BufferUsage.StaticDraw);
+      _indexBuffer = Gl.GenBuffer();
+      Gl.BindBuffer(BufferTarget.ElementArrayBuffer, _indexBuffer);
+      Gl.BufferData(BufferTarget.ElementArrayBuffer, (uint)(indices.Length * sizeof(uint)), indices, BufferUsage.StaticDraw);
 
       if (positionSize > 0)
       {
@@ -57,7 +59,9 @@ namespace SharpRetro.OpenGL.Objects
         Gl.EnableVertexAttribArray(texLocaton);
       }
 
+      Unbind();
       Gl.BindBuffer(BufferTarget.ArrayBuffer, 0);
+      Gl.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
     }
 
     protected override uint Generate()
