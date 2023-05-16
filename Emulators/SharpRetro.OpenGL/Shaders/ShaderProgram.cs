@@ -125,7 +125,7 @@ namespace SharpRetro.OpenGL.Shaders
     /// <param name="textureUnitIndex">The index of the texture unit that is bound to the texture to sample.</param>
     public void SetFragTexture(uint textureUnitIndex)
     {
-      Gl.Uniform1(_fragTexLocation, textureUnitIndex);
+      Gl.Uniform1(_fragTexLocation, (int)textureUnitIndex);
     }
 
     /// <summary>
