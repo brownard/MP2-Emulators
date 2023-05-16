@@ -294,104 +294,776 @@ namespace SharpRetro.LibRetro
 
   public enum RETRO_ENVIRONMENT
   {
+    /// <summary>
+    /// const unsigned * --<br/>
+    /// Sets screen rotation of graphics.<br/>
+    /// Valid values are 0, 1, 2, 3, which rotates screen by 0, 90, 180,<br/>
+    /// 270 degrees counter-clockwise respectively.<br/>
+    /// </summary>
     SET_ROTATION = 1,
+
+    /// <summary>
+    /// bool * --<br/>
+    /// NOTE: As of 2019 this callback is considered deprecated in favor of<br/>
+    /// using core options to manage overscan in a more nuanced, core-specific way.<br/>
+    /// </summary>
     GET_OVERSCAN = 2,
+
+    /// <summary>
+    /// bool * --<br/>
+    /// Boolean value whether or not frontend supports frame duping,<br/>
+    /// passing NULL to video frame callback.<br/>
+    /// </summary>
     GET_CAN_DUPE = 3,
+
+    /// <summary>
+    /// const struct retro_message * --<br/>
+    /// Sets a message to be displayed in implementation-specific manner<br/>
+    /// for a certain amount of 'frames'.<br/>
+    /// Should not be used for trivial messages, which should simply be<br/>
+    /// logged via RETRO_ENVIRONMENT_GET_LOG_INTERFACE (or as a<br/>
+    /// fallback, stderr).<br/>
+    /// </summary>
     SET_MESSAGE = 6,
+
+    /// <summary>
+    /// N<br/>
+    /// Requests the frontend to shutdown.<br/>
+    /// Should only be used if game has a specific<br/>
+    /// way to shutdown the game from a menu item or similar.<br/>
+    /// </summary>
     SHUTDOWN = 7,
+
+    /// <summary>
+    /// const unsigned * --<br/>
+    /// Gives a hint to the frontend how demanding this implementation<br/>
+    /// is on a system. E.g. reporting a level of 2 means<br/>
+    /// this implementation should run decently on all frontends<br/>
+    /// of level 2 and up.<br/>
+    /// </summary>
     SET_PERFORMANCE_LEVEL = 8,
+
+    /// <summary>
+    /// const char ** --<br/>
+    /// Returns the "system" directory of the frontend.<br/>
+    /// This directory can be used to store system specific<br/>
+    /// content such as BIOSes, configuration data, etc.<br/>
+    /// The returned value can be NULL.<br/>
+    /// If so, no such directory is defined,<br/>
+    /// and it's up to the implementation to find a suitable directory.<br/>
+    /// </summary>
     GET_SYSTEM_DIRECTORY = 9,
+
+    /// <summary>
+    /// const enum retro_pixel_format * --<br/>
+    /// Sets the internal pixel format used by the implementation.<br/>
+    /// The default pixel format is RETRO_PIXEL_FORMAT_0RGB1555.<br/>
+    /// This pixel format however, is deprecated (see enum retro_pixel_format).<br/>
+    /// If the call returns false, the frontend does not support this pixel<br/>
+    /// format.<br/>
+    /// </summary>
     SET_PIXEL_FORMAT = 10,
+
+    /// <summary>
+    /// const struct retro_input_descriptor * --<br/>
+    /// Sets an array of retro_input_descriptors.<br/>
+    /// It is up to the frontend to present this in a usable way.<br/>
+    /// The array is terminated by retro_input_descriptor::description<br/>
+    /// being set to NULL.<br/>
+    /// This function can be called at any time, but it is recommended<br/>
+    /// to call it as early as possible.<br/>
+    /// </summary>
     SET_INPUT_DESCRIPTORS = 11,
+
+    /// <summary>
+    /// const struct retro_keyboard_callback * --<br/>
+    /// Sets a callback function used to notify core about keyboard events.<br/>
+    /// </summary>
     SET_KEYBOARD_CALLBACK = 12,
+
+    /// <summary>
+    /// const struct retro_disk_control_callback * --<br/>
+    /// Sets an interface which frontend can use to eject and insert<br/>
+    /// disk images.<br/>
+    /// This is used for games which consist of multiple images and<br/>
+    /// must be manually swapped out by the user (e.g. PSX).<br/>
+    /// </summary>
     SET_DISK_CONTROL_INTERFACE = 13,
+
+    /// <summary>
+    /// struct retro_hw_render_callback * --<br/>
+    /// Sets an interface to let a libretro core render with<br/>
+    /// hardware acceleration.<br/>
+    /// Should be called in retro_load_game().<br/>
+    /// If successful, libretro cores will be able to render to a<br/>
+    /// frontend-provided framebuffer.<br/>
+    /// The size of this framebuffer will be at least as large as<br/>
+    /// max_width<br/>
+    /// If HW rendering is used, pass only RETRO_HW_FRAME_BUFFER_VALID or<br/>
+    /// NULL to retro_video_refresh_t.<br/>
+    /// </summary>
     SET_HW_RENDER = 14,
+
+    /// <summary>
+    /// struct retro_variable * --<br/>
+    /// Interface to acquire user-defined information from environment<br/>
+    /// that cannot feasibly be supported in a multi-system way.<br/>
+    /// 'key' should be set to a key which has already been set by<br/>
+    /// SET_VARIABLES.<br/>
+    /// 'data' will be set to a value or NULL.<br/>
+    /// </summary>
     GET_VARIABLE = 15,
+
+    /// <summary>
+    /// const struct retro_variable * --<br/>
+    /// Allows an implementation to signal the environment<br/>
+    /// which variables it might want to check for later using<br/>
+    /// GET_VARIABLE.<br/>
+    /// This allows the frontend to present these variables to<br/>
+    /// a user dynamically.<br/>
+    /// This should be called the first time as early as<br/>
+    /// possible (ideally in retro_set_environment).<br/>
+    /// Afterward it may be called again for the core to communicate<br/>
+    /// updated options to the frontend, but the number of core<br/>
+    /// options must not change from the number in the initial call.<br/>
+    /// </summary>
     SET_VARIABLES = 16,
+
+    /// <summary>
+    /// bool * --<br/>
+    /// Result is set to true if some variables are updated by<br/>
+    /// frontend since last call to RETRO_ENVIRONMENT_GET_VARIABLE.<br/>
+    /// Variables should be queried with GET_VARIABLE.<br/>
+    /// </summary>
     GET_VARIABLE_UPDATE = 17,
+
+    /// <summary>
+    /// const bool * --<br/>
+    /// If true, the libretro implementation supports calls to<br/>
+    /// retro_load_game() with NULL as argument.<br/>
+    /// Used by cores which can run without particular game data.<br/>
+    /// This should be called within retro_set_environment() only.<br/>
+    /// </summary>
     SET_SUPPORT_NO_GAME = 18,
+
+    /// <summary>
+    /// const char ** --<br/>
+    /// Retrieves the absolute path from where this libretro<br/>
+    /// implementation was loaded.<br/>
+    /// NULL is returned if the libretro was loaded statically<br/>
+    /// (i.e. linked statically to frontend), or if the path cannot be<br/>
+    /// determined.<br/>
+    /// Mostly useful in cooperation with SET_SUPPORT_NO_GAME as assets can<br/>
+    /// be loaded without ugly hacks.<br/>
+    /// </summary>
     GET_LIBRETRO_PATH = 19,
-    SET_AUDIO_CALLBACK = 22,
+
+    /// <summary>
+    /// const struct retro_frame_time_callback * --<br/>
+    /// Lets the core know how much time has passed since last<br/>
+    /// invocation of retro_run().<br/>
+    /// The frontend can tamper with the timing to fake fast-forward,<br/>
+    /// slow-motion, frame stepping, etc.<br/>
+    /// In this case the delta time will use the reference value<br/>
+    /// in frame_time_callback..<br/>
+    /// </summary>
     SET_FRAME_TIME_CALLBACK = 21,
+
+    /// <summary>
+    /// const struct retro_audio_callback * --<br/>
+    /// Sets an interface which is used to notify a libretro core about audio<br/>
+    /// being available for writing.<br/>
+    /// The callback can be called from any thread, so a core using this must<br/>
+    /// have a thread safe audio implementation.<br/>
+    /// It is intended for games where audio and video are completely<br/>
+    /// asynchronous and audio can be generated on the fly.<br/>
+    /// This interface is not recommended for use with emulators which have<br/>
+    /// highly synchronous audio.<br/>
+    /// </summary>
+    SET_AUDIO_CALLBACK = 22,
+
+    /// <summary>
+    /// struct retro_rumble_interface * --<br/>
+    /// Gets an interface which is used by a libretro core to set<br/>
+    /// state of rumble motors in controllers.<br/>
+    /// A strong and weak motor is supported, and they can be<br/>
+    /// controlled indepedently.<br/>
+    /// Should be called from either retro_init() or retro_load_game().<br/>
+    /// Should not be called from retro_set_environment().<br/>
+    /// Returns false if rumble functionality is unavailable.<br/>
+    /// </summary>
     GET_RUMBLE_INTERFACE = 23,
+
+    /// <summary>
+    /// uint64_t * --<br/>
+    /// Gets a bitmask telling which device type are expected to be<br/>
+    /// handled properly in a call to retro_input_state_t.<br/>
+    /// Devices which are not handled or recognized always return<br/>
+    /// 0 in retro_input_state_t.<br/>
+    /// Example bitmask: caps = (1 << RETRO_DEVICE_JOYPAD) | (1 << RETRO_DEVICE_ANALOG).<br/>
+    /// Should only be called in retro_run().<br/>
+    /// </summary>
     GET_INPUT_DEVICE_CAPABILITIES = 24,
-    //25,26 are experimental
+
+    /// <summary>
+    /// struct retro_sensor_interface * --<br/>
+    /// Gets access to the sensor interface.<br/>
+    /// The purpose of this interface is to allow<br/>
+    /// setting state related to sensors such as polling rate,<br/>
+    /// enabling<br/>
+    /// Reading sensor state is done via the normal<br/>
+    /// input_state_callback API.<br/>
+    /// </summary>
+    GET_SENSOR_INTERFACE = 25 | RETRO_ENVIRONMENT_EXPERIMENTAL,
+
+    /// <summary>
+    /// struct retro_camera_callback * --<br/>
+    /// Gets an interface to a video camera driver.<br/>
+    /// A libretro core can use this interface to get access to a<br/>
+    /// video camera.<br/>
+    /// New video frames are delivered in a callback in same<br/>
+    /// thread as retro_run().<br/>
+    /// </summary>
+    GET_CAMERA_INTERFACE = 26 | RETRO_ENVIRONMENT_EXPERIMENTAL,
+
+    /// <summary>
+    /// struct retro_log_callback * --<br/>
+    /// Gets an interface for logging. This is useful for<br/>
+    /// logging in a cross-platform way<br/>
+    /// as certain platforms cannot use stderr for logging.<br/>
+    /// It also allows the frontend to<br/>
+    /// show logging information in a more suitable way.<br/>
+    /// If this interface is not used, libretro cores should<br/>
+    /// log to stderr as desired.<br/>
+    /// </summary>
     GET_LOG_INTERFACE = 27,
+
+    /// <summary>
+    /// struct retro_perf_callback * --<br/>
+    /// Gets an interface for performance counters. This is useful<br/>
+    /// for performance logging in a cross-platform way and for detecting<br/>
+    /// architecture-specific features, such as SIMD support.<br/>
+    /// </summary>
     GET_PERF_INTERFACE = 28,
+
+    /// <summary>
+    /// struct retro_location_callback * --<br/>
+    /// Gets access to the location interface.<br/>
+    /// The purpose of this interface is to be able to retrieve<br/>
+    /// location-based information from the host device,<br/>
+    /// such as current latitude<br/>
+    /// </summary>
     GET_LOCATION_INTERFACE = 29,
+
+    /// <summary>
+    /// Old name, kept for compatibility. *<br/>
+    /// </summary>
+    GET_CONTENT_DIRECTORY = 30,
+
+    /// <summary>
+    /// const char ** --<br/>
+    /// Returns the "core assets" directory of the frontend.<br/>
+    /// This directory can be used to store specific assets that the<br/>
+    /// core relies upon, such as art assets,<br/>
+    /// input data, etc etc.<br/>
+    /// The returned value can be NULL.<br/>
+    /// If so, no such directory is defined,<br/>
+    /// and it's up to the implementation to find a suitable directory.<br/>
+    /// </summary>
     GET_CORE_ASSETS_DIRECTORY = 30,
+
+    /// <summary>
+    /// const char ** --<br/>
+    /// Returns the "save" directory of the frontend, unless there is no<br/>
+    /// save directory available. The save directory should be used to<br/>
+    /// store SRAM, memory cards, high scores, etc, if the libretro core<br/>
+    /// cannot use the regular memory interface (retro_get_memory_data()).<br/>
+    /// </summary>
     GET_SAVE_DIRECTORY = 31,
+
+    /// <summary>
+    /// const struct retro_system_av_info * --<br/>
+    /// Sets a new av_info structure. This can only be called from<br/>
+    /// within retro_run().<br/>
+    /// This should *only* be used if the core is completely altering the<br/>
+    /// internal resolutions, aspect ratios, timings, sampling rate, etc.<br/>
+    /// Calling this can require a full reinitialization of video<br/>
+    /// drivers in the frontend,<br/>
+    /// </summary>
     SET_SYSTEM_AV_INFO = 32,
+
+    /// <summary>
+    /// const struct retro_get_proc_address_interface * --<br/>
+    /// Allows a libretro core to announce support for the<br/>
+    /// get_proc_address() interface.<br/>
+    /// This interface allows for a standard way to extend libretro where<br/>
+    /// use of environment calls are too indirect,<br/>
+    /// e.g. for cases where the frontend wants to call directly into the core.<br/>
+    /// </summary>
     SET_PROC_ADDRESS_CALLBACK = 33,
+
+    /// <summary>
+    /// const struct retro_subsystem_info * --<br/>
+    /// This environment call introduces the concept of libretro "subsystems".<br/>
+    /// A subsystem is a variant of a libretro core which supports<br/>
+    /// different kinds of games.<br/>
+    /// The purpose of this is to support e.g. emulators which might<br/>
+    /// have special needs, e.g. Super Nintendo's Super GameBoy, Sufami Turbo.<br/>
+    /// It can also be used to pick among subsystems in an explicit way<br/>
+    /// if the libretro implementation is a multi-system emulator itself.<br/>
+    /// </summary>
     SET_SUBSYSTEM_INFO = 34,
+
+    /// <summary>
+    /// const struct retro_controller_info * --<br/>
+    /// This environment call lets a libretro core tell the frontend<br/>
+    /// which controller subclasses are recognized in calls to<br/>
+    /// retro_set_controller_port_device().<br/>
+    /// </summary>
     SET_CONTROLLER_INFO = 35,
+
+    /// <summary>
+    /// const struct retro_memory_map * --<br/>
+    /// This environment call lets a libretro core tell the frontend<br/>
+    /// about the memory maps this core emulates.<br/>
+    /// This can be used to implement, for example, cheats in a core-agnostic way.<br/>
+    /// </summary>
     SET_MEMORY_MAPS = 36 | RETRO_ENVIRONMENT_EXPERIMENTAL,
+
+    /// <summary>
+    /// const struct retro_game_geometry * --<br/>
+    /// This environment call is similar to SET_SYSTEM_AV_INFO for changing<br/>
+    /// video parameters, but provides a guarantee that drivers will not be<br/>
+    /// reinitialized.<br/>
+    /// This can only be called from within retro_run().<br/>
+    /// </summary>
     SET_GEOMETRY = 37,
+
+    /// <summary>
+    /// const char **<br/>
+    /// Returns the specified username of the frontend, if specified by the user.<br/>
+    /// This username can be used as a nickname for a core that has online facilities<br/>
+    /// or any other mode where personalization of the user is desirable.<br/>
+    /// The returned value can be NULL.<br/>
+    /// If this environ callback is used by a core that requires a valid username,<br/>
+    /// a default username should be specified by the core.<br/>
+    /// </summary>
     GET_USERNAME = 38,
+
+    /// <summary>
+    /// unsigned * --<br/>
+    /// Returns the specified language of the frontend, if specified by the user.<br/>
+    /// It can be used by the core for localization purposes.<br/>
+    /// </summary>
     GET_LANGUAGE = 39,
 
     /// <summary>
-    /// uint64_t * --
-    /// Sets quirk flags associated with serialization. The frontend will zero any flags it doesn't
-    /// recognize or support. Should be set in either retro_init or retro_load_game, but not both.
+    /// struct retro_framebuffer * --<br/>
+    /// Returns a preallocated framebuffer which the core can use for rendering<br/>
+    /// the frame into when not using SET_HW_RENDER.<br/>
+    /// The framebuffer returned from this call must not be used<br/>
+    /// after the current call to retro_run() returns.<br/>
+    /// </summary>
+    GET_CURRENT_SOFTWARE_FRAMEBUFFER = 40 | RETRO_ENVIRONMENT_EXPERIMENTAL,
+
+    /// <summary>
+    /// const struct retro_hw_render_interface ** --<br/>
+    /// Returns an API specific rendering interface for accessing API specific data.<br/>
+    /// Not all HW rendering APIs support or need this.<br/>
+    /// The contents of the returned pointer is specific to the rendering API<br/>
+    /// being used. See the various headers like libretro_vulkan.h, etc.<br/>
+    /// </summary>
+    GET_HW_RENDER_INTERFACE = 41 | RETRO_ENVIRONMENT_EXPERIMENTAL,
+
+    /// <summary>
+    /// const bool * --<br/>
+    /// If true, the libretro implementation supports achievements<br/>
+    /// either via memory descriptors set with RETRO_ENVIRONMENT_SET_MEMORY_MAPS<br/>
+    /// or via retro_get_memory_data<br/>
+    /// </summary>
+    SET_SUPPORT_ACHIEVEMENTS = 42 | RETRO_ENVIRONMENT_EXPERIMENTAL,
+
+    /// <summary>
+    /// const struct retro_hw_render_context_negotiation_interface * --<br/>
+    /// Sets an interface which lets the libretro core negotiate with frontend how a context is created.<br/>
+    /// The semantics of this interface depends on which API is used in SET_HW_RENDER earlier.<br/>
+    /// This interface will be used when the frontend is trying to create a HW rendering context,<br/>
+    /// so it will be used after SET_HW_RENDER, but before the context_reset callback.<br/>
+    /// </summary>
+    SET_HW_RENDER_CONTEXT_NEGOTIATION_INTERFACE = 43 | RETRO_ENVIRONMENT_EXPERIMENTAL,
+
+    /// <summary>
+    /// uint64_t * --<br/>
+    /// Sets quirk flags associated with serialization. The frontend will zero any flags it doesn't<br/>
+    /// recognize or support. Should be set in either retro_init or retro_load_game, but not both.<br/>
     /// </summary>
     SET_SERIALIZATION_QUIRKS = 44,
 
     /// <summary>
-    /// * N/A (null) * --
-    /// The frontend will try to use a 'shared' hardware context (mostly applicable
-    /// to OpenGL) when a hardware context is being set up.
-    ///
-    /// Returns true if the frontend supports shared hardware contexts and false
-    /// if the frontend does not support shared hardware contexts.
-    ///
-    /// This will do nothing on its own until SET_HW_RENDER env callbacks are
-    /// being used.
+    /// N<br/>
+    /// The frontend will try to use a 'shared' hardware context (mostly applicable<br/>
+    /// to OpenGL) when a hardware context is being set up.<br/>
     /// </summary>
     SET_HW_SHARED_CONTEXT = 44 | RETRO_ENVIRONMENT_EXPERIMENTAL,
 
     /// <summary>
-    /// int * --
-    /// Tells the core if the frontend wants audio or video.
-    /// If disabled, the frontend will discard the audio or video,
-    /// so the core may decide to skip generating a frame or generating audio.
-    /// This is mainly used for increasing performance.
-    /// Bit 0 (value 1): Enable Video
-    /// Bit 1 (value 2): Enable Audio
-    /// Bit 2 (value 4): Use Fast Savestates.
-    /// Bit 3 (value 8): Hard Disable Audio
-    /// Other bits are reserved for future use and will default to zero.
-    /// If video is disabled:
-    /// * The frontend wants the core to not generate any video,
-    ///   including presenting frames via hardware acceleration.
-    /// * The frontend's video frame callback will do nothing.
-    /// * After running the frame, the video output of the next frame should be
-    ///   no different than if video was enabled, and saving and loading state
-    ///   should have no issues.
-    /// If audio is disabled:
-    /// * The frontend wants the core to not generate any audio.
-    /// * The frontend's audio callbacks will do nothing.
-    /// * After running the frame, the audio output of the next frame should be
-    ///   no different than if audio was enabled, and saving and loading state
-    ///   should have no issues.
-    /// Fast Savestates:
-    /// * Guaranteed to be created by the same binary that will load them.
-    /// * Will not be written to or read from the disk.
-    /// * Suggest that the core assumes loading state will succeed.
-    /// * Suggest that the core updates its memory buffers in-place if possible.
-    /// * Suggest that the core skips clearing memory.
-    /// * Suggest that the core skips resetting the system.
-    /// * Suggest that the core may skip validation steps.
-    /// Hard Disable Audio:
-    /// * Used for a secondary core when running ahead.
-    /// * Indicates that the frontend will never need audio from the core.
-    /// * Suggests that the core may stop synthesizing audio, but this should not
-    ///   compromise emulation accuracy.
-    /// * Audio output for the next frame does not matter, and the frontend will
-    ///   never need an accurate audio state in the future.
-    /// * State will never be saved when using Hard Disable Audio.
+    /// struct retro_vfs_interface_info * --<br/>
+    /// Gets access to the VFS interface.<br/>
+    /// VFS presence needs to be queried prior to load_game or any<br/>
+    /// get_system<br/>
+    /// core supports VFS before it starts handing out paths.<br/>
+    /// It is recomended to do so in retro_set_environment<br/>
     /// </summary>
-    RETRO_ENVIRONMENT_GET_AUDIO_VIDEO_ENABLE = 47 | RETRO_ENVIRONMENT_EXPERIMENTAL,
+    GET_VFS_INTERFACE = 45 | RETRO_ENVIRONMENT_EXPERIMENTAL,
+
+    /// <summary>
+    /// struct retro_led_interface * --<br/>
+    /// Gets an interface which is used by a libretro core to set<br/>
+    /// state of LEDs.<br/>
+    /// </summary>
+    GET_LED_INTERFACE = 46 | RETRO_ENVIRONMENT_EXPERIMENTAL,
+
+    /// <summary>
+    /// int * --<br/>
+    /// Tells the core if the frontend wants audio or video.<br/>
+    /// If disabled, the frontend will discard the audio or video,<br/>
+    /// so the core may decide to skip generating a frame or generating audio.<br/>
+    /// This is mainly used for increasing performance.<br/>
+    /// Bit 0 (value 1): Enable Video<br/>
+    /// Bit 1 (value 2): Enable Audio<br/>
+    /// Bit 2 (value 4): Use Fast Savestates.<br/>
+    /// Bit 3 (value 8): Hard Disable Audio<br/>
+    /// Other bits are reserved for future use and will default to zero.<br/>
+    /// If video is disabled:<br/>
+    /// * The frontend wants the core to not generate any video,<br/>
+    /// including presenting frames via hardware acceleration.<br/>
+    /// * The frontend's video frame callback will do nothing.<br/>
+    /// * After running the frame, the video output of the next frame should be<br/>
+    /// no different than if video was enabled, and saving and loading state<br/>
+    /// should have no issues.<br/>
+    /// If audio is disabled:<br/>
+    /// * The frontend wants the core to not generate any audio.<br/>
+    /// * The frontend's audio callbacks will do nothing.<br/>
+    /// * After running the frame, the audio output of the next frame should be<br/>
+    /// no different than if audio was enabled, and saving and loading state<br/>
+    /// should have no issues.<br/>
+    /// Fast Savestates:<br/>
+    /// * Guaranteed to be created by the same binary that will load them.<br/>
+    /// * Will not be written to or read from the disk.<br/>
+    /// * Suggest that the core assumes loading state will succeed.<br/>
+    /// * Suggest that the core updates its memory buffers in-place if possible.<br/>
+    /// * Suggest that the core skips clearing memory.<br/>
+    /// * Suggest that the core skips resetting the system.<br/>
+    /// * Suggest that the core may skip validation steps.<br/>
+    /// Hard Disable Audio:<br/>
+    /// * Used for a secondary core when running ahead.<br/>
+    /// * Indicates that the frontend will never need audio from the core.<br/>
+    /// * Suggests that the core may stop synthesizing audio, but this should not<br/>
+    /// compromise emulation accuracy.<br/>
+    /// * Audio output for the next frame does not matter, and the frontend will<br/>
+    /// never need an accurate audio state in the future.<br/>
+    /// * State will never be saved when using Hard Disable Audio.<br/>
+    /// </summary>
+    GET_AUDIO_VIDEO_ENABLE = 47 | RETRO_ENVIRONMENT_EXPERIMENTAL,
+
+    /// <summary>
+    /// struct retro_midi_interface ** --<br/>
+    /// Returns a MIDI interface that can be used for raw data I<br/>
+    /// </summary>
+    GET_MIDI_INTERFACE = 48 | RETRO_ENVIRONMENT_EXPERIMENTAL,
+
+    /// <summary>
+    /// bool * --<br/>
+    /// Boolean value that indicates whether or not the frontend is in<br/>
+    /// fastforwarding mode.<br/>
+    /// </summary>
+    GET_FASTFORWARDING = 49 | RETRO_ENVIRONMENT_EXPERIMENTAL,
+
+    /// <summary>
+    /// float * --<br/>
+    /// Float value that lets us know what target refresh rate<br/>
+    /// is curently in use by the frontend.<br/>
+    /// </summary>
+    GET_TARGET_REFRESH_RATE = 50 | RETRO_ENVIRONMENT_EXPERIMENTAL,
+
+    /// <summary>
+    /// bool * --<br/>
+    /// Boolean value that indicates whether or not the frontend supports<br/>
+    /// input bitmasks being returned by retro_input_state_t. The advantage<br/>
+    /// of this is that retro_input_state_t has to be only called once to<br/>
+    /// grab all button states instead of multiple times.<br/>
+    /// </summary>
+    GET_INPUT_BITMASKS = 51 | RETRO_ENVIRONMENT_EXPERIMENTAL,
+
+    /// <summary>
+    /// unsigned * --<br/>
+    /// Unsigned value is the API version number of the core options<br/>
+    /// interface supported by the frontend. If callback return false,<br/>
+    /// API version is assumed to be 0.<br/>
+    /// </summary>
+    GET_CORE_OPTIONS_VERSION = 52,
+
+    /// <summary>
+    /// const struct retro_core_option_definition ** --<br/>
+    /// Allows an implementation to signal the environment<br/>
+    /// which variables it might want to check for later using<br/>
+    /// GET_VARIABLE.<br/>
+    /// This allows the frontend to present these variables to<br/>
+    /// a user dynamically.<br/>
+    /// This should only be called if RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION<br/>
+    /// returns an API version of >= 1.<br/>
+    /// This should be called instead of RETRO_ENVIRONMENT_SET_VARIABLES.<br/>
+    /// This should be called the first time as early as<br/>
+    /// possible (ideally in retro_set_environment).<br/>
+    /// Afterwards it may be called again for the core to communicate<br/>
+    /// updated options to the frontend, but the number of core<br/>
+    /// options must not change from the number in the initial call.<br/>
+    /// </summary>
+    SET_CORE_OPTIONS = 53,
+
+    /// <summary>
+    /// const struct retro_core_options_intl * --<br/>
+    /// Allows an implementation to signal the environment<br/>
+    /// which variables it might want to check for later using<br/>
+    /// GET_VARIABLE.<br/>
+    /// This allows the frontend to present these variables to<br/>
+    /// a user dynamically.<br/>
+    /// This should only be called if RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION<br/>
+    /// returns an API version of >= 1.<br/>
+    /// This should be called instead of RETRO_ENVIRONMENT_SET_VARIABLES.<br/>
+    /// This should be called instead of RETRO_ENVIRONMENT_SET_CORE_OPTIONS.<br/>
+    /// This should be called the first time as early as<br/>
+    /// possible (ideally in retro_set_environment).<br/>
+    /// Afterwards it may be called again for the core to communicate<br/>
+    /// updated options to the frontend, but the number of core<br/>
+    /// options must not change from the number in the initial call.<br/>
+    /// </summary>
+    SET_CORE_OPTIONS_INTL = 54,
+
+    /// <summary>
+    /// struct retro_core_option_display * --<br/>
+    /// </summary>
+    SET_CORE_OPTIONS_DISPLAY = 55,
+
+    /// <summary>
+    /// unsigned * --<br/>
+    /// </summary>
+    GET_PREFERRED_HW_RENDER = 56,
+
+    /// <summary>
+    /// unsigned * --<br/>
+    /// Unsigned value is the API version number of the disk control<br/>
+    /// interface supported by the frontend. If callback return false,<br/>
+    /// API version is assumed to be 0.<br/>
+    /// </summary>
+    GET_DISK_CONTROL_INTERFACE_VERSION = 57,
+
+    /// <summary>
+    /// const struct retro_disk_control_ext_callback * --<br/>
+    /// Sets an interface which frontend can use to eject and insert<br/>
+    /// disk images, and also obtain information about individual<br/>
+    /// disk image files registered by the core.<br/>
+    /// This is used for games which consist of multiple images and<br/>
+    /// must be manually swapped out by the user (e.g. PSX, floppy disk<br/>
+    /// based systems).<br/>
+    /// </summary>
+    SET_DISK_CONTROL_EXT_INTERFACE = 58,
+
+    /// <summary>
+    /// unsigned * --<br/>
+    /// Unsigned value is the API version number of the message<br/>
+    /// interface supported by the frontend. If callback returns<br/>
+    /// false, API version is assumed to be 0.<br/>
+    /// </summary>
+    GET_MESSAGE_INTERFACE_VERSION = 59,
+
+    /// <summary>
+    /// const struct retro_message_ext * --<br/>
+    /// Sets a message to be displayed in an implementation-specific<br/>
+    /// manner for a certain amount of 'frames'. Additionally allows<br/>
+    /// the core to specify message logging level, priority and<br/>
+    /// destination (OSD, logging interface or both).<br/>
+    /// Should not be used for trivial messages, which should simply be<br/>
+    /// logged via RETRO_ENVIRONMENT_GET_LOG_INTERFACE (or as a<br/>
+    /// fallback, stderr).<br/>
+    /// </summary>
+    SET_MESSAGE_EXT = 60,
+
+    /// <summary>
+    /// unsigned * --<br/>
+    /// Unsigned value is the number of active input devices<br/>
+    /// provided by the frontend. This may change between<br/>
+    /// frames, but will remain constant for the duration<br/>
+    /// of each frame.<br/>
+    /// If callback returns true, a core need not poll any<br/>
+    /// input device with an index greater than or equal to<br/>
+    /// the number of active devices.<br/>
+    /// If callback returns false, the number of active input<br/>
+    /// devices is unknown. In this case, all input devices<br/>
+    /// should be considered active.<br/>
+    /// </summary>
+    GET_INPUT_MAX_USERS = 61,
+
+    /// <summary>
+    /// const struct retro_audio_buffer_status_callback * --<br/>
+    /// Lets the core know the occupancy level of the frontend<br/>
+    /// audio buffer. Can be used by a core to attempt frame<br/>
+    /// skipping in order to avoid buffer under-runs.<br/>
+    /// A core may pass NULL to disable buffer status reporting<br/>
+    /// in the frontend.<br/>
+    /// </summary>
+    SET_AUDIO_BUFFER_STATUS_CALLBACK = 62,
+
+    /// <summary>
+    /// const unsigned * --<br/>
+    /// Sets minimum frontend audio latency in milliseconds.<br/>
+    /// Resultant audio latency may be larger than set value,<br/>
+    /// or smaller if a hardware limit is encountered. A frontend<br/>
+    /// is expected to honour requests up to 512 ms.<br/>
+    /// </summary>
+    SET_MINIMUM_AUDIO_LATENCY = 63,
+
+    /// <summary>
+    /// const struct retro_fastforwarding_override * --<br/>
+    /// Used by a libretro core to override the current<br/>
+    /// fastforwarding mode of the frontend.<br/>
+    /// If NULL is passed to this function, the frontend<br/>
+    /// will return true if fastforwarding override<br/>
+    /// functionality is supported (no change in<br/>
+    /// fastforwarding state will occur in this case).<br/>
+    /// </summary>
+    SET_FASTFORWARDING_OVERRIDE = 64,
+
+    /// <summary>
+    /// const struct retro_system_content_info_override * --<br/>
+    /// Allows an implementation to override 'global' content<br/>
+    /// info parameters reported by retro_get_system_info().<br/>
+    /// Overrides also affect subsystem content info parameters<br/>
+    /// set via RETRO_ENVIRONMENT_SET_SUBSYSTEM_INFO.<br/>
+    /// This function must be called inside retro_set_environment().<br/>
+    /// If callback returns false, content info overrides<br/>
+    /// are unsupported by the frontend, and will be ignored.<br/>
+    /// If callback returns true, extended game info may be<br/>
+    /// retrieved by calling RETRO_ENVIRONMENT_GET_GAME_INFO_EXT<br/>
+    /// in retro_load_game() or retro_load_game_special().<br/>
+    /// </summary>
+    SET_CONTENT_INFO_OVERRIDE = 65,
+
+    /// <summary>
+    /// const struct retro_game_info_ext ** --<br/>
+    /// Allows an implementation to fetch extended game<br/>
+    /// information, providing additional content path<br/>
+    /// and memory buffer status details.<br/>
+    /// This function may only be called inside<br/>
+    /// retro_load_game() or retro_load_game_special().<br/>
+    /// If callback returns false, extended game information<br/>
+    /// is unsupported by the frontend. In this case, only<br/>
+    /// regular retro_game_info will be available.<br/>
+    /// RETRO_ENVIRONMENT_GET_GAME_INFO_EXT is guaranteed<br/>
+    /// to return true if RETRO_ENVIRONMENT_SET_CONTENT_INFO_OVERRIDE<br/>
+    /// returns true.<br/>
+    /// </summary>
+    GET_GAME_INFO_EXT = 66,
+
+    /// <summary>
+    /// const struct retro_core_options_v2 * --<br/>
+    /// Allows an implementation to signal the environment<br/>
+    /// which variables it might want to check for later using<br/>
+    /// GET_VARIABLE.<br/>
+    /// This allows the frontend to present these variables to<br/>
+    /// a user dynamically.<br/>
+    /// This should only be called if RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION<br/>
+    /// returns an API version of >= 2.<br/>
+    /// This should be called instead of RETRO_ENVIRONMENT_SET_VARIABLES.<br/>
+    /// This should be called instead of RETRO_ENVIRONMENT_SET_CORE_OPTIONS.<br/>
+    /// This should be called the first time as early as<br/>
+    /// possible (ideally in retro_set_environment).<br/>
+    /// Afterwards it may be called again for the core to communicate<br/>
+    /// updated options to the frontend, but the number of core<br/>
+    /// options must not change from the number in the initial call.<br/>
+    /// If RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION returns an API<br/>
+    /// version of >= 2, this callback is guaranteed to succeed<br/>
+    /// (i.e. callback return value does not indicate success)<br/>
+    /// If callback returns true, frontend has core option category<br/>
+    /// support.<br/>
+    /// If callback returns false, frontend does not have core option<br/>
+    /// category support.<br/>
+    /// </summary>
+    SET_CORE_OPTIONS_V2 = 67,
+
+    /// <summary>
+    /// const struct retro_core_options_v2_intl * --<br/>
+    /// Allows an implementation to signal the environment<br/>
+    /// which variables it might want to check for later using<br/>
+    /// GET_VARIABLE.<br/>
+    /// This allows the frontend to present these variables to<br/>
+    /// a user dynamically.<br/>
+    /// This should only be called if RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION<br/>
+    /// returns an API version of >= 2.<br/>
+    /// This should be called instead of RETRO_ENVIRONMENT_SET_VARIABLES.<br/>
+    /// This should be called instead of RETRO_ENVIRONMENT_SET_CORE_OPTIONS.<br/>
+    /// This should be called instead of RETRO_ENVIRONMENT_SET_CORE_OPTIONS_INTL.<br/>
+    /// This should be called instead of RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2.<br/>
+    /// This should be called the first time as early as<br/>
+    /// possible (ideally in retro_set_environment).<br/>
+    /// Afterwards it may be called again for the core to communicate<br/>
+    /// updated options to the frontend, but the number of core<br/>
+    /// options must not change from the number in the initial call.<br/>
+    /// If RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION returns an API<br/>
+    /// version of >= 2, this callback is guaranteed to succeed<br/>
+    /// (i.e. callback return value does not indicate success)<br/>
+    /// If callback returns true, frontend has core option category<br/>
+    /// support.<br/>
+    /// If callback returns false, frontend does not have core option<br/>
+    /// category support.<br/>
+    /// </summary>
+    SET_CORE_OPTIONS_V2_INTL = 68,
+
+    /// <summary>
+    /// const struct retro_core_options_update_display_callback * --<br/>
+    /// Allows a frontend to signal that a core must update<br/>
+    /// the visibility of any dynamically hidden core options,<br/>
+    /// and enables the frontend to detect visibility changes.<br/>
+    /// Used by the frontend to update the menu display status<br/>
+    /// of core options without requiring a call of retro_run().<br/>
+    /// Must be called in retro_set_environment().<br/>
+    /// </summary>
+    SET_CORE_OPTIONS_UPDATE_DISPLAY_CALLBACK = 69,
+
+    /// <summary>
+    /// const struct retro_variable * --<br/>
+    /// Allows an implementation to notify the frontend<br/>
+    /// that a core option value has changed.<br/>
+    /// </summary>
+    SET_VARIABLE = 70,
+
+    /// <summary>
+    /// struct retro_throttle_state * --<br/>
+    /// Allows an implementation to get details on the actual rate<br/>
+    /// the frontend is attempting to call retro_run().<br/>
+    /// </summary>
+    GET_THROTTLE_STATE = 71 | RETRO_ENVIRONMENT_EXPERIMENTAL,
+
+    /// <summary>
+    /// int * --<br/>
+    /// Tells the core about the context the frontend is asking for savestate.<br/>
+    /// (see enum retro_savestate_context)<br/>
+    /// </summary>
+    GET_SAVESTATE_CONTEXT = 72 | RETRO_ENVIRONMENT_EXPERIMENTAL,
+
+    /// <summary>
+    /// struct retro_hw_render_context_negotiation_interface * --<br/>
+    /// Before calling SET_HW_RNEDER_CONTEXT_NEGOTIATION_INTERFACE, a core can query<br/>
+    /// which version of the interface is supported.<br/>
+    /// </summary>
+    GET_HW_RENDER_CONTEXT_NEGOTIATION_INTERFACE_SUPPORT = 73 | RETRO_ENVIRONMENT_EXPERIMENTAL,
+
+    /// <summary>
+    /// bool * --<br/>
+    /// Result is set to true if the frontend has already verified JIT can be<br/>
+    /// used, mainly for use iOS<br/>
+    /// </summary>
+    GET_JIT_CAPABLE = 74,
 
     RETRO_ENVIRONMENT_EXPERIMENTAL = 0x10000
   };

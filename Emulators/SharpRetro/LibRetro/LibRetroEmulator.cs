@@ -574,12 +574,17 @@ namespace SharpRetro.LibRetro
           return false;
         case RETRO_ENVIRONMENT.SET_HW_SHARED_CONTEXT:
           return true;
-        case RETRO_ENVIRONMENT.RETRO_ENVIRONMENT_GET_AUDIO_VIDEO_ENABLE:
+        case RETRO_ENVIRONMENT.GET_AUDIO_VIDEO_ENABLE:
           // Enable video and audio
           *(int*)data.ToPointer() = (int)(AUDIO_VIDEO_ENABLE.ENABLE_VIDEO | AUDIO_VIDEO_ENABLE.ENABLE_AUDIO);
           return true;
+        case RETRO_ENVIRONMENT.GET_MIDI_INTERFACE:
+          return false;
+        case RETRO_ENVIRONMENT.GET_FASTFORWARDING:
+          *(bool*)data.ToPointer() = false;
+          return true;
         default:
-          Log(RETRO_LOG_LEVEL.DEBUG, "Unknkown retro_environment command {0} - {1}", (int)cmd, cmd & (~RETRO_ENVIRONMENT.RETRO_ENVIRONMENT_EXPERIMENTAL));
+          Log(RETRO_LOG_LEVEL.DEBUG, "Unknown retro_environment command {0} - {1}", (int)cmd, cmd & (~RETRO_ENVIRONMENT.RETRO_ENVIRONMENT_EXPERIMENTAL));
           return false;
       }
     }
