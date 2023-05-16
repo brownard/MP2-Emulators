@@ -2,9 +2,6 @@
 using SharpRetro.LibRetro;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SharpRetro.OpenGL.Contexts
 {
@@ -80,7 +77,8 @@ namespace SharpRetro.OpenGL.Contexts
       // Version
       attributes.AddRange(new int[] {
         Wgl.CONTEXT_MAJOR_VERSION_ARB, versionMajor,
-        Wgl.CONTEXT_MINOR_VERSION_ARB, versionMinor
+        Wgl.CONTEXT_MINOR_VERSION_ARB, versionMinor,
+        Wgl.CONTEXT_RELEASE_BEHAVIOR_ARB, Wgl.CONTEXT_RELEASE_BEHAVIOR_NONE_ARB
       });
 
       // Debug context
