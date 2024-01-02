@@ -6,7 +6,6 @@ using SharpRetro.Video;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace SharpRetro.LibRetro
 {
@@ -250,10 +249,10 @@ namespace SharpRetro.LibRetro
 
       //no way (need new mechanism) to check for SSSE3, MMXEXT, SSE4, SSE42
       retro_perf_callback.get_cpu_features = new retro_get_cpu_features_t(() => (ulong)(
-          (NativeMethods.IsProcessorFeaturePresent(NativeMethods.ProcessorFeature.InstructionsXMMIAvailable) ? RETRO_SIMD.SSE : 0) |
-          (NativeMethods.IsProcessorFeaturePresent(NativeMethods.ProcessorFeature.InstructionsXMMI64Available) ? RETRO_SIMD.SSE2 : 0) |
-          (NativeMethods.IsProcessorFeaturePresent(NativeMethods.ProcessorFeature.InstructionsSSE3Available) ? RETRO_SIMD.SSE3 : 0) |
-          (NativeMethods.IsProcessorFeaturePresent(NativeMethods.ProcessorFeature.InstructionsMMXAvailable) ? RETRO_SIMD.MMX : 0)
+          (Win32PInvokes.IsProcessorFeaturePresent(Win32PInvokes.ProcessorFeature.InstructionsXMMIAvailable) ? RETRO_SIMD.SSE : 0) |
+          (Win32PInvokes.IsProcessorFeaturePresent(Win32PInvokes.ProcessorFeature.InstructionsXMMI64Available) ? RETRO_SIMD.SSE2 : 0) |
+          (Win32PInvokes.IsProcessorFeaturePresent(Win32PInvokes.ProcessorFeature.InstructionsSSE3Available) ? RETRO_SIMD.SSE3 : 0) |
+          (Win32PInvokes.IsProcessorFeaturePresent(Win32PInvokes.ProcessorFeature.InstructionsMMXAvailable) ? RETRO_SIMD.MMX : 0)
         ));
       retro_perf_callback.get_perf_counter = new retro_perf_get_counter_t(() => System.Diagnostics.Stopwatch.GetTimestamp());
       retro_perf_callback.get_time_usec = new retro_perf_get_time_usec_t(() => DateTime.Now.Ticks / 10);
@@ -793,20 +792,36 @@ namespace SharpRetro.LibRetro
     #endregion
 
     #region Log
-    protected void RetroLogPrintf(RETRO_LOG_LEVEL level, string fmt, IntPtr args)
+    protected void RetroLogPrintf(RETRO_LOG_LEVEL level, string fmt, IntPtr a0, IntPtr a1, IntPtr a2, IntPtr a3, IntPtr a4, IntPtr a5, IntPtr a6, IntPtr a7, IntPtr a8, IntPtr a9, IntPtr a10, IntPtr a11, IntPtr a12, IntPtr a13, IntPtr a14, IntPtr a15)
     {
-      LogDelegate logDelegate = _logDelegate;
-      if (logDelegate == null)
+      if (_logDelegate == null)
         return;
-      var sb = new StringBuilder(NativeMethods._vscprintf(fmt, args) + 1);
-      NativeMethods.vsprintf(sb, fmt, args);
-      logDelegate(level, sb.ToString());
+      //avert your eyes, these things were not meant to be seen in c#
+      //I'm not sure this is a great idea. It would suck for silly logging to be unstable. But.. I dont think this is unstable. The sprintf might just print some garbledy stuff.
+      IntPtr[] args = new IntPtr[] { a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15 };
+      string message = Printf(fmt, args);
+      _logDelegate(level, message);
     }
 
     protected void Log(RETRO_LOG_LEVEL level, string format, params object[] args)
     {
       if (_logDelegate != null)
         _logDelegate(level, string.Format(format, args));
+    }
+
+    protected string Printf(string format, IntPtr[] args)
+    {
+      int idx = 0;
+      string message;
+      try
+      {
+        message = Sprintf.sprintf(format, () => args[idx++]);
+      }
+      catch (Exception ex)
+      {
+        message = string.Format("Error in sprintf - {0}", ex);
+      }
+      return message;
     }
     #endregion
 
